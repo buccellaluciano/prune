@@ -1,0 +1,867 @@
+# Catálogo declarativo de tweaks.
+#
+# Cada tweak es un conjunto de operaciones de registro. "on" es el valor que
+# aplica el tweak; "off" es el valor que lo revierte (si se omite, revertir
+# BORRA el valor, devolviendo Windows a su comportamiento por defecto).
+#
+# Reglas:
+#   - Nada de toggles a ciegas: el estado se calcula leyendo el registro real.
+#   - kind = "dword" -> on/off enteros; kind = "sz" -> on/off strings.
+#   - name = "" apunta al valor (Predeterminado) de la clave.
+#   - delete_key_on_revert borra esa clave completa al revertir.
+#   - Todo lo que esté bajo HKLM requiere ejecutar como administrador.
+
+[[category]]
+id = "privacy"
+title = "Privacidad"
+icon = "shield"
+
+[[category]]
+id = "ai"
+title = "IA y Copilot"
+icon = "sparkles"
+
+[[category]]
+id = "start"
+title = "Inicio y sugerencias"
+icon = "megaphone-off"
+
+[[category]]
+id = "search"
+title = "Búsqueda"
+icon = "search"
+
+[[category]]
+id = "taskbar"
+title = "Barra de tareas"
+icon = "panel-bottom"
+
+[[category]]
+id = "explorer"
+title = "Explorador"
+icon = "folder"
+
+[[category]]
+id = "appearance"
+title = "Apariencia"
+icon = "palette"
+
+[[category]]
+id = "gaming"
+title = "Gaming y entrada"
+icon = "gamepad"
+
+# ───────────────────────────── Privacidad ─────────────────────────────
+
+[[tweak]]
+id = "privacy.advertising_id"
+category = "privacy"
+title = "Desactivar ID de publicidad"
+description = "Evita que las apps usen tu identificador de publicidad para anuncios personalizados."
+risk = "safe"
+tags = ["anuncios", "telemetria"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo'
+name = "Enabled"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "privacy.tailored_experiences"
+category = "privacy"
+title = "Desactivar experiencias personalizadas"
+description = "Microsoft deja de usar tus datos de diagnóstico para sugerencias y anuncios a medida."
+risk = "safe"
+tags = ["telemetria"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Privacy'
+name = "TailoredExperiencesWithDiagnosticDataEnabled"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "privacy.online_speech"
+category = "privacy"
+title = "Desactivar reconocimiento de voz en línea"
+description = "La voz no se envía a la nube. El dictado online deja de funcionar."
+risk = "safe"
+tags = ["voz"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Speech_OneCore\Settings\OnlineSpeechPrivacy'
+name = "HasAccepted"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "privacy.inking_typing"
+category = "privacy"
+title = "Desactivar personalización de escritura y lápiz"
+description = "Windows deja de recolectar lo que escribís y dibujás para armar un diccionario personal."
+risk = "safe"
+tags = ["teclado", "telemetria"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\InputPersonalization'
+name = "RestrictImplicitInkCollection"
+kind = "dword"
+on = 1
+off = 0
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\InputPersonalization'
+name = "RestrictImplicitTextCollection"
+kind = "dword"
+on = 1
+off = 0
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\InputPersonalization\TrainedDataStore'
+name = "HarvestContacts"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "privacy.typing_insights"
+category = "privacy"
+title = "Desactivar estadísticas de escritura"
+description = "Desactiva la recolección de estadísticas de tipeo (Typing insights)."
+risk = "safe"
+tags = ["teclado"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Input\TIPC'
+name = "Enabled"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "privacy.track_app_launches"
+category = "privacy"
+title = "No registrar apps abiertas"
+description = "Windows deja de registrar qué apps abrís para ordenar Inicio y la búsqueda."
+risk = "safe"
+tags = ["inicio"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "Start_TrackProgs"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "privacy.feedback_frequency"
+category = "privacy"
+title = "No pedir comentarios"
+description = "Windows deja de mostrar encuestas de feedback."
+risk = "safe"
+tags = ["feedback"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Siuf\Rules'
+name = "NumberOfSIUFInPeriod"
+kind = "dword"
+on = 0
+
+[[tweak]]
+id = "privacy.telemetry_policy"
+category = "privacy"
+title = "Telemetría al mínimo (directiva)"
+description = "Pone los datos de diagnóstico en el nivel más bajo que permite tu edición. En Home y Pro el mínimo efectivo es 'Requeridos'."
+risk = "moderate"
+tags = ["telemetria", "directiva"]
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SOFTWARE\Policies\Microsoft\Windows\DataCollection'
+name = "AllowTelemetry"
+kind = "dword"
+on = 0
+
+[[tweak]]
+id = "privacy.activity_history"
+category = "privacy"
+title = "Desactivar historial de actividad"
+description = "No se guarda ni se sube el historial de actividad (apps, archivos y webs que usaste)."
+risk = "safe"
+tags = ["directiva"]
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SOFTWARE\Policies\Microsoft\Windows\System'
+name = "EnableActivityFeed"
+kind = "dword"
+on = 0
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SOFTWARE\Policies\Microsoft\Windows\System'
+name = "PublishUserActivities"
+kind = "dword"
+on = 0
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SOFTWARE\Policies\Microsoft\Windows\System'
+name = "UploadUserActivities"
+kind = "dword"
+on = 0
+
+# ───────────────────────────── IA y Copilot ─────────────────────────────
+
+[[tweak]]
+id = "ai.recall"
+category = "ai"
+title = "Desactivar Recall (instantáneas)"
+description = "Directiva que impide que Recall guarde capturas de tu actividad. Solo tiene efecto en PCs Copilot+."
+risk = "safe"
+restart = "reboot"
+min_build = 26100
+tags = ["recall", "directiva"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Policies\Microsoft\Windows\WindowsAI'
+name = "DisableAIDataAnalysis"
+kind = "dword"
+on = 1
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SOFTWARE\Policies\Microsoft\Windows\WindowsAI'
+name = "DisableAIDataAnalysis"
+kind = "dword"
+on = 1
+
+[[tweak]]
+id = "ai.copilot_legacy"
+category = "ai"
+title = "Desactivar Copilot integrado (23H2)"
+description = "Directiva para el Copilot integrado de 23H2. En 24H2 en adelante Copilot es una app: quitala desde Bloatware."
+risk = "safe"
+restart = "explorer"
+tags = ["copilot", "directiva"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Policies\Microsoft\Windows\WindowsCopilot'
+name = "TurnOffWindowsCopilot"
+kind = "dword"
+on = 1
+
+# ───────────────────────── Inicio y sugerencias ─────────────────────────
+
+[[tweak]]
+id = "start.recommendations"
+category = "start"
+title = "Ocultar recomendaciones y consejos en Inicio"
+description = "Saca las recomendaciones promocionales (Iris) del menú Inicio."
+risk = "safe"
+restart = "explorer"
+tags = ["anuncios"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "Start_IrisRecommendations"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "start.account_notifications"
+category = "start"
+title = "Ocultar avisos de cuenta en Inicio"
+description = "Saca los avisos tipo 'Completá tu cuenta Microsoft' / 'Hacé backup' del menú Inicio."
+risk = "safe"
+restart = "explorer"
+min_build = 22621
+tags = ["anuncios"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "Start_AccountNotifications"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "start.suggestions"
+category = "start"
+title = "Sin sugerencias en Inicio"
+description = "Desactiva las apps sugeridas que aparecen en el menú Inicio."
+risk = "safe"
+tags = ["anuncios"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
+name = "SubscribedContent-338388Enabled"
+kind = "dword"
+on = 0
+off = 1
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
+name = "SystemPaneSuggestionsEnabled"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "start.silent_installs"
+category = "start"
+title = "Bloquear instalación silenciosa de apps sugeridas"
+description = "Evita que Windows instale juegos y apps promocionadas (Candy Crush & cía.) sin preguntar."
+risk = "safe"
+tags = ["anuncios", "bloatware"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
+name = "SilentInstalledAppsEnabled"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "start.tips"
+category = "start"
+title = "Sin consejos y trucos"
+description = "Desactiva las notificaciones de 'consejos, trucos y sugerencias'."
+risk = "safe"
+tags = ["notificaciones"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
+name = "SubscribedContent-338389Enabled"
+kind = "dword"
+on = 0
+off = 1
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
+name = "SoftLandingEnabled"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "start.settings_suggestions"
+category = "start"
+title = "Sin contenido sugerido en Configuración"
+description = "Saca las sugerencias y promociones de la app Configuración."
+risk = "safe"
+tags = ["anuncios"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
+name = "SubscribedContent-338393Enabled"
+kind = "dword"
+on = 0
+off = 1
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
+name = "SubscribedContent-353694Enabled"
+kind = "dword"
+on = 0
+off = 1
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
+name = "SubscribedContent-353696Enabled"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "start.welcome_experience"
+category = "start"
+title = "Sin 'experiencia de bienvenida' tras actualizar"
+description = "Evita la pantalla de novedades después de las actualizaciones."
+risk = "safe"
+tags = ["notificaciones"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
+name = "SubscribedContent-310093Enabled"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "start.finish_setup_nag"
+category = "start"
+title = "Sin '¡Terminemos de configurar tu dispositivo!'"
+description = "Desactiva la pantalla que insiste con OneDrive, Microsoft 365 y la cuenta Microsoft."
+risk = "safe"
+tags = ["notificaciones"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement'
+name = "ScoobeSystemSettingEnabled"
+kind = "dword"
+on = 0
+
+[[tweak]]
+id = "start.suggested_notifications"
+category = "start"
+title = "Sin notificaciones 'sugeridas'"
+description = "Silencia las notificaciones del sistema que sugieren funciones y apps."
+risk = "safe"
+tags = ["notificaciones"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Notifications\Settings\Windows.SystemToast.Suggested'
+name = "Enabled"
+kind = "dword"
+on = 0
+
+[[tweak]]
+id = "start.lockscreen_tips"
+category = "start"
+title = "Sin datos curiosos en la pantalla de bloqueo"
+description = "Saca los consejos y 'datos curiosos' de la pantalla de bloqueo."
+risk = "safe"
+tags = ["anuncios"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
+name = "RotatingLockScreenOverlayEnabled"
+kind = "dword"
+on = 0
+off = 1
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
+name = "SubscribedContent-338387Enabled"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "start.sync_provider_ads"
+category = "start"
+title = "Sin anuncios en el Explorador"
+description = "Saca los avisos de proveedores de sincronización (OneDrive, Microsoft 365) del Explorador."
+risk = "safe"
+tags = ["anuncios"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "ShowSyncProviderNotifications"
+kind = "dword"
+on = 0
+off = 1
+
+# ───────────────────────────── Búsqueda ─────────────────────────────
+
+[[tweak]]
+id = "search.web_results"
+category = "search"
+title = "Sin resultados web de Bing en la búsqueda"
+description = "Directiva que desactiva las sugerencias web en la búsqueda de Inicio. Las búsquedas quedan solo locales."
+risk = "moderate"
+restart = "explorer"
+tags = ["bing", "directiva"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Policies\Microsoft\Windows\Explorer'
+name = "DisableSearchBoxSuggestions"
+kind = "dword"
+on = 1
+
+[[tweak]]
+id = "search.highlights"
+category = "search"
+title = "Sin destacados de búsqueda"
+description = "Saca los dibujitos y temas del día del cuadro de búsqueda."
+risk = "safe"
+tags = ["bing"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\SearchSettings'
+name = "IsDynamicSearchBoxEnabled"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "search.taskbar_mode"
+category = "search"
+title = "Búsqueda en la barra de tareas"
+description = "Cómo se muestra la búsqueda: oculta, solo la lupa, lupa con texto o el cuadro completo."
+risk = "safe"
+tags = ["barra", "lupa", "icono"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Search'
+name = "SearchboxTaskbarMode"
+kind = "dword"
+[[tweak.choice]]
+id = "hidden"
+label = "Oculta"
+values = [0]
+[[tweak.choice]]
+id = "icon"
+label = "Ícono"
+values = [1]
+[[tweak.choice]]
+id = "icon_label"
+label = "Ícono y texto"
+values = [3]
+min_build = 22621
+[[tweak.choice]]
+id = "box"
+label = "Cuadro"
+values = [2]
+default = true
+
+# ───────────────────────────── Barra de tareas ─────────────────────────────
+
+[[tweak]]
+id = "taskbar.align_left"
+category = "taskbar"
+title = "Alinear íconos a la izquierda"
+description = "Botón de Inicio e íconos a la izquierda, como en Windows 10."
+risk = "safe"
+tags = ["barra"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "TaskbarAl"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "taskbar.hide_task_view"
+category = "taskbar"
+title = "Ocultar botón Vista de tareas"
+description = "Saca el botón de Vista de tareas (Win+Tab sigue funcionando)."
+risk = "safe"
+tags = ["barra"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "ShowTaskViewButton"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "taskbar.disable_widgets"
+category = "taskbar"
+title = "Desactivar Widgets"
+description = "Directiva que desactiva por completo el panel de Widgets (noticias, clima, MSN)."
+risk = "safe"
+restart = "explorer"
+tags = ["widgets", "msn", "directiva"]
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SOFTWARE\Policies\Microsoft\Dsh'
+name = "AllowNewsAndInterests"
+kind = "dword"
+on = 0
+
+[[tweak]]
+id = "taskbar.end_task"
+category = "taskbar"
+title = "'Finalizar tarea' con clic derecho"
+description = "Agrega 'Finalizar tarea' al menú contextual de las apps en la barra."
+risk = "safe"
+min_build = 22631
+tags = ["barra", "productividad"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings'
+name = "TaskbarEndTask"
+kind = "dword"
+on = 1
+
+[[tweak]]
+id = "taskbar.clock_seconds"
+category = "taskbar"
+title = "Mostrar segundos en el reloj"
+description = "El reloj de la barra muestra los segundos. Consume un poco más de batería."
+risk = "safe"
+restart = "explorer"
+tags = ["reloj"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "ShowSecondsInSystemClock"
+kind = "dword"
+on = 1
+
+[[tweak]]
+id = "taskbar.no_animations"
+category = "taskbar"
+title = "Sin animaciones de la barra"
+description = "Desactiva las animaciones de la barra de tareas. Se siente más rápida."
+risk = "safe"
+restart = "explorer"
+tags = ["rendimiento"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "TaskbarAnimations"
+kind = "dword"
+on = 0
+off = 1
+
+# ───────────────────────────── Explorador ─────────────────────────────
+
+[[tweak]]
+id = "explorer.show_extensions"
+category = "explorer"
+title = "Mostrar extensiones de archivo"
+description = "Muestra .exe, .pdf, etc. Recomendado por seguridad: así 'factura.pdf.exe' no se disfraza."
+risk = "safe"
+tags = ["seguridad"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "HideFileExt"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "explorer.show_hidden"
+category = "explorer"
+title = "Mostrar archivos ocultos"
+description = "Muestra los archivos y carpetas ocultos (no los protegidos del sistema)."
+risk = "safe"
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "Hidden"
+kind = "dword"
+on = 1
+off = 2
+
+[[tweak]]
+id = "explorer.open_this_pc"
+category = "explorer"
+title = "Abrir en 'Este equipo'"
+description = "El Explorador abre en 'Este equipo' en vez de 'Inicio'."
+risk = "safe"
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "LaunchTo"
+kind = "dword"
+on = 1
+
+[[tweak]]
+id = "explorer.classic_context_menu"
+category = "explorer"
+title = "Menú contextual clásico"
+description = "Vuelve el menú del clic derecho completo, sin el 'Mostrar más opciones'."
+risk = "moderate"
+restart = "explorer"
+tags = ["menu", "productividad"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32'
+name = ""
+kind = "sz"
+on = ""
+delete_key_on_revert = 'Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}'
+
+[[tweak]]
+id = "explorer.compact_mode"
+category = "explorer"
+title = "Modo compacto"
+description = "Reduce el espacio entre elementos del Explorador."
+risk = "safe"
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "UseCompactMode"
+kind = "dword"
+on = 1
+off = 0
+
+[[tweak]]
+id = "explorer.checkboxes"
+category = "explorer"
+title = "Casillas para seleccionar"
+description = "Muestra casillas de verificación para seleccionar archivos."
+risk = "safe"
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "AutoCheckSelect"
+kind = "dword"
+on = 1
+off = 0
+
+[[tweak]]
+id = "explorer.separate_process"
+category = "explorer"
+title = "Carpetas en un proceso separado"
+description = "Si una ventana del Explorador se cuelga, no arrastra a la barra de tareas. Usa algo más de RAM."
+risk = "safe"
+restart = "logoff"
+tags = ["estabilidad"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "SeparateProcess"
+kind = "dword"
+on = 1
+off = 0
+
+[[tweak]]
+id = "explorer.full_path_title"
+category = "explorer"
+title = "No 'embellecer' rutas"
+description = "Muestra los nombres de archivo y carpeta tal como están escritos, sin cambiar mayúsculas."
+risk = "safe"
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "DontPrettyPath"
+kind = "dword"
+on = 1
+off = 0
+
+[[tweak]]
+id = "explorer.no_aero_shake"
+category = "explorer"
+title = "Desactivar 'agitar para minimizar'"
+description = "Agitar una ventana ya no minimiza las demás."
+risk = "safe"
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "DisallowShaking"
+kind = "dword"
+on = 1
+off = 0
+
+# ───────────────────────────── Apariencia ─────────────────────────────
+
+[[tweak]]
+id = "appearance.dark_mode"
+category = "appearance"
+title = "Modo oscuro"
+description = "Modo oscuro para Windows y para las apps."
+risk = "safe"
+tags = ["tema"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Themes\Personalize'
+name = "AppsUseLightTheme"
+kind = "dword"
+on = 0
+off = 1
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Themes\Personalize'
+name = "SystemUsesLightTheme"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "appearance.no_transparency"
+category = "appearance"
+title = "Sin efectos de transparencia"
+description = "Desactiva la transparencia (Mica/Acrylic). Ayuda en equipos con poca GPU."
+risk = "safe"
+tags = ["rendimiento", "tema"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Themes\Personalize'
+name = "EnableTransparency"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "appearance.faster_menus"
+category = "appearance"
+title = "Menús más rápidos"
+description = "Baja la demora al abrir los submenús de 400 ms a 100 ms."
+risk = "safe"
+restart = "logoff"
+tags = ["rendimiento"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Control Panel\Desktop'
+name = "MenuShowDelay"
+kind = "sz"
+on = "100"
+off = "400"
+
+# ───────────────────────────── Gaming y entrada ─────────────────────────────
+
+[[tweak]]
+id = "gaming.game_dvr"
+category = "gaming"
+title = "Desactivar grabación en segundo plano (Game DVR)"
+description = "Desactiva la captura en segundo plano de la Xbox Game Bar. Puede subir los FPS en equipos modestos."
+risk = "safe"
+tags = ["rendimiento", "xbox"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'System\GameConfigStore'
+name = "GameDVR_Enabled"
+kind = "dword"
+on = 0
+off = 1
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\GameDVR'
+name = "AppCaptureEnabled"
+kind = "dword"
+on = 0
+off = 1
+
+[[tweak]]
+id = "gaming.mouse_acceleration"
+category = "gaming"
+title = "Desactivar aceleración del mouse"
+description = "Desactiva 'Mejorar precisión del puntero': el movimiento queda 1:1. Ideal para juegos."
+risk = "safe"
+restart = "logoff"
+tags = ["mouse"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Control Panel\Mouse'
+name = "MouseSpeed"
+kind = "sz"
+on = "0"
+off = "1"
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Control Panel\Mouse'
+name = "MouseThreshold1"
+kind = "sz"
+on = "0"
+off = "6"
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Control Panel\Mouse'
+name = "MouseThreshold2"
+kind = "sz"
+on = "0"
+off = "10"
+
+[[tweak]]
+id = "gaming.sticky_keys_prompt"
+category = "gaming"
+title = "Sin aviso de teclas especiales (Shift x5)"
+description = "Apretar Shift cinco veces ya no abre el aviso de Teclas especiales en medio del juego."
+risk = "safe"
+restart = "logoff"
+tags = ["teclado"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Control Panel\Accessibility\StickyKeys'
+name = "Flags"
+kind = "sz"
+on = "506"
+off = "510"

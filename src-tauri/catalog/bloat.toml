@@ -1,0 +1,222 @@
+# Catálogo de bloatware (paquetes Appx/MSIX).
+#
+# A diferencia del repo original, no se usan comodines amplios: se busca por
+# nombre exacto de paquete (o un prefijo explícito de publisher), y SOLO se
+# puede quitar lo que está en esta lista. Lo esencial (Store, App Installer /
+# winget, Terminal, Calculadora, Seguridad de Windows, runtimes) nunca está acá.
+#
+# tier:
+#   safe     -> nadie lo extraña
+#   moderate -> puede que alguien lo use
+#   advanced -> rompe funciones (juegos de Xbox, etc.); leer la nota
+
+# ── Microsoft: promociones y apps abandonadas ──
+[[app]]
+name = "Clipchamp.Clipchamp"
+title = "Clipchamp"
+tier = "safe"
+
+[[app]]
+name = "Microsoft.BingNews"
+title = "Microsoft Noticias"
+tier = "safe"
+
+[[app]]
+name = "Microsoft.BingWeather"
+title = "El Tiempo (MSN)"
+tier = "safe"
+
+[[app]]
+name = "Microsoft.BingSearch"
+title = "Bing Search"
+tier = "safe"
+
+[[app]]
+name = "Microsoft.Getstarted"
+title = "Consejos"
+tier = "safe"
+
+[[app]]
+name = "Microsoft.MicrosoftOfficeHub"
+title = "Microsoft 365 (Office Hub)"
+tier = "safe"
+
+[[app]]
+name = "Microsoft.MicrosoftSolitaireCollection"
+title = "Solitaire Collection"
+tier = "safe"
+
+[[app]]
+name = "Microsoft.WindowsFeedbackHub"
+title = "Centro de opiniones"
+tier = "safe"
+
+[[app]]
+name = "Microsoft.WindowsMaps"
+title = "Mapas (discontinuada)"
+tier = "safe"
+
+[[app]]
+name = "Microsoft.ZuneVideo"
+title = "Películas y TV"
+tier = "safe"
+
+[[app]]
+name = "Microsoft.549981C3F5F10"
+title = "Cortana (discontinuada)"
+tier = "safe"
+
+[[app]]
+name = "Microsoft.People"
+title = "Contactos"
+tier = "safe"
+
+[[app]]
+name = "Microsoft.Windows.DevHome"
+title = "Dev Home (discontinuada)"
+tier = "safe"
+
+[[app]]
+name = "Microsoft.PowerAutomateDesktop"
+title = "Power Automate"
+tier = "safe"
+
+[[app]]
+name = "Microsoft.Todos"
+title = "Microsoft To Do"
+tier = "moderate"
+
+[[app]]
+name = "MSTeams"
+title = "Microsoft Teams (personal)"
+tier = "moderate"
+
+[[app]]
+name = "MicrosoftTeams"
+title = "Microsoft Teams (clásico personal)"
+tier = "safe"
+
+[[app]]
+name = "Microsoft.OutlookForWindows"
+title = "Outlook (nuevo)"
+tier = "moderate"
+note = "Reemplaza a Correo y Calendario. Quitalo solo si usás otro cliente de correo."
+
+[[app]]
+name = "Microsoft.Copilot"
+title = "Copilot"
+tier = "moderate"
+
+[[app]]
+name = "MicrosoftCorporationII.MicrosoftFamily"
+title = "Microsoft Family Safety"
+tier = "moderate"
+
+[[app]]
+name = "MicrosoftCorporationII.QuickAssist"
+title = "Asistencia rápida"
+tier = "moderate"
+note = "Es la herramienta de soporte remoto que más usan los estafadores. Quitarla reduce ese riesgo."
+
+[[app]]
+name = "Microsoft.MicrosoftStickyNotes"
+title = "Sticky Notes"
+tier = "moderate"
+
+[[app]]
+name = "Microsoft.WindowsSoundRecorder"
+title = "Grabadora de sonido"
+tier = "moderate"
+
+[[app]]
+name = "Microsoft.WindowsAlarms"
+title = "Reloj y alarmas"
+tier = "moderate"
+
+[[app]]
+name = "Microsoft.YourPhone"
+title = "Vincular teléfono"
+tier = "moderate"
+
+[[app]]
+name = "MicrosoftWindows.CrossDevice"
+title = "Experiencia entre dispositivos"
+tier = "moderate"
+
+[[app]]
+name = "Microsoft.ZuneMusic"
+title = "Reproductor multimedia"
+tier = "moderate"
+
+[[app]]
+name = "Microsoft.WindowsCamera"
+title = "Cámara"
+tier = "moderate"
+
+[[app]]
+name = "Microsoft.GetHelp"
+title = "Obtener ayuda"
+tier = "moderate"
+note = "Algunos solucionadores de problemas de Windows 11 la necesitan."
+
+# ── Xbox: rompe juegos de Game Pass / Microsoft Store ──
+[[app]]
+name = "Microsoft.GamingApp"
+title = "Xbox"
+tier = "advanced"
+note = "Necesaria para instalar juegos de PC Game Pass."
+
+[[app]]
+name = "Microsoft.XboxGamingOverlay"
+title = "Xbox Game Bar"
+tier = "advanced"
+note = "Algunos juegos la usan para capturas y para el chat."
+
+[[app]]
+name = "Microsoft.XboxIdentityProvider"
+title = "Xbox Identity Provider"
+tier = "advanced"
+note = "Login de Xbox: sin esto, los juegos de Microsoft Store no inician sesión."
+
+[[app]]
+name = "Microsoft.Windows.Photos"
+title = "Fotos"
+tier = "advanced"
+note = "Es el visor de imágenes por defecto. Instalá otro antes de quitarlo."
+
+# ── Terceros preinstalados por OEM / promociones ──
+[[app]]
+name = "king.com."
+match = "prefix"
+title = "Juegos de King (Candy Crush, etc.)"
+tier = "safe"
+
+[[app]]
+name = "SpotifyAB.SpotifyMusic"
+title = "Spotify (Store)"
+tier = "moderate"
+
+[[app]]
+name = "Disney.37853FC22B2CE"
+title = "Disney+"
+tier = "safe"
+
+[[app]]
+name = "BytedancePte.Ltd.TikTok"
+title = "TikTok"
+tier = "safe"
+
+[[app]]
+name = "AmazonVideo.PrimeVideo"
+title = "Prime Video"
+tier = "safe"
+
+[[app]]
+name = "Facebook.InstagramBeta"
+title = "Instagram"
+tier = "safe"
+
+[[app]]
+name = "5319275A.WhatsAppDesktop"
+title = "WhatsApp"
+tier = "moderate"

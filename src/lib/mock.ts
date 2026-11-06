@@ -1,0 +1,109 @@
+// Backend simulado para desarrollar la UI en el navegador (npm run dev).
+// Nunca se usa dentro de Tauri.
+import type { BloatApp, JournalEntry, Overview, Tweak } from "./api";
+
+const op = (key: string, name: string, current: string, on: string, off = "(borra el valor)") => ({
+  key, name, current, on, off,
+});
+
+const A = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced";
+const CDM = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager";
+
+type MockTweak = Omit<Tweak, "choices" | "choice"> & Partial<Pick<Tweak, "choices" | "choice">>;
+
+const SEARCH_VALUES: Record<string, string> = { hidden: "0", icon: "1", icon_label: "3", box: "2" };
+
+const raw: MockTweak[] = [
+  { id: "search.taskbar_mode", category: "search", title: "Búsqueda en la barra de tareas", description: "Cómo se muestra la búsqueda: oculta, solo la lupa, lupa con texto o el cuadro completo.", risk: "safe", restart: "none", tags: ["barra"], requires_admin: false, state: "applied", choice: "hidden",
+    choices: [{ id: "hidden", label: "Oculta", default: false }, { id: "icon", label: "Ícono", default: false }, { id: "icon_label", label: "Ícono y texto", default: false }, { id: "box", label: "Cuadro", default: true }],
+    ops: [op("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Search", "SearchboxTaskbarMode", "0", "0 Oculta · 1 Ícono · 3 Ícono y texto · 2 Cuadro", "")] },
+  { id: "privacy.advertising_id", category: "privacy", title: "Desactivar ID de publicidad", description: "Evita que las apps usen tu identificador de publicidad para anuncios personalizados.", risk: "safe", restart: "none", tags: ["anuncios"], requires_admin: false, state: "default", ops: [op("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo", "Enabled", "1", "0", "1")] },
+  { id: "privacy.telemetry_policy", category: "privacy", title: "Telemetría al mínimo (directiva)", description: "Pone los datos de diagnóstico en el nivel más bajo que permite tu edición.", risk: "moderate", restart: "none", tags: ["telemetria"], requires_admin: true, state: "default", ops: [op("HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection", "AllowTelemetry", "(no existe)", "0")] },
+  { id: "ai.recall", category: "ai", title: "Desactivar Recall (instantáneas)", description: "Directiva que impide que Recall guarde capturas de tu actividad.", risk: "safe", restart: "reboot", tags: ["recall"], requires_admin: true, state: "applied", ops: [op("HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI", "DisableAIDataAnalysis", "1", "1")] },
+  { id: "start.recommendations", category: "start", title: "Ocultar recomendaciones en Inicio", description: "Saca las recomendaciones promocionales del menú Inicio.", risk: "safe", restart: "explorer", tags: ["anuncios"], requires_admin: false, state: "default", ops: [op(A, "Start_IrisRecommendations", "(no existe)", "0", "1")] },
+  { id: "start.silent_installs", category: "start", title: "Bloquear instalación silenciosa de apps", description: "Evita que Windows instale juegos promocionados sin preguntar.", risk: "safe", restart: "none", tags: ["bloatware"], requires_admin: false, state: "partial", ops: [op(CDM, "SilentInstalledAppsEnabled", "1", "0", "1")] },
+  { id: "search.web_results", category: "search", title: "Sin resultados web de Bing", description: "Las búsquedas de Inicio quedan solo locales.", risk: "moderate", restart: "explorer", tags: ["bing"], requires_admin: false, state: "default", ops: [op("HKCU\\Software\\Policies\\Microsoft\\Windows\\Explorer", "DisableSearchBoxSuggestions", "(no existe)", "1")] },
+  { id: "taskbar.align_left", category: "taskbar", title: "Alinear íconos a la izquierda", description: "Botón de Inicio e íconos a la izquierda, como en Windows 10.", risk: "safe", restart: "none", tags: ["barra"], requires_admin: false, state: "default", ops: [op(A, "TaskbarAl", "(no existe)", "0", "1")] },
+  { id: "taskbar.end_task", category: "taskbar", title: "'Finalizar tarea' con clic derecho", description: "Agrega 'Finalizar tarea' al menú contextual de la barra.", risk: "safe", restart: "none", tags: ["productividad"], requires_admin: false, state: "applied", ops: [op(A + "\\TaskbarDeveloperSettings", "TaskbarEndTask", "1", "1")] },
+  { id: "explorer.show_extensions", category: "explorer", title: "Mostrar extensiones de archivo", description: "Así 'factura.pdf.exe' no se disfraza.", risk: "safe", restart: "none", tags: ["seguridad"], requires_admin: false, state: "default", ops: [op(A, "HideFileExt", "1", "0", "1")] },
+  { id: "explorer.classic_context_menu", category: "explorer", title: "Menú contextual clásico", description: "El clic derecho completo, sin 'Mostrar más opciones'.", risk: "moderate", restart: "explorer", tags: ["menu"], requires_admin: false, state: "default", ops: [op("HKCU\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32", "(Predeterminado)", "(no existe)", "\"\"", "(borra la clave)")] },
+  { id: "appearance.dark_mode", category: "appearance", title: "Modo oscuro", description: "Modo oscuro para Windows y para las apps.", risk: "safe", restart: "none", tags: ["tema"], requires_admin: false, state: "applied", ops: [op("HKCU\\...\\Personalize", "AppsUseLightTheme", "0", "0", "1")] },
+  { id: "gaming.mouse_acceleration", category: "gaming", title: "Desactivar aceleración del mouse", description: "Movimiento 1:1, ideal para juegos.", risk: "safe", restart: "logoff", tags: ["mouse"], requires_admin: false, state: "default", ops: [op("HKCU\\Control Panel\\Mouse", "MouseSpeed", "\"1\"", "\"0\"", "\"1\"")] },
+];
+
+const tweaks: Tweak[] = raw.map((t) => ({ choices: [], choice: null, ...t }));
+
+const overview: Overview = {
+  system: { product: "Windows 11 Pro", display_version: "25H2", build: 26200, ubr: 7019, edition: "Professional", elevated: false },
+  categories: [
+    { id: "privacy", title: "Privacidad", icon: "shield" },
+    { id: "ai", title: "IA y Copilot", icon: "sparkles" },
+    { id: "start", title: "Inicio y sugerencias", icon: "megaphone-off" },
+    { id: "search", title: "Búsqueda", icon: "search" },
+    { id: "taskbar", title: "Barra de tareas", icon: "panel-bottom" },
+    { id: "explorer", title: "Explorador", icon: "folder" },
+    { id: "appearance", title: "Apariencia", icon: "palette" },
+    { id: "gaming", title: "Gaming y entrada", icon: "gamepad" },
+  ],
+  tweaks,
+};
+
+const bloat: BloatApp[] = [
+  { id: "Clipchamp.Clipchamp", title: "Clipchamp", tier: "safe", note: null, packages: [{ full_name: "Clipchamp.Clipchamp_4.2_x64", family_name: "Clipchamp.Clipchamp_yxz", version: "4.2.0.0" }] },
+  { id: "Microsoft.BingNews", title: "Microsoft Noticias", tier: "safe", note: null, packages: [{ full_name: "Microsoft.BingNews_4.55_x64", family_name: "Microsoft.BingNews_8we", version: "4.55.0.0" }] },
+  { id: "MicrosoftCorporationII.QuickAssist", title: "Asistencia rápida", tier: "moderate", note: "Es la herramienta de soporte remoto que más usan los estafadores.", packages: [{ full_name: "QuickAssist_2.0_x64", family_name: "QuickAssist_8we", version: "2.0.0.0" }] },
+  { id: "Microsoft.GamingApp", title: "Xbox", tier: "advanced", note: "Necesaria para instalar juegos de PC Game Pass.", packages: [{ full_name: "Microsoft.GamingApp_2510_x64", family_name: "Microsoft.GamingApp_8we", version: "2510.0.0.0" }] },
+];
+
+const history: JournalEntry[] = [];
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+export async function mock<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
+  await wait(120);
+  const a = (args ?? {}) as any;
+  switch (cmd) {
+    case "get_overview":
+      return structuredClone(overview) as T;
+    case "plan_changes":
+      return a.changes.flatMap((d: any) => {
+        const t = tweaks.find((t) => t.id === d.id)!;
+        const to = (o: { on: string; off: string }) => (d.choice ? SEARCH_VALUES[d.choice] : d.applied ? o.on : o.off);
+        return t.ops.map((o) => ({ tweak_id: t.id, key: o.key, name: o.name, from: o.current, to: to(o), noop: false }));
+      }) as T;
+    case "apply_changes": {
+      for (const d of a.changes) {
+        const t = tweaks.find((t) => t.id === d.id)!;
+        if (t.requires_admin && !overview.system.elevated) continue;
+        if (d.choice) {
+          t.choice = d.choice;
+          t.state = t.choices.find((c) => c.id === d.choice)?.default ? "default" : "applied";
+          t.ops[0].current = SEARCH_VALUES[d.choice];
+        } else t.state = d.applied ? "applied" : "default";
+      }
+      const results = a.changes.map((d: any) => {
+        const t = tweaks.find((t) => t.id === d.id)!;
+        const denied = t.requires_admin && !overview.system.elevated;
+        return { id: d.id, ok: !denied, error: denied ? "Requiere ejecutar como administrador" : null };
+      });
+      const id = Date.now();
+      history.unshift({ id, at: id / 1000, label: `${a.changes.length} tweaks`, changes: a.changes.map((d: any) => ({ tweak_id: d.id })), removed_apps: [], undone: false });
+      return { entry_id: id, results, restart: "explorer" } as T;
+    }
+    case "history":
+      return structuredClone(history) as T;
+    case "undo": {
+      const e = history.find((h) => h.id === a.entryId)!;
+      e.undone = true;
+      return { entry_id: e.id, results: e.changes.map((c) => ({ id: c.tweak_id, ok: true, error: null })), restart: "none" } as T;
+    }
+    case "list_bloat":
+      return structuredClone(bloat) as T;
+    case "remove_bloat":
+      return a.ids.map((id: string) => {
+        const i = bloat.findIndex((b) => b.id === id);
+        if (i >= 0) bloat.splice(i, 1);
+        return { id, ok: true, removed: [id], error: null };
+      }) as T;
+  }
+  throw new Error(`mock: comando desconocido ${cmd}`);
+}
