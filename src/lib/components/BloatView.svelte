@@ -58,7 +58,7 @@
 <div class="mx-auto max-w-5xl">
   <header class="mb-5 flex items-end gap-4">
     <div class="flex-1">
-      <h1 class="font-display text-[24px] font-semibold tracking-tight">Bloatware</h1>
+      <h1 class="font-display text-[20px] font-semibold">Bloatware</h1>
       <p class="mt-1 max-w-2xl text-[13px] text-mute">
         Solo se muestran las apps del catálogo que tenés instaladas. Lo esencial (Store, winget, Terminal, Calculadora,
         Seguridad de Windows) nunca aparece acá. Quitar una app <b class="text-ink">no se puede deshacer</b> desde esta app:
@@ -68,11 +68,11 @@
   </header>
 
   {#if error}
-    <p class="rounded-xl bg-advanced/10 p-4 text-[13px] text-advanced">{error}</p>
+    <p class="rounded-md border border-advanced/30 p-4 text-[13px] text-advanced">{error}</p>
   {:else if !apps}
     <div class="flex items-center gap-2 text-[13px] text-mute"><LoaderCircle size={16} class="animate-spin" /> Buscando paquetes instalados…</div>
   {:else if apps.length === 0}
-    <div class="rounded-2xl border border-line bg-card p-10 text-center">
+    <div class="rounded-lg border border-line bg-card p-10 text-center">
       <PackageX size={28} class="mx-auto text-safe" />
       <p class="mt-3 text-[14px]">No quedó bloatware del catálogo instalado.</p>
     </div>
@@ -82,17 +82,17 @@
       {#if list.length}
         <section class="mb-6">
           <div class="mb-2 flex items-baseline gap-3">
-            <h2 class="text-[13px] font-semibold {tier.cls}">{tier.title}</h2>
+            <h2 class="section-title text-[13px] font-medium {tier.cls}">{tier.title}</h2>
             <span class="text-[12px] text-faint">{tier.hint}</span>
             <button class="ml-auto text-[12px] text-mute hover:text-ink" onclick={() => selectTier(tier.id)}>Seleccionar todo</button>
           </div>
           <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
             {#each list as app (app.id)}
               <label
-                class="flex cursor-pointer gap-3 rounded-xl border bg-card p-3 transition-colors
-                  {selected[app.id] ? 'border-accent/70 bg-accent/5' : 'border-line hover:bg-card-hi'}"
+                class="flex cursor-pointer gap-3 rounded-md border bg-card p-3 transition-colors
+                  {selected[app.id] ? 'border-accent/60 bg-card-hi' : 'border-line hover:bg-card-hi'}"
               >
-                <input type="checkbox" class="mt-0.5 accent-[#7c6cff]" bind:checked={selected[app.id]} />
+                <input type="checkbox" class="mt-0.5 accent-[#8fb5a0]" bind:checked={selected[app.id]} />
                 <span class="min-w-0">
                   <span class="block truncate text-[13px] font-medium">{app.title}</span>
                   <span class="block truncate font-mono text-[10.5px] text-faint">{app.packages[0]?.version} · {app.id}</span>
@@ -107,11 +107,11 @@
       {/if}
     {/each}
 
-    <div class="sticky bottom-4 mt-6 flex items-center gap-3 rounded-2xl border border-line bg-panel/95 p-3 backdrop-blur">
+    <div class="sticky bottom-4 mt-6 flex items-center gap-3 rounded-lg border border-[#3a3935] bg-panel p-2.5 shadow-lg shadow-black/50">
       <label class="flex items-center gap-2 text-[12.5px] {elevated ? 'text-mute' : 'text-faint'}" title={elevated ? "" : "Requiere administrador"}>
         <input
           type="checkbox"
-          class="accent-[#7c6cff]"
+          class="accent-[#8fb5a0]"
           checked={deprovision && elevated}
           onchange={(e) => (deprovision = e.currentTarget.checked)}
           disabled={!elevated}
@@ -122,12 +122,12 @@
       {#if confirming}
         <span class="text-[12.5px] text-moderate">¿Quitar {chosen.length} apps?</span>
         <button class="rounded-lg px-3 py-1.5 text-[13px] text-mute hover:bg-card-hi" onclick={() => (confirming = false)}>Cancelar</button>
-        <button class="inline-flex items-center gap-2 rounded-xl bg-advanced px-4 py-1.5 text-[13px] font-medium text-white disabled:opacity-50" disabled={working} onclick={remove}>
+        <button class="inline-flex items-center gap-2 rounded-md bg-advanced px-3 py-1 text-[13px] font-medium text-bg disabled:opacity-50" disabled={working} onclick={remove}>
           {#if working}<LoaderCircle size={14} class="animate-spin" />{/if} Sí, quitar
         </button>
       {:else}
         <button
-          class="rounded-xl bg-card-hi px-4 py-1.5 text-[13px] font-medium disabled:opacity-40"
+          class="rounded-md border border-line px-3 py-1 text-[13px] disabled:opacity-40"
           disabled={!chosen.length}
           onclick={() => (confirming = true)}
         >

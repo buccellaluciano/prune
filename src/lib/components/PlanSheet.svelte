@@ -25,15 +25,15 @@
   function verb(id: string): { text: string; cls: string } {
     const p = store.pending[id];
     const t = store.tweaks.find((t) => t.id === id);
-    if (typeof p === "string" && t) return { text: `→ ${store.choiceLabel(t, p)}`, cls: "bg-accent/20 text-[#b9b0ff]" };
-    return p ? { text: "aplicar", cls: "bg-safe/15 text-safe" } : { text: "revertir", cls: "bg-moderate/15 text-moderate" };
+    if (typeof p === "string" && t) return { text: `→ ${store.choiceLabel(t, p)}`, cls: "text-accent" };
+    return p ? { text: "aplicar", cls: "text-safe" } : { text: "revertir", cls: "text-moderate" };
   }
 </script>
 
 {#if store.planOpen}
   <div class="fixed inset-0 z-30 bg-black/50" transition:fade={{ duration: 150 }} onclick={() => (store.planOpen = false)} role="presentation"></div>
   <section
-    class="fixed top-0 right-0 bottom-0 z-40 flex w-[min(560px,92vw)] flex-col border-l border-line bg-panel shadow-2xl"
+    class="fixed top-0 right-0 bottom-0 z-40 flex w-[min(560px,92vw)] flex-col border-l border-line bg-panel shadow-xl shadow-black/50"
     transition:fly={{ x: 560, duration: 240, opacity: 1 }}
     aria-label="Plan de cambios"
   >
@@ -54,10 +54,10 @@
         <div class="flex items-center gap-2 text-[13px] text-mute"><LoaderCircle size={16} class="animate-spin" /> Calculando…</div>
       {:else}
         {#each grouped as [id, ops] (id)}
-          <div class="rounded-xl border border-line bg-card p-3">
+          <div class="rounded-md border border-line bg-card p-3">
             <div class="mb-2 flex items-center gap-2 text-[13px]">
               <span class="font-medium">{title(id)}</span>
-              <span class="rounded-md px-1.5 py-0.5 text-[11px] {verb(id).cls}">{verb(id).text}</span>
+              <span class="text-[11.5px] {verb(id).cls}">{verb(id).text}</span>
             </div>
             {#each ops as c}
               <div class="mt-1.5 rounded-lg bg-bg/60 p-2 font-mono text-[10.5px] {c.noop ? 'opacity-50' : ''}">
@@ -80,7 +80,7 @@
       <span class="flex-1 text-[12px] text-mute">{store.pendingCount} tweaks · {plan?.filter((c) => !c.noop).length ?? "…"} valores</span>
       <button class="rounded-lg px-3 py-2 text-[13px] text-mute hover:bg-card-hi hover:text-ink" onclick={() => (store.planOpen = false)}>Volver</button>
       <button
-        class="accent-grad inline-flex items-center gap-2 rounded-xl px-4 py-2 text-[13px] font-medium text-white disabled:opacity-50"
+        class="accent-grad inline-flex items-center gap-2 rounded-md px-3.5 py-1.5 text-[13px] font-medium disabled:opacity-50"
         disabled={!plan || store.busy}
         onclick={() => store.applyPending()}
       >

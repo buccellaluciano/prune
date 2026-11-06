@@ -5,22 +5,17 @@
 
 {#if store.pendingCount > 0 && store.view === "tweaks"}
   <div
-    transition:fly={{ y: 40, duration: 220 }}
-    class="pointer-events-auto absolute bottom-5 left-1/2 z-20 flex whitespace-nowrap -translate-x-1/2 items-center gap-3 rounded-2xl border border-line bg-panel/95 py-2 pr-2 pl-4 shadow-2xl shadow-black/60 backdrop-blur"
+    transition:fly={{ y: 24, duration: 180 }}
+    class="pointer-events-auto absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-3 rounded-lg border border-[#3a3935] bg-panel py-1.5 pr-1.5 pl-3.5 whitespace-nowrap shadow-lg shadow-black/50"
   >
-    <span class="accent-grad grid size-6 place-items-center rounded-full font-mono text-[12px] font-semibold text-white">
-      {store.pendingCount}
-    </span>
     <span class="text-[13px] text-mute">
+      <span class="font-mono text-ink">{store.pendingCount}</span>
       {store.pendingCount === 1 ? "cambio pendiente" : "cambios pendientes"}
     </span>
-    <button class="rounded-lg px-3 py-1.5 text-[13px] text-mute hover:bg-card-hi hover:text-ink" onclick={() => store.clearPending()}>
+    <button class="rounded-md px-2.5 py-1 text-[13px] text-mute hover:bg-card-hi hover:text-ink" onclick={() => store.clearPending()}>
       Descartar
     </button>
-    <button
-      class="accent-grad rounded-xl px-4 py-1.5 text-[13px] font-medium text-white shadow-lg shadow-accent/30 hover:brightness-110"
-      onclick={() => (store.planOpen = true)}
-    >
+    <button class="accent-grad rounded-md px-3 py-1 text-[13px] font-medium" onclick={() => (store.planOpen = true)}>
       Revisar y aplicar
     </button>
   </div>

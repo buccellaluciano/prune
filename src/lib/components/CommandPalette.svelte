@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Command, CornerDownLeft } from "@lucide/svelte";
   import { store, normalize, PROFILES } from "$lib/store.svelte";
+  import { theme, THEMES } from "$lib/theme.svelte";
   import { fade, scale } from "svelte/transition";
   import { tick } from "svelte";
 
@@ -28,6 +29,10 @@
     ...(store.overview?.categories ?? []).map((c) => ({
       id: "c:" + c.id, group: "Ir a", label: c.title, hint: "categoría",
       run: () => ((store.view = "tweaks"), (store.category = c.id), (store.query = "")),
+    })),
+    ...THEMES.filter((t) => t.id !== theme.current).map((t) => ({
+      id: "th:" + t.id, group: "Acciones", label: `Cambiar al tema ${t.title}`, hint: t.hint,
+      run: () => theme.set(t.id),
     })),
     ...PROFILES.map((p) => ({
       id: "p:" + p.id, group: "Perfiles", label: `Marcar perfil: ${p.title}`, hint: p.hint,
@@ -90,13 +95,13 @@
 {#if store.paletteOpen}
   <div class="fixed inset-0 z-50 bg-black/55 backdrop-blur-[2px]" transition:fade={{ duration: 120 }} onclick={() => (store.paletteOpen = false)} role="presentation"></div>
   <div
-    class="fixed top-[12vh] left-1/2 z-50 w-[min(640px,92vw)] -translate-x-1/2 overflow-hidden rounded-2xl border border-line bg-panel shadow-2xl shadow-black/70"
+    class="fixed top-[12vh] left-1/2 z-50 w-[min(640px,92vw)] -translate-x-1/2 overflow-hidden rounded-lg border border-[#3a3935] bg-panel shadow-xl shadow-black/60"
     transition:scale={{ start: 0.97, duration: 140 }}
     role="dialog"
     aria-label="Paleta de comandos"
   >
     <div class="flex items-center gap-3 border-b border-line px-4">
-      <Command size={16} class="text-accent" />
+      <Command size={15} class="text-faint" />
       <input
         bind:this={input}
         bind:value={q}
@@ -109,17 +114,17 @@
     <ul class="max-h-[52vh] overflow-y-auto p-2">
       {#each items as item, i (item.id)}
         {#if i === 0 || items[i - 1].group !== item.group}
-          <li class="px-2.5 pt-2 pb-1 text-[10.5px] font-medium tracking-wider text-faint uppercase">{item.group}</li>
+          <li class="px-2.5 pt-2.5 pb-1 text-[11.5px] text-faint">{item.group}</li>
         {/if}
         <li>
           <button
             data-idx={i}
-            class="flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left {i === sel ? 'bg-accent/15' : ''}"
+            class="flex w-full items-center gap-3 rounded-md px-2.5 py-1.5 text-left {i === sel ? 'bg-card-hi' : ''}"
             onmouseenter={() => (sel = i)}
             onclick={() => run(item)}
           >
             {#if item.state !== undefined}
-              <span class="h-4 w-7 shrink-0 rounded-full p-0.5 transition-colors {item.state ? 'accent-grad' : 'bg-[#323850]'}">
+              <span class="h-4 w-7 shrink-0 rounded-full p-0.5 transition-colors {item.state ? 'accent-grad' : 'bg-line'}">
                 <span class="block size-3 rounded-full bg-white transition-transform {item.state ? 'translate-x-3' : ''}"></span>
               </span>
             {/if}

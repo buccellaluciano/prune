@@ -1,0 +1,527 @@
+/* ═══════════════════════════════ Tema Aero 7 ═══════════════════════════════
+   Inspirado en el estilo visual de Windows 7. Todo es CSS propio: no usa imágenes,
+   íconos ni fondos de Microsoft. El vidrio real lo pone DWM (efecto acrílico)
+   detrás de la ventana transparente; acá solo se agregan el tinte y los brillos.
+   Las reglas van sin @layer para ganarle a las utilidades de Tailwind. */
+
+:root[data-theme="aero"] {
+  color-scheme: light;
+  --font-sans: "Segoe UI", Tahoma, sans-serif;
+  --font-display: "Segoe UI", Tahoma, sans-serif;
+
+  --color-bg: #ffffff;
+  --color-panel: #f4f8fd;
+  --color-card: #ffffff;
+  --color-card-hi: #f2f7fe;
+  --color-line: #ccd8e8;
+  --color-ink: #1e1e1e;
+  --color-mute: #4e6580;
+  --color-faint: #8293a8;
+  --color-accent: #3399ff;
+  --color-accent-2: #1e395b;
+  --color-safe: #24871b;
+  --color-moderate: #b3690a;
+  --color-advanced: #c33320;
+
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 3px;
+  --radius-xl: 3px;
+  --radius-2xl: 4px;
+
+  /* Tinte "cielo" del vidrio, reflejo superior y vetas diagonales */
+  --aero-tint: rgb(110 170 235 / 0.36);
+  --aero-sheen: linear-gradient(to bottom, rgb(255 255 255 / 0.42), rgb(255 255 255 / 0.12) 38%, rgb(255 255 255 / 0) 60%);
+  --aero-streaks: linear-gradient(
+    118deg,
+    transparent 0 18%,
+    rgb(255 255 255 / 0.16) 21%,
+    transparent 27%,
+    transparent 52%,
+    rgb(255 255 255 / 0.1) 56%,
+    transparent 61%
+  );
+
+  --btn: linear-gradient(to bottom, #f2f2f2 0%, #ebebeb 49%, #dddddd 50%, #cfcfcf 100%);
+  --btn-hover: linear-gradient(to bottom, #eaf6fd 0%, #d9f0fc 49%, #bee6fd 50%, #a7d9f5 100%);
+  --btn-down: linear-gradient(to bottom, #e5f4fc 0%, #c4e5f6 49%, #98d1ef 50%, #68b3db 100%);
+  --sel-hover: linear-gradient(to bottom, #fafbfd, #ebf3fd);
+  --sel: linear-gradient(to bottom, #dcebfc, #c1dbfc);
+}
+
+:root[data-theme="aero"] ::selection {
+  background: #3399ff;
+  color: white;
+}
+
+/* Fondo: transparente en la app (se ve el acrílico); en el navegador, un "escritorio" de prueba. */
+:root[data-theme="aero"][data-native="true"],
+:root[data-theme="aero"][data-native="true"] body {
+  background: transparent;
+}
+:root[data-theme="aero"][data-native="false"] body {
+  background:
+    radial-gradient(1200px 700px at 30% 20%, #4aa3e6, transparent 70%),
+    radial-gradient(900px 600px at 80% 90%, #1b5aa6, transparent 70%),
+    #2a73c2;
+}
+
+/* Marco de vidrio: toda la ventana */
+:root[data-theme="aero"] .app-frame {
+  background: var(--aero-streaks), var(--aero-sheen), var(--aero-tint);
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 0.55),
+    inset 0 0 0 2px rgb(255 255 255 / 0.45);
+}
+
+/* ───────── Barra de título ───────── */
+.aero-titlebar {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  height: 30px;
+  flex-shrink: 0;
+  padding-left: 10px;
+  user-select: none;
+}
+.aero-titlebar-icon {
+  margin-top: 7px;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #9fd4ff, #2f7fd8 60%, #164f9a);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.35),
+    inset 0 1px 0 rgb(255 255 255 / 0.6);
+  pointer-events: none;
+}
+.aero-titlebar-text {
+  margin-top: 6px;
+  font: 12px "Segoe UI", sans-serif;
+  color: #000;
+  /* El resplandor blanco del texto sobre el vidrio */
+  text-shadow:
+    0 0 10px #fff,
+    0 0 6px #fff,
+    0 0 3px #fff;
+  pointer-events: none;
+}
+.aero-caption {
+  margin-left: auto;
+  margin-right: 6px;
+  display: flex;
+  border: 1px solid rgb(0 0 0 / 0.55);
+  border-top: none;
+  border-radius: 0 0 5px 5px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.5),
+    inset 0 0 0 1px rgb(255 255 255 / 0.35);
+}
+.aero-caption .cap {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 19px;
+  background: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.5),
+    rgb(255 255 255 / 0.22) 49%,
+    rgb(255 255 255 / 0.06) 50%,
+    rgb(255 255 255 / 0.28)
+  );
+  border-right: 1px solid rgb(0 0 0 / 0.35);
+}
+.aero-caption .cap svg {
+  fill: white;
+  filter: drop-shadow(0 0 1px rgb(0 0 0 / 0.9)) drop-shadow(0 0 1px rgb(0 0 0 / 0.6));
+}
+.aero-caption .cap:hover {
+  background: linear-gradient(to bottom, #b8e0ff, #6bb6f5 49%, #2c8ae8 50%, #5ab7ff);
+  box-shadow: inset 0 0 6px rgb(160 230 255 / 0.9);
+}
+.aero-caption .cap:active {
+  background: linear-gradient(to bottom, #7bb0de, #3d84c9 49%, #1d5fa8 50%, #3a8bd1);
+}
+.aero-caption .cap.close {
+  width: 45px;
+  border-right: none;
+  background: linear-gradient(to bottom, #e9a99c 0%, #d97764 49%, #c4462c 50%, #d5694f 100%);
+}
+.aero-caption .cap.close:hover {
+  background: linear-gradient(to bottom, #f6b8a8 0%, #ed7c64 49%, #e04324 50%, #f0806a 100%);
+  box-shadow: inset 0 0 8px rgb(255 210 190 / 0.95);
+}
+.aero-caption .cap.close:active {
+  background: linear-gradient(to bottom, #c98a7d, #b85440 49%, #9c2c14 50%, #b54d33);
+}
+
+/* ───────── Panel lateral sobre el vidrio ───────── */
+:root[data-theme="aero"] .sidebar {
+  background: transparent;
+  border: none;
+}
+:root[data-theme="aero"] .sidebar,
+:root[data-theme="aero"] .sidebar .text-mute,
+:root[data-theme="aero"] .sidebar .text-faint,
+:root[data-theme="aero"] .sidebar .text-ink {
+  color: #000;
+  text-shadow:
+    0 0 8px #fff,
+    0 0 4px #fff,
+    0 0 2px rgb(255 255 255 / 0.9);
+}
+:root[data-theme="aero"] .sidebar .font-mono {
+  text-shadow: none;
+}
+:root[data-theme="aero"] .sidebar .nav {
+  color: #000;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  padding: 0.35rem 0.6rem;
+}
+:root[data-theme="aero"] .sidebar .nav:hover {
+  background: rgb(255 255 255 / 0.45);
+  border-color: rgb(255 255 255 / 0.85);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.4),
+    0 0 6px rgb(255 255 255 / 0.6);
+  color: #000;
+}
+:root[data-theme="aero"] .sidebar .nav.active {
+  background: linear-gradient(to bottom, rgb(255 255 255 / 0.85), rgb(220 235 252 / 0.85));
+  border-color: #7da2ce;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.7);
+}
+/* Cuadros blancos dentro del vidrio (progreso, selector de tema) */
+:root[data-theme="aero"] .sidebar .bg-card {
+  background: rgb(255 255 255 / 0.6);
+  border-color: rgb(0 0 0 / 0.25);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.6);
+}
+:root[data-theme="aero"] .sidebar .bg-line {
+  background: #e6e6e6;
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.25);
+  border: 1px solid #a7a7a7;
+}
+:root[data-theme="aero"] .sidebar .border-line,
+:root[data-theme="aero"] .sidebar.border-line {
+  border-color: rgb(0 0 0 / 0.18);
+}
+:root[data-theme="aero"] .sidebar .group:hover {
+  background: rgb(255 255 255 / 0.45);
+}
+
+/* Barra de progreso verde con brillo que recorre */
+:root[data-theme="aero"] .progress-fill {
+  border-radius: 1px;
+  background:
+    linear-gradient(90deg, transparent 0, rgb(255 255 255 / 0.55) 50%, transparent 100%) -200px 0 / 120px 100% no-repeat,
+    linear-gradient(to bottom, #c4f2bd 0%, #5fd856 45%, #19b318 50%, #3dcb3a 100%);
+  box-shadow: none;
+  animation: aero-shine 2.8s linear infinite;
+}
+@keyframes aero-shine {
+  to {
+    background-position:
+      calc(100% + 200px) 0,
+      0 0;
+  }
+}
+
+/* ───────── Área de contenido: el "cliente" blanco encastrado en el vidrio ───────── */
+:root[data-theme="aero"] main {
+  background: var(--color-bg);
+  margin: 0 7px 7px 0;
+  border: 1px solid rgb(0 0 0 / 0.5);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.55);
+  border-radius: 2px;
+}
+:root[data-theme="aero"] main h1 {
+  color: #1e395b;
+  font-weight: 400;
+  font-size: 21px;
+}
+:root[data-theme="aero"] main h2 {
+  color: #1e395b;
+}
+:root[data-theme="aero"] main h2.section-title {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+:root[data-theme="aero"] main h2.section-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, #b6c9e0, transparent);
+}
+
+/* Barra de comandos estilo Explorador */
+:root[data-theme="aero"] .toolbar {
+  background: linear-gradient(to bottom, #fafcff 0%, #e9f1fb 50%, #dce8f6 51%, #e3edf9 100%);
+  border-bottom: 1px solid #a0afc3;
+  box-shadow: inset 0 1px 0 #fff;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+/* Barra de información amarilla */
+:root[data-theme="aero"] .infobar {
+  background: #ffffe1;
+  color: #1e1e1e;
+  border-bottom: 1px solid #c9c592;
+}
+
+/* ───────── Botones: gris brillante que se pone celeste al pasar el mouse ───────── */
+:root[data-theme="aero"] button.border:not([role]),
+:root[data-theme="aero"] button.bg-card,
+:root[data-theme="aero"] button.bg-card-hi,
+:root[data-theme="aero"] button.accent-grad,
+:root[data-theme="aero"] button.bg-advanced,
+:root[data-theme="aero"] button.bg-moderate\/15 {
+  background: var(--btn);
+  border: 1px solid #707070;
+  border-radius: 3px;
+  color: #000;
+  font-weight: 400;
+  text-shadow: none;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.7);
+}
+:root[data-theme="aero"] button.border:not([role]):hover:not(:disabled),
+:root[data-theme="aero"] button.bg-card:hover:not(:disabled),
+:root[data-theme="aero"] button.bg-card-hi:hover:not(:disabled),
+:root[data-theme="aero"] button.accent-grad:hover:not(:disabled),
+:root[data-theme="aero"] button.bg-advanced:hover:not(:disabled),
+:root[data-theme="aero"] button.bg-moderate\/15:hover:not(:disabled) {
+  background: var(--btn-hover);
+  border-color: #3c7fb1;
+  filter: none;
+}
+:root[data-theme="aero"] button.border:not([role]):active:not(:disabled),
+:root[data-theme="aero"] button.bg-card:active:not(:disabled),
+:root[data-theme="aero"] button.bg-card-hi:active:not(:disabled),
+:root[data-theme="aero"] button.accent-grad:active:not(:disabled),
+:root[data-theme="aero"] button.bg-advanced:active:not(:disabled),
+:root[data-theme="aero"] button.bg-moderate\/15:active:not(:disabled) {
+  background: var(--btn-down);
+  border-color: #2c628b;
+  box-shadow: inset 1px 1px 0 rgb(0 0 0 / 0.15);
+}
+/* Botón por defecto (la acción principal): borde celeste */
+:root[data-theme="aero"] button.accent-grad {
+  border-color: #3399ff;
+  box-shadow: inset 0 0 0 1px #8ad3f8;
+}
+:root[data-theme="aero"] button:disabled {
+  background: #f4f4f4;
+  border-color: #adb2b5;
+  color: #838383;
+  box-shadow: none;
+}
+
+/* Otros elementos con el degradé de acento (logo, avatar, contador): brillo azul */
+:root[data-theme="aero"] .accent-grad:not(button):not(.progress-fill) {
+  background: linear-gradient(to bottom, #8cc4f5 0%, #3f92e3 49%, #2276d4 50%, #4799ea 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.6),
+    0 0 0 1px rgb(0 0 0 / 0.25);
+}
+
+/* ───────── Switches → casilla de verificación ───────── */
+:root[data-theme="aero"] [role="switch"] {
+  width: 15px;
+  height: 15px;
+  margin-top: 3px;
+  padding: 0;
+  border: 1px solid #8e8f8f;
+  border-radius: 2px;
+  background: linear-gradient(135deg, #dcdcdc, #ffffff);
+  box-shadow:
+    inset 0 0 0 2px #f4f4f4,
+    inset 0 0 0 3px #c9cdd2;
+}
+:root[data-theme="aero"] [role="switch"] > span {
+  display: none;
+}
+:root[data-theme="aero"] [role="switch"]:hover:not(:disabled) {
+  border-color: #3c7fb1;
+  box-shadow:
+    inset 0 0 0 2px #def9fa,
+    inset 0 0 0 3px #79c6f9;
+}
+:root[data-theme="aero"] [role="switch"][aria-checked="true"]::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid #1c4f8a;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* ───────── Opciones (radio) y selector de tema: selección del Explorador ───────── */
+:root[data-theme="aero"] [role="radiogroup"] {
+  background: transparent;
+  border-color: transparent;
+}
+:root[data-theme="aero"] [role="radio"] {
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  box-shadow: none;
+  color: #1e1e1e;
+}
+:root[data-theme="aero"] [role="radio"]:hover {
+  background: var(--sel-hover);
+  border-color: #b8d6fb;
+}
+:root[data-theme="aero"] [role="radio"][aria-checked="true"] {
+  background: var(--sel);
+  border-color: #7da2ce;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.5);
+  color: #000;
+}
+
+/* ───────── Tarjetas ───────── */
+:root[data-theme="aero"] main article {
+  border-color: #d5dfea;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+}
+:root[data-theme="aero"] main article:hover {
+  background: var(--sel-hover);
+  border-color: #b8d6fb;
+}
+:root[data-theme="aero"] main label.bg-card:hover {
+  background: var(--sel-hover);
+  border-color: #b8d6fb;
+}
+
+/* ───────── Campos de texto ───────── */
+:root[data-theme="aero"] input:not([type="checkbox"]) {
+  border-radius: 2px;
+  border: 1px solid;
+  border-color: #abadb3 #dbdfe6 #e3e9ef #e2e3ea;
+  background: #fff;
+}
+:root[data-theme="aero"] input:not([type="checkbox"]):hover {
+  border-color: #5794bf #b7d5ea #c7e2f1 #c5daed;
+}
+:root[data-theme="aero"] input:not([type="checkbox"]):focus {
+  border-color: #3d7bad #a4c9e3 #b7d9ed #b5cfe7;
+}
+
+/* ───────── Diálogos: marco de vidrio con difuminado sobre la página ───────── */
+:root[data-theme="aero"] [role="dialog"],
+:root[data-theme="aero"] section[aria-label="Plan de cambios"] {
+  background: var(--aero-streaks), var(--aero-sheen), rgb(150 195 240 / 0.55);
+  backdrop-filter: blur(14px) saturate(1.4);
+  border: 1px solid rgb(0 0 0 / 0.55);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.55),
+    0 8px 30px rgb(0 0 0 / 0.45);
+  border-radius: 6px;
+}
+:root[data-theme="aero"] [role="dialog"] > div,
+:root[data-theme="aero"] section[aria-label="Plan de cambios"] > header,
+:root[data-theme="aero"] section[aria-label="Plan de cambios"] > footer {
+  border-color: rgb(0 0 0 / 0.2);
+}
+:root[data-theme="aero"] [role="dialog"] input {
+  border: none;
+  background: transparent;
+  text-shadow: 0 0 6px #fff;
+}
+:root[data-theme="aero"] [role="dialog"] ul,
+:root[data-theme="aero"] section[aria-label="Plan de cambios"] > div {
+  background: #fff;
+  margin: 0 6px;
+  border: 1px solid rgb(0 0 0 / 0.4);
+}
+:root[data-theme="aero"] [role="dialog"] > div:last-child,
+:root[data-theme="aero"] section[aria-label="Plan de cambios"] header,
+:root[data-theme="aero"] section[aria-label="Plan de cambios"] header .text-mute,
+:root[data-theme="aero"] section[aria-label="Plan de cambios"] footer .text-mute {
+  color: #000;
+  text-shadow:
+    0 0 8px #fff,
+    0 0 3px #fff;
+}
+:root[data-theme="aero"] [role="dialog"] li button.bg-accent\/15 {
+  background: var(--sel);
+  outline: 1px solid #7da2ce;
+}
+:root[data-theme="aero"] .bg-black\/50,
+:root[data-theme="aero"] .bg-black\/55 {
+  background: rgb(0 0 0 / 0.25);
+}
+
+/* Globos de notificación */
+:root[data-theme="aero"] .toast {
+  background: linear-gradient(to bottom, #ffffff, #e4e5f0);
+  border: 1px solid #767676;
+  border-radius: 4px;
+  color: #1e1e1e;
+  box-shadow: 2px 3px 8px rgb(0 0 0 / 0.35);
+}
+
+/* Barra flotante de cambios pendientes */
+:root[data-theme="aero"] main .absolute.bottom-5 {
+  background: linear-gradient(to bottom, #ffffff, #e9eef6);
+  border: 1px solid #8ea5c2;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.25);
+}
+
+/* ───────── Barras de desplazamiento clásicas ───────── */
+:root[data-theme="aero"] * {
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+}
+:root[data-theme="aero"] ::-webkit-scrollbar {
+  width: 17px;
+  height: 17px;
+}
+:root[data-theme="aero"] ::-webkit-scrollbar-track {
+  background: linear-gradient(to right, #e3e3e3, #f0f0f0 20%, #f0f0f0 80%, #e3e3e3);
+}
+:root[data-theme="aero"] ::-webkit-scrollbar-thumb {
+  border: 1px solid #959595;
+  border-radius: 3px;
+  background: linear-gradient(to right, #f3f3f3, #e8e8e8 49%, #d9d9d9 50%, #e2e2e2);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.8);
+}
+:root[data-theme="aero"] ::-webkit-scrollbar-thumb:hover {
+  border-color: #3c7fb1;
+  background: linear-gradient(to right, #e3f4fc, #d6eefb 49%, #b9e0f6 50%, #c8e8f8);
+}
+
+/* Marca y avatar: burbuja azul brillante */
+:root[data-theme="aero"] .brand-mark,
+:root[data-theme="aero"] .avatar {
+  border: none;
+  color: white;
+  text-shadow: none;
+  background: radial-gradient(circle at 35% 28%, #a9dbff, #3b8de0 55%, #1a5aa8);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.35),
+    inset 0 1px 0 rgb(255 255 255 / 0.6);
+}
+:root[data-theme="aero"] .brand-mark {
+  border-radius: 6px;
+}
+
+/* Listas (tweaks, programas): filas estilo Explorador dentro de un recuadro */
+:root[data-theme="aero"] main .divide-line > * {
+  border-color: #e3e9f1;
+}
+:root[data-theme="aero"] main .bg-card.border-line {
+  border-color: #c5d3e3;
+}

@@ -19,7 +19,8 @@
         "minWidth": 960,
         "minHeight": 620,
         "theme": "Dark",
-        "center": true
+        "center": true,
+        "transparent": true
       }
     ],
     "security": {

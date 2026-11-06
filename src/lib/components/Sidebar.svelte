@@ -3,6 +3,7 @@
   import { apps } from "$lib/apps.svelte";
   import { store, PROFILES } from "$lib/store.svelte";
   import CategoryIcon from "./CategoryIcon.svelte";
+  import { theme, THEMES } from "$lib/theme.svelte";
 
   const counts = $derived.by(() => {
     const c: Record<string, { on: number; total: number }> = {};
@@ -29,28 +30,28 @@
   }
 </script>
 
-<aside class="flex h-full w-64 shrink-0 flex-col border-r border-line bg-panel/80">
-  <div class="flex items-center gap-3 px-5 pt-5 pb-4">
-    <div class="accent-grad grid size-9 place-items-center rounded-xl shadow-lg shadow-accent/30">
-      <Wand2 size={18} color="white" />
+<aside class="sidebar flex h-full w-60 shrink-0 flex-col border-r border-line bg-panel">
+  <div class="flex items-center gap-2.5 px-4 pt-4 pb-4">
+    <div class="brand-mark grid size-7 place-items-center rounded-md border border-line text-ink">
+      <Wand2 size={14} strokeWidth={1.8} />
     </div>
-    <div>
-      <div class="font-display text-[15px] font-semibold tracking-tight">Debloater</div>
+    <div class="min-w-0">
+      <div class="text-[13.5px] leading-tight font-semibold">Debloater</div>
       {#if store.overview}
-        <div class="text-[11px] text-mute">
-          {store.overview.system.display_version} · build {store.overview.system.build}.{store.overview.system.ubr}
+        <div class="font-mono text-[10.5px] text-faint">
+          {store.overview.system.display_version} · {store.overview.system.build}.{store.overview.system.ubr}
         </div>
       {/if}
     </div>
   </div>
 
   <!-- Progreso global -->
-  <div class="mx-4 mb-3 rounded-xl border border-line bg-card px-3 py-2.5">
-    <div class="flex items-baseline justify-between text-[11px] text-mute">
-      <span>Optimizado</span><span class="font-mono text-ink">{applied}/{store.tweaks.length}</span>
+  <div class="mx-4 mb-4">
+    <div class="flex items-baseline justify-between text-[11.5px] text-mute">
+      <span>Optimizado</span><span class="font-mono text-[11px] text-ink">{applied}/{store.tweaks.length}</span>
     </div>
-    <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-line">
-      <div class="accent-grad h-full rounded-full transition-all duration-700" style="width:{pct}%"></div>
+    <div class="mt-1.5 h-[3px] overflow-hidden rounded-full bg-line">
+      <div class="progress-fill accent-grad h-full rounded-full transition-all duration-700" style="width:{pct}%"></div>
     </div>
   </div>
 
@@ -59,7 +60,7 @@
       class="nav {store.view === 'tweaks' && !store.category ? 'active' : ''}"
       onclick={() => goCategory(null)}
     >
-      <SlidersHorizontal size={16} strokeWidth={1.8} /> <span class="flex-1 text-left">Todos los tweaks</span>
+      <SlidersHorizontal size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">Todos los tweaks</span>
     </button>
 
     {#each store.overview?.categories ?? [] as c (c.id)}
@@ -76,21 +77,21 @@
     <div class="my-2 border-t border-line"></div>
 
     <button class="nav {store.view === 'apps' ? 'active' : ''}" onclick={() => ((store.view = "apps"), (store.query = ""))}>
-      <AppWindow size={16} strokeWidth={1.8} /> <span class="flex-1 text-left">Programas</span>
-      {#if apps.running}<span class="size-2 animate-pulse rounded-full bg-accent" title="winget trabajando"></span>
-      {:else if apps.upgradable.length}<span class="rounded-md bg-moderate/15 px-1.5 font-mono text-[10.5px] text-moderate">{apps.upgradable.length}</span>{/if}
+      <AppWindow size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">Programas</span>
+      {#if apps.running}<span class="size-1.5 animate-pulse rounded-full bg-accent" title="winget trabajando"></span>
+      {:else if apps.upgradable.length}<span class="font-mono text-[11px] text-moderate" title="Actualizaciones disponibles">{apps.upgradable.length}</span>{/if}
     </button>
     <button class="nav {store.view === 'bloat' ? 'active' : ''}" onclick={() => (store.view = "bloat")}>
-      <PackageX size={16} strokeWidth={1.8} /> <span class="flex-1 text-left">Bloatware</span>
+      <PackageX size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">Bloatware</span>
     </button>
     <button class="nav {store.view === 'history' ? 'active' : ''}" onclick={() => (store.view = "history")}>
-      <History size={16} strokeWidth={1.8} /> <span class="flex-1 text-left">Historial</span>
+      <History size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">Historial</span>
     </button>
 
-    <div class="mt-4 mb-1.5 px-2.5 text-[11px] font-medium tracking-wider text-faint uppercase">Perfiles</div>
+    <div class="mt-5 mb-1 px-2.5 text-[11.5px] text-faint">Perfiles</div>
     {#each PROFILES as p (p.id)}
       <button
-        class="group w-full rounded-lg px-2.5 py-2 text-left hover:bg-card-hi"
+        class="group w-full rounded-md px-2.5 py-1.5 text-left hover:bg-card-hi"
         onclick={() => {
           store.stageMany(p.ids, true);
           store.view = "tweaks";
@@ -98,9 +99,24 @@
         }}
       >
         <div class="text-[13px] text-ink">{p.title}</div>
-        <div class="text-[11px] text-mute">{p.hint}</div>
+        <div class="text-[11px] text-faint">{p.hint}</div>
       </button>
     {/each}
+
+    <div class="mt-5 mb-1.5 px-2.5 text-[11.5px] text-faint">Tema</div>
+    <div class="theme-picker mx-2.5 flex gap-1 rounded-md border border-line p-0.5" role="radiogroup" aria-label="Tema">
+      {#each THEMES as t (t.id)}
+        <button
+          role="radio"
+          aria-checked={theme.current === t.id}
+          title={t.hint}
+          class="flex-1 rounded-[4px] px-2 py-1 text-[12px] {theme.current === t.id ? 'bg-card-hi font-medium text-ink' : 'text-mute hover:text-ink'}"
+          onclick={() => theme.set(t.id)}
+        >
+          {t.title}
+        </button>
+      {/each}
+    </div>
   </nav>
 
   {#if store.user}
@@ -108,9 +124,9 @@
     {@const elevated = store.overview?.system.elevated ?? false}
     <div class="flex items-center gap-3 border-t border-line px-4 py-3">
       {#if u.picture}
-        <img src={u.picture} alt="" class="size-9 shrink-0 rounded-full object-cover ring-1 ring-line" />
+        <img src={u.picture} alt="" class="size-8 shrink-0 rounded-full object-cover ring-1 ring-line" />
       {:else}
-        <div class="accent-grad grid size-9 shrink-0 place-items-center rounded-full text-[14px] font-semibold text-white uppercase" aria-hidden="true">
+        <div class="avatar grid size-8 shrink-0 place-items-center rounded-full border border-line bg-card-hi text-[13px] font-medium text-ink uppercase" aria-hidden="true">
           {initials(u.name || u.username)}
         </div>
       {/if}
@@ -134,18 +150,17 @@
     width: 100%;
     align-items: center;
     gap: 0.6rem;
-    border-radius: 0.6rem;
-    padding: 0.45rem 0.65rem;
+    border-radius: 5px;
+    padding: 0.35rem 0.6rem;
     color: var(--color-mute);
-    transition: background 120ms, color 120ms;
+    transition: background 100ms, color 100ms;
   }
   .nav:hover {
     background: var(--color-card-hi);
     color: var(--color-ink);
   }
   .nav.active {
-    background: rgb(124 108 255 / 0.14);
+    background: var(--color-card-hi);
     color: var(--color-ink);
-    box-shadow: inset 2px 0 0 var(--color-accent);
   }
 </style>

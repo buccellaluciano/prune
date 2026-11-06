@@ -31,20 +31,20 @@
 </script>
 
 <div class="mx-auto max-w-3xl">
-  <h1 class="font-display text-[24px] font-semibold tracking-tight">Historial</h1>
+  <h1 class="font-display text-[20px] font-semibold">Historial</h1>
   <p class="mt-1 mb-5 text-[13px] text-mute">Cada cambio guarda el valor anterior exacto del registro. Deshacer lo restaura tal cual estaba.</p>
 
   {#if !entries}
     <div class="flex items-center gap-2 text-[13px] text-mute"><LoaderCircle size={16} class="animate-spin" /> Cargando…</div>
   {:else if entries.length === 0}
-    <div class="rounded-2xl border border-line bg-card p-10 text-center text-[13px] text-mute">
+    <div class="rounded-lg border border-line bg-card p-10 text-center text-[13px] text-mute">
       <History size={26} class="mx-auto mb-3 text-faint" /> Todavía no aplicaste cambios.
     </div>
   {:else}
     <ol class="relative space-y-2 border-l border-line pl-5">
       {#each entries as e (e.id)}
-        <li class="relative rounded-xl border border-line bg-card p-3 {e.undone ? 'opacity-55' : ''}">
-          <span class="absolute top-4 -left-[25px] size-2.5 rounded-full {e.undone ? 'bg-faint' : e.removed_apps.length ? 'bg-advanced' : 'accent-grad'}"></span>
+        <li class="relative rounded-md border border-line bg-card px-3 py-2.5 {e.undone ? 'opacity-55' : ''}">
+          <span class="absolute top-4 -left-[24.5px] size-2 rounded-full {e.undone ? 'bg-line' : e.removed_apps.length ? 'bg-advanced' : 'bg-accent'}"></span>
           <div class="flex items-center gap-3">
             <div class="min-w-0 flex-1">
               <div class="truncate text-[13px] font-medium">{e.label}</div>
