@@ -34,7 +34,7 @@ async fn plan_changes(changes: Vec<Desired>) -> Result<Vec<PlannedChange>, Strin
 #[tauri::command]
 async fn apply_changes(state: tauri::State<'_, Engine>, changes: Vec<Desired>) -> Result<ApplyReport, String> {
     let info = system::info();
-    Ok(state.apply(&changes, info.elevated, info.build))
+    Ok(state.apply(&changes, info.elevated, info.build, info.foreign_user.as_deref()))
 }
 
 #[tauri::command]
@@ -43,8 +43,8 @@ async fn history(state: tauri::State<'_, Engine>) -> Result<Vec<JournalEntry>, S
 }
 
 #[tauri::command]
-async fn undo(state: tauri::State<'_, Engine>, entry_id: u64) -> Result<ApplyReport, String> {
-    state.undo(entry_id)
+async fn undo(state: tauri::State<'_, Engine>, entry_id: u64, force: Option<bool>) -> Result<ApplyReport, String> {
+    state.undo(entry_id, force.unwrap_or(false), system::foreign_user().as_deref())
 }
 
 #[tauri::command]
@@ -60,6 +60,11 @@ async fn remove_bloat(
     ids: Vec<String>,
     deprovision: bool,
 ) -> Result<Vec<appx::RemoveResult>, String> {
+    if let Some(user) = system::foreign_user() {
+        return Err(format!(
+            "La app corre con otra cuenta de administrador: se quitarían las apps de esa cuenta y no las de {user}"
+        ));
+    }
     let deprovision = deprovision && system::is_elevated();
     let results = tauri::async_runtime::spawn_blocking(move || appx::remove(&ids, deprovision))
         .await

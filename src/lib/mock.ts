@@ -9,7 +9,7 @@ const op = (key: string, name: string, current: string, on: string, off = "(borr
 const A = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced";
 const CDM = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager";
 
-type MockTweak = Omit<Tweak, "choices" | "choice"> & Partial<Pick<Tweak, "choices" | "choice">>;
+type MockTweak = Omit<Tweak, "choices" | "choice" | "per_user"> & Partial<Pick<Tweak, "choices" | "choice">>;
 
 const SEARCH_VALUES: Record<string, string> = { hidden: "0", icon: "1", icon_label: "3", box: "2" };
 
@@ -31,10 +31,10 @@ const raw: MockTweak[] = [
   { id: "gaming.mouse_acceleration", category: "gaming", title: "Desactivar aceleración del mouse", description: "Movimiento 1:1, ideal para juegos.", risk: "safe", restart: "logoff", tags: ["mouse"], requires_admin: false, state: "default", ops: [op("HKCU\\Control Panel\\Mouse", "MouseSpeed", "\"1\"", "\"0\"", "\"1\"")] },
 ];
 
-const tweaks: Tweak[] = raw.map((t) => ({ choices: [], choice: null, ...t }));
+const tweaks: Tweak[] = raw.map((t) => ({ choices: [], choice: null, per_user: t.ops.some((o) => o.key.startsWith("HKCU")), ...t }));
 
 const overview: Overview = {
-  system: { product: "Windows 11 Pro", display_version: "25H2", build: 26200, ubr: 7019, edition: "Professional", elevated: false },
+  system: { product: "Windows 11 Pro", display_version: "25H2", build: 26200, ubr: 7019, edition: "Professional", elevated: false, foreign_user: null },
   categories: [
     { id: "privacy", title: "Privacidad", icon: "shield" },
     { id: "ai", title: "IA y Copilot", icon: "sparkles" },
@@ -133,14 +133,14 @@ export async function mock<T>(cmd: string, args?: Record<string, unknown>): Prom
       });
       const id = Date.now();
       history.unshift({ id, at: id / 1000, label: `${a.changes.length} tweaks`, changes: a.changes.map((d: any) => ({ tweak_id: d.id })), removed_apps: [], undone: false });
-      return { entry_id: id, results, restart: "explorer" } as T;
+      return { entry_id: id, results, restart: "explorer", conflicts: [], warning: null } as T;
     }
     case "history":
       return structuredClone(history) as T;
     case "undo": {
       const e = history.find((h) => h.id === a.entryId)!;
       e.undone = true;
-      return { entry_id: e.id, results: e.changes.map((c) => ({ id: c.tweak_id, ok: true, error: null })), restart: "none" } as T;
+      return { entry_id: e.id, results: e.changes.map((c) => ({ id: c.tweak_id, ok: true, error: null })), restart: "none", conflicts: [], warning: null } as T;
     }
     case "winget_status":
       await wait(700);

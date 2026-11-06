@@ -37,6 +37,8 @@ pub struct TweakView {
     pub restart: Restart,
     pub tags: Vec<String>,
     pub requires_admin: bool,
+    /// Toca HKCU (configuración del usuario).
+    pub per_user: bool,
     pub state: TweakState,
     pub ops: Vec<OpView>,
     /// Vacío para tweaks de switch.
@@ -121,6 +123,12 @@ pub struct Change {
     /// Si revertir borró un árbol de claves, guardamos su raíz (informativo).
     #[serde(default)]
     pub deleted_tree: Option<String>,
+    /// Valor que dejó este cambio (None = lo borró). Solo es confiable si `tracked`;
+    /// las entradas viejas no lo tienen.
+    #[serde(default)]
+    pub after: Option<RawValue>,
+    #[serde(default)]
+    pub tracked: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -147,11 +155,23 @@ pub struct ApplyReport {
     pub entry_id: Option<u64>,
     pub results: Vec<ItemResult>,
     pub restart: Restart,
+    /// Deshacer: valores que cambiaron después de esta entrada. Si hay alguno y no se
+    /// forzó, no se tocó nada y la UI pide confirmación.
+    pub conflicts: Vec<String>,
+    /// Aviso para mostrar una vez (por ejemplo, historial dañado y respaldado).
+    pub warning: Option<String>,
+}
+
+impl ApplyReport {
+    fn new(entry_id: Option<u64>, results: Vec<ItemResult>, restart: Restart) -> Self {
+        Self { entry_id, results, restart, conflicts: vec![], warning: None }
+    }
 }
 
 pub struct Engine {
     journal_path: PathBuf,
     lock: Mutex<()>,
+    warning: Mutex<Option<String>>,
 }
 
 fn now_ms() -> u64 {
@@ -269,6 +289,7 @@ pub fn list(build: u32) -> Vec<TweakView> {
                 restart: t.restart,
                 tags: t.tags.clone(),
                 requires_admin: t.requires_admin(),
+                per_user: t.per_user(),
                 state,
                 ops,
                 choices: t
@@ -318,6 +339,8 @@ fn apply_op(t: &Tweak, op: &Op, target: &Target) -> Result<Change, String> {
         before,
         created_keys: Vec::new(),
         deleted_tree: None,
+        after: None,
+        tracked: true,
     };
     match target {
         Target::DeleteTree(tree) => {
@@ -326,8 +349,9 @@ fn apply_op(t: &Tweak, op: &Op, target: &Target) -> Result<Change, String> {
         }
         Target::Set(v) => {
             change.created_keys = reg::missing_keys(op.hive, &op.path).map_err(|e| e.to_string())?;
-            reg::write_raw(op.hive, &op.path, &op.name, &reg::encode(op.kind, v))
-                .map_err(|e| e.to_string())?;
+            let raw = reg::encode(op.kind, v);
+            reg::write_raw(op.hive, &op.path, &op.name, &raw).map_err(|e| e.to_string())?;
+            change.after = Some(raw);
         }
         Target::DeleteValue => {
             reg::delete_value(op.hive, &op.path, &op.name).map_err(|e| e.to_string())?;
@@ -355,14 +379,36 @@ impl Engine {
         Self {
             journal_path: data_dir.join("journal.json"),
             lock: Mutex::new(()),
+            warning: Mutex::new(None),
         }
     }
 
+    /// Lee el historial. Si existe pero no se puede interpretar (dañado o de un formato
+    /// incompatible), lo aparta con otro nombre en vez de pisarlo, y deja un aviso.
     fn load(&self) -> Vec<JournalEntry> {
-        fs::read(&self.journal_path)
-            .ok()
-            .and_then(|b| serde_json::from_slice(&b).ok())
-            .unwrap_or_default()
+        let bytes = match fs::read(&self.journal_path) {
+            Ok(b) => b,
+            Err(_) => return Vec::new(),
+        };
+        match serde_json::from_slice(&bytes) {
+            Ok(entries) => entries,
+            Err(e) => {
+                let backup = self.journal_path.with_file_name(format!("journal.danado-{}.json", now_ms()));
+                let msg = match fs::rename(&self.journal_path, &backup) {
+                    Ok(()) => format!(
+                        "El historial no se pudo leer ({e}). Se guardó una copia en {} y se empezó uno nuevo.",
+                        backup.display()
+                    ),
+                    Err(re) => format!("El historial no se pudo leer ({e}) ni respaldar ({re})."),
+                };
+                *self.warning.lock().unwrap() = Some(msg);
+                Vec::new()
+            }
+        }
+    }
+
+    fn take_warning(&self) -> Option<String> {
+        self.warning.lock().unwrap().take()
     }
 
     fn save(&self, entries: &[JournalEntry]) -> Result<(), String> {
@@ -384,9 +430,10 @@ impl Engine {
     pub fn record_removed_apps(&self, label: String, apps: Vec<String>) -> Result<(), String> {
         let _g = self.lock.lock().unwrap();
         let mut entries = self.load();
+        let id = entries.last().map_or(now_ms(), |l| now_ms().max(l.id + 1));
         entries.push(JournalEntry {
-            id: now_ms(),
-            at: now_ms() / 1000,
+            id,
+            at: id / 1000,
             label,
             changes: vec![],
             removed_apps: apps,
@@ -395,7 +442,9 @@ impl Engine {
         self.save(&entries)
     }
 
-    pub fn apply(&self, desired: &[Desired], elevated: bool, build: u32) -> ApplyReport {
+    /// `foreign_user`: si la app corre elevada con otra cuenta, el nombre del usuario
+    /// real de la sesión. En ese caso HKCU es el de la cuenta admin y no se toca.
+    pub fn apply(&self, desired: &[Desired], elevated: bool, build: u32, foreign_user: Option<&str>) -> ApplyReport {
         let _g = self.lock.lock().unwrap();
         let mut results = Vec::new();
         let mut changes = Vec::new();
@@ -409,6 +458,14 @@ impl Engine {
             };
             if t.requires_admin() && !elevated {
                 results.push(ItemResult { id: t.id.clone(), ok: false, error: Some("Requiere ejecutar como administrador".into()) });
+                continue;
+            }
+            if let (true, Some(user)) = (t.per_user(), foreign_user) {
+                results.push(ItemResult {
+                    id: t.id.clone(),
+                    ok: false,
+                    error: Some(format!("La app corre con otra cuenta de administrador: se aplicaría a esa cuenta y no a {user}")),
+                });
                 continue;
             }
             if (d.applied || t.is_choice()) && !t.supported_on(build) {
@@ -456,18 +513,29 @@ impl Engine {
                 1 => applied_titles.remove(0),
                 n => format!("{n} tweaks"),
             };
+            // Id único aunque dos operaciones caigan en el mismo milisegundo.
+            let id = entries.last().map_or(id, |l| id.max(l.id + 1));
             entries.push(JournalEntry { id, at: id / 1000, label, changes, removed_apps: vec![], undone: false });
             if let Err(e) = self.save(&entries) {
                 results.push(ItemResult { id: "journal".into(), ok: false, error: Some(format!("No se pudo guardar el historial: {e}")) });
             }
             Some(id)
         };
-        ApplyReport { entry_id, results, restart }
+        let mut report = ApplyReport::new(entry_id, results, restart);
+        report.warning = self.take_warning();
+        report
     }
 
-    pub fn undo(&self, entry_id: u64) -> Result<ApplyReport, String> {
+    /// Deshace una entrada del historial.
+    ///
+    /// - Si algún valor cambió después de esta entrada (otro cambio posterior, Windows u
+    ///   otro programa), no toca nada y devuelve `conflicts`, salvo que `force` sea true.
+    /// - Solo marca la entrada como deshecha si todos los valores se restauraron; si no,
+    ///   se puede reintentar (restaurar es idempotente).
+    pub fn undo(&self, entry_id: u64, force: bool, foreign_user: Option<&str>) -> Result<ApplyReport, String> {
         let _g = self.lock.lock().unwrap();
         let mut entries = self.load();
+        let warning = self.take_warning();
         let entry = entries
             .iter_mut()
             .find(|e| e.id == entry_id)
@@ -478,6 +546,38 @@ impl Engine {
         if entry.changes.is_empty() {
             return Err("Las apps quitadas no se pueden restaurar desde acá: reinstalalas desde Microsoft Store.".into());
         }
+        if let (true, Some(user)) = (entry.changes.iter().any(|c| c.hive == Hive::HKCU), foreign_user) {
+            return Err(format!(
+                "La app corre con otra cuenta de administrador: deshacer tocaría esa cuenta y no la de {user}"
+            ));
+        }
+
+        if !force {
+            let mut conflicts = Vec::new();
+            for c in &entry.changes {
+                if !c.tracked {
+                    continue;
+                }
+                let current = reg::read(c.hive, &c.path, &c.name).map_err(|e| e.to_string())?;
+                // Igual a lo que dejamos: se puede deshacer. Igual a lo de antes: ya está restaurado.
+                if current != c.after && current != c.before {
+                    let title = catalog::find_tweak(&c.tweak_id).map_or(c.tweak_id.clone(), |t| t.title.clone());
+                    conflicts.push(format!(
+                        "{title}: {}\\{} vale {}",
+                        reg::hive_label(c.hive),
+                        c.name,
+                        reg::describe(current.as_ref())
+                    ));
+                }
+            }
+            if !conflicts.is_empty() {
+                let mut r = ApplyReport::new(Some(entry_id), vec![], Restart::None);
+                r.conflicts = conflicts;
+                r.warning = warning;
+                return Ok(r);
+            }
+        }
+
         let mut results = Vec::new();
         let mut restart = Restart::None;
         for c in entry.changes.iter().rev() {
@@ -495,8 +595,128 @@ impl Engine {
                 results.push(ItemResult { id, ok: true, error: None });
             }
         }
-        entry.undone = true;
-        self.save(&entries)?;
-        Ok(ApplyReport { entry_id: Some(entry_id), results, restart })
+        if results.iter().all(|r| r.ok) {
+            entry.undone = true;
+            self.save(&entries)?;
+        }
+        let mut report = ApplyReport::new(Some(entry_id), results, restart);
+        report.warning = warning;
+        Ok(report)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::catalog::{Value, ValueKind};
+
+    /// Clave de prueba propia en HKCU; se borra al terminar cada test.
+    struct TestKey(String);
+    impl TestKey {
+        fn new(tag: &str) -> Self {
+            Self(format!(r"Software\DebloaterTest\{}-{tag}", std::process::id()))
+        }
+    }
+    impl Drop for TestKey {
+        fn drop(&mut self) {
+            let _ = reg::delete_tree(Hive::HKCU, &self.0);
+            let _ = reg::delete_key_if_empty(Hive::HKCU, r"Software\DebloaterTest");
+        }
+    }
+
+    fn temp_engine(tag: &str) -> (Engine, PathBuf) {
+        let dir = std::env::temp_dir().join(format!("debloater-engine-{}-{tag}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        (Engine::new(dir.clone()), dir)
+    }
+
+    fn entry_for(key: &str, before: Option<RawValue>, after: Option<RawValue>) -> JournalEntry {
+        JournalEntry {
+            id: 1,
+            at: 0,
+            label: "test".into(),
+            changes: vec![Change {
+                tweak_id: "test.tweak".into(),
+                hive: Hive::HKCU,
+                path: key.into(),
+                name: "Value".into(),
+                before,
+                created_keys: vec![],
+                deleted_tree: None,
+                after,
+                tracked: true,
+            }],
+            removed_apps: vec![],
+            undone: false,
+        }
+    }
+
+    fn dword(n: i64) -> RawValue {
+        reg::encode(ValueKind::Dword, &Value::Int(n))
+    }
+
+    #[test]
+    fn damaged_journal_is_backed_up_not_overwritten() {
+        let (engine, dir) = temp_engine("damaged");
+        fs::write(dir.join("journal.json"), b"{ esto no es json").unwrap();
+        assert!(engine.history().is_empty());
+        let backups: Vec<_> = fs::read_dir(&dir)
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.file_name().to_string_lossy().starts_with("journal.danado-"))
+            .collect();
+        assert_eq!(backups.len(), 1, "debe quedar una copia del historial dañado");
+        assert_eq!(fs::read(backups[0].path()).unwrap(), b"{ esto no es json");
+        assert!(engine.take_warning().is_some());
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn undo_detects_later_changes_and_force_overrides() {
+        let key = TestKey::new("conflict");
+        let (engine, dir) = temp_engine("conflict");
+        // La entrada dice: el valor no existía y lo dejamos en 1. Ahora alguien lo puso en 2.
+        engine.save(&[entry_for(&key.0, None, Some(dword(1)))]).unwrap();
+        reg::write_raw(Hive::HKCU, &key.0, "Value", &dword(2)).unwrap();
+
+        let r = engine.undo(1, false, None).unwrap();
+        assert_eq!(r.conflicts.len(), 1);
+        assert_eq!(reg::read(Hive::HKCU, &key.0, "Value").unwrap(), Some(dword(2)), "sin forzar no toca nada");
+        assert!(!engine.history()[0].undone);
+
+        let r = engine.undo(1, true, None).unwrap();
+        assert!(r.conflicts.is_empty() && r.results.iter().all(|x| x.ok));
+        assert_eq!(reg::read(Hive::HKCU, &key.0, "Value").unwrap(), None);
+        assert!(engine.history()[0].undone);
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn undo_without_conflict_and_already_restored_values() {
+        let key = TestKey::new("clean");
+        let (engine, dir) = temp_engine("clean");
+        // Valor tal como lo dejamos: se deshace sin preguntar.
+        engine.save(&[entry_for(&key.0, Some(dword(0)), Some(dword(1)))]).unwrap();
+        reg::write_raw(Hive::HKCU, &key.0, "Value", &dword(1)).unwrap();
+        let r = engine.undo(1, false, None).unwrap();
+        assert!(r.conflicts.is_empty());
+        assert_eq!(reg::read(Hive::HKCU, &key.0, "Value").unwrap(), Some(dword(0)));
+
+        // Un reintento sobre un valor que ya volvió a "antes" tampoco es conflicto.
+        let mut e = entry_for(&key.0, Some(dword(0)), Some(dword(1)));
+        e.id = 2;
+        engine.save(&[e]).unwrap();
+        let r = engine.undo(2, false, None).unwrap();
+        assert!(r.conflicts.is_empty() && r.results.iter().all(|x| x.ok));
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn undo_refuses_hkcu_when_running_as_another_account() {
+        let key = TestKey::new("foreign");
+        let (engine, dir) = temp_engine("foreign");
+        engine.save(&[entry_for(&key.0, None, Some(dword(1)))]).unwrap();
+        assert!(engine.undo(1, true, Some("otra")).is_err());
+        let _ = fs::remove_dir_all(&dir);
     }
 }

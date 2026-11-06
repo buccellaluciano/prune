@@ -25,7 +25,7 @@ fn wide(s: &str) -> Vec<u16> {
     s.encode_utf16().chain(std::iter::once(0)).collect()
 }
 
-fn username() -> Option<String> {
+pub(crate) fn username() -> Option<String> {
     let mut buf = [0u16; 257];
     let mut len = buf.len() as u32;
     unsafe { GetUserNameW(Some(PWSTR(buf.as_mut_ptr())), &mut len) }.ok()?;

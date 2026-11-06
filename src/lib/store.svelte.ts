@@ -103,6 +103,8 @@ class AppStore {
   disabledReason(t: Tweak): string | null {
     if (t.state === "unsupported") return "No aplica a tu versión de Windows";
     if (t.requires_admin && !this.overview?.system.elevated) return "Requiere ejecutar como administrador";
+    const foreign = this.overview?.system.foreign_user;
+    if (t.per_user && foreign) return `La app corre con otra cuenta: se aplicaría a esa cuenta y no a ${foreign}`;
     return null;
   }
 
@@ -155,6 +157,7 @@ class AppStore {
   }
 
   report(r: ApplyReport, verb: string) {
+    if (r.warning) this.toast("error", r.warning);
     const ok = r.results.filter((x) => x.ok).length;
     const failed = r.results.filter((x) => !x.ok);
     if (ok) this.toast("ok", `${ok} ${ok === 1 ? "cambio" : "cambios"} ${verb}.`);

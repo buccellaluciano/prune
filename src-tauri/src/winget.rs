@@ -10,6 +10,7 @@ use std::io::Read;
 use std::os::windows::process::CommandExt;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
+use std::sync::mpsc::{self, RecvTimeoutError};
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
@@ -70,9 +71,33 @@ fn winget_path() -> Result<PathBuf, String> {
     }
 }
 
+/// Tiempo máximo para consultas (listar, versiones) y para instalar/actualizar/desinstalar.
+const QUERY_TIMEOUT: Duration = Duration::from_secs(3 * 60);
+const ACTION_TIMEOUT: Duration = Duration::from_secs(30 * 60);
+
+/// Separa la salida en líneas (winget usa `\r` para las barras de progreso).
+fn split_lines(cur: &mut Vec<u8>, bytes: &[u8], mut emit: impl FnMut(String)) {
+    for &b in bytes {
+        if b == b'\r' || b == b'\n' {
+            let s = String::from_utf8_lossy(cur).trim().to_string();
+            cur.clear();
+            // Ignora el "spinner" de winget (- \ | /).
+            if s.chars().count() > 1 {
+                emit(s);
+            }
+        } else {
+            cur.push(b);
+        }
+    }
+}
+
 /// Ejecuta winget y devuelve (código de salida, líneas de salida).
 /// `on_line` recibe cada línea a medida que llega (incluye barras de progreso).
-fn run(args: &[&str], mut on_line: impl FnMut(&str)) -> Result<(u32, Vec<String>), String> {
+///
+/// Se termina cuando termina **el proceso de winget**, no cuando se cierra su salida:
+/// algunos instaladores abren el programa al final y ese proceso puede heredar la
+/// salida de winget y mantenerla abierta indefinidamente. Además hay un tiempo límite.
+fn run(args: &[&str], timeout: Duration, mut on_line: impl FnMut(&str)) -> Result<(u32, Vec<String>), String> {
     let mut child = Command::new(winget_path()?)
         .args(args)
         .stdin(Stdio::null())
@@ -82,39 +107,59 @@ fn run(args: &[&str], mut on_line: impl FnMut(&str)) -> Result<(u32, Vec<String>
         .spawn()
         .map_err(|e| format!("No se pudo ejecutar winget: {e}"))?;
 
+    // Un hilo lee la salida y la manda por un canal; si queda bloqueado por un proceso
+    // heredero, simplemente se abandona (termina solo cuando ese proceso cierre).
     let mut out = child.stdout.take().expect("stdout");
+    let (tx, rx) = mpsc::channel::<String>();
+    std::thread::spawn(move || {
+        let mut cur = Vec::new();
+        let mut buf = [0u8; 4096];
+        while let Ok(n) = out.read(&mut buf) {
+            if n == 0 {
+                break;
+            }
+            split_lines(&mut cur, &buf[..n], |s| {
+                let _ = tx.send(s);
+            });
+        }
+        split_lines(&mut cur, b"\n", |s| {
+            let _ = tx.send(s);
+        });
+    });
+
+    let started = Instant::now();
     let mut lines = Vec::new();
-    let mut cur: Vec<u8> = Vec::new();
-    let mut buf = [0u8; 4096];
-    let mut flush = |cur: &mut Vec<u8>, lines: &mut Vec<String>| {
-        let s = String::from_utf8_lossy(cur).trim().to_string();
-        cur.clear();
-        // Ignora el "spinner" de winget (- \ | /).
-        if s.chars().count() > 1 {
-            on_line(&s);
-            lines.push(s);
+    let mut take = |line: String, lines: &mut Vec<String>| {
+        on_line(&line);
+        lines.push(line);
+    };
+    let status = loop {
+        match rx.recv_timeout(Duration::from_millis(100)) {
+            Ok(line) => take(line, &mut lines),
+            Err(RecvTimeoutError::Timeout) | Err(RecvTimeoutError::Disconnected) => {}
+        }
+        if let Some(status) = child.try_wait().map_err(|e| e.to_string())? {
+            break status;
+        }
+        if started.elapsed() > timeout {
+            let _ = child.kill();
+            let _ = child.wait();
+            return Err(format!("winget no terminó en {} minutos y se canceló", timeout.as_secs() / 60));
         }
     };
-    loop {
-        let n = out.read(&mut buf).map_err(|e| e.to_string())?;
-        if n == 0 {
-            break;
-        }
-        for &b in &buf[..n] {
-            if b == b'\r' || b == b'\n' {
-                flush(&mut cur, &mut lines);
-            } else {
-                cur.push(b);
-            }
+    // Lo que quedó en el canal, sin esperar a que se cierre la salida.
+    let drain_until = Instant::now() + Duration::from_millis(300);
+    while let Some(left) = drain_until.checked_duration_since(Instant::now()) {
+        match rx.recv_timeout(left) {
+            Ok(line) => take(line, &mut lines),
+            Err(_) => break,
         }
     }
-    flush(&mut cur, &mut lines);
-    let status = child.wait().map_err(|e| e.to_string())?;
     Ok((status.code().unwrap_or(-1) as u32, lines))
 }
 
 fn version() -> Result<String, String> {
-    let (code, lines) = run(&["--version"], |_| {})?;
+    let (code, lines) = run(&["--version"], QUERY_TIMEOUT, |_| {})?;
     match (code, lines.first()) {
         (0, Some(v)) => Ok(v.clone()),
         _ => Err(format!("winget respondió con error 0x{code:08X}")),
@@ -127,7 +172,7 @@ fn installed() -> Result<HashMap<String, String>, String> {
     let tmp_s = tmp.to_string_lossy().to_string();
     let mut args = vec!["export", "-o", &tmp_s, "--source", "winget", "--include-versions"];
     args.extend(COMMON);
-    let (code, lines) = run(&args, |_| {})?;
+    let (code, lines) = run(&args, QUERY_TIMEOUT, |_| {})?;
     let data = std::fs::read(&tmp);
     let _ = std::fs::remove_file(&tmp);
     let data = data.map_err(|_| format!("winget export falló (0x{code:08X}): {}", lines.last().cloned().unwrap_or_default()))?;
@@ -149,7 +194,7 @@ fn installed() -> Result<HashMap<String, String>, String> {
 fn upgrades() -> Result<HashMap<String, String>, String> {
     let mut args = vec!["upgrade", "--source", "winget"];
     args.extend(COMMON);
-    let (_, lines) = run(&args, |_| {})?;
+    let (_, lines) = run(&args, QUERY_TIMEOUT, |_| {})?;
     Ok(parse_upgrades(&lines))
 }
 
@@ -228,7 +273,7 @@ pub fn act(id: &str, action: Action, mut progress: impl FnMut(&str)) -> ActionRe
 
     let _g = LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let mut last = Instant::now() - Duration::from_secs(1);
-    let res = run(&args, |line| {
+    let res = run(&args, ACTION_TIMEOUT, |line| {
         // Limita la frecuencia de eventos de progreso a la UI.
         if last.elapsed() >= Duration::from_millis(120) {
             last = Instant::now();
@@ -260,6 +305,23 @@ pub fn act(id: &str, action: Action, mut progress: impl FnMut(&str)) -> ActionRe
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn splits_progress_and_lines() {
+        let mut cur = Vec::new();
+        let mut out = Vec::new();
+        split_lines(&mut cur, b"  -\r  \\\r  Descargando 10%\r  Descargando 55%\rListo\nresto", |s| out.push(s));
+        assert_eq!(out, ["Descargando 10%", "Descargando 55%", "Listo"]);
+        assert_eq!(cur, b"resto");
+    }
+
+    /// Corre winget de verdad (solo `--version`) con el nuevo `run`.
+    #[test]
+    #[ignore]
+    fn real_winget_version() {
+        let v = version().unwrap();
+        assert!(v.starts_with('v'), "{v}");
+    }
 
     #[test]
     fn parses_upgrade_table() {

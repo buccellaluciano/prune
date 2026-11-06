@@ -117,6 +117,10 @@ impl Tweak {
     pub fn requires_admin(&self) -> bool {
         self.ops.iter().any(|o| o.hive == Hive::HKLM)
     }
+    /// Toca configuración del usuario (HKCU).
+    pub fn per_user(&self) -> bool {
+        self.ops.iter().any(|o| o.hive == Hive::HKCU)
+    }
     pub fn supported_on(&self, build: u32) -> bool {
         self.min_build.is_none_or(|m| build >= m) && self.max_build.is_none_or(|m| build <= m)
     }

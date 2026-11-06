@@ -185,9 +185,13 @@ pub fn cancel() {
 /// Inicia el escaneo de una unidad (solo letras de `drives()`). Corre en segundo plano.
 pub fn start(letter: &str) -> Result<(), String> {
     let letter = letter.trim().trim_end_matches([':', '\\']).to_ascii_uppercase();
-    if !drives().iter().any(|d| d.letter == letter) {
+    let Some(drive) = drives().into_iter().find(|d| d.letter == letter) else {
         return Err(format!("Unidad no disponible: {letter}"));
-    }
+    };
+    // Solo NTFS y ReFS dan IDs de archivo únicos y estables. En FAT32/exFAT pueden venir
+    // en 0 o repetidos: deduplicar ahí colapsaría archivos distintos en uno.
+    let fs = drive.fs.to_ascii_uppercase();
+    DEDUPE.store(fs == "NTFS" || fs == "REFS", Relaxed);
     let s = &*SCAN;
     if s.running.swap(true, Relaxed) {
         return Err("Ya hay un análisis en curso".into());
@@ -208,6 +212,7 @@ pub fn start(letter: &str) -> Result<(), String> {
         if !SCAN.cancel.load(Relaxed) {
             *SCAN.tree.lock().unwrap() = Some(Arc::new(tree));
         }
+        reset_seen(); // libera la memoria de IDs: ya no hace falta
         SCAN.running.store(false, Relaxed);
     });
     Ok(())
@@ -325,6 +330,9 @@ struct Listing {
     denied: bool,
 }
 
+/// Si se deduplican enlaces duros por ID de archivo (solo NTFS/ReFS).
+static DEDUPE: AtomicBool = AtomicBool::new(true);
+
 /// Tamaño ya contado por ID de archivo. Un archivo con varios enlaces duros (típico entre
 /// WinSxS y System32) aparece en varias carpetas pero ocupa espacio una sola vez.
 /// NTFS solo mantiene al día el tamaño en una de las entradas de directorio del archivo;
@@ -344,7 +352,7 @@ fn claim(file_id: i64, size: u64) -> u64 {
 
 fn reset_seen() {
     for s in SEEN.iter() {
-        s.lock().unwrap().clear();
+        *s.lock().unwrap() = HashMap::new();
     }
 }
 
@@ -406,7 +414,7 @@ fn list_dir(path: &str) -> Listing {
                         let alloc = info.AllocationSize.max(0) as u64;
                         let eof = info.EndOfFile.max(0) as u64;
                         let size = if alloc > 0 || eof == 0 { alloc } else { eof.div_ceil(4096) * 4096 };
-                        out.own += claim(info.FileId, size);
+                        out.own += if DEDUPE.load(Relaxed) { claim(info.FileId, size) } else { size };
                     }
                 }
             }

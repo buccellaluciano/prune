@@ -128,7 +128,8 @@
       {:else}
         <button
           class="rounded-md border border-line px-3 py-1 text-[13px] disabled:opacity-40"
-          disabled={!chosen.length}
+          disabled={!chosen.length || !!store.overview?.system.foreign_user}
+          title={store.overview?.system.foreign_user ? "La app corre con otra cuenta de administrador" : undefined}
           onclick={() => (confirming = true)}
         >
           Quitar {chosen.length || ""} seleccionadas

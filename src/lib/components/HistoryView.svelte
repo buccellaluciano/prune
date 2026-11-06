@@ -6,6 +6,8 @@
 
   let entries = $state<JournalEntry[] | null>(null);
   let working = $state<number | null>(null);
+  /** Entrada con valores que cambiaron después: se pide confirmación antes de pisarlos. */
+  let conflict = $state<{ id: number; items: string[] } | null>(null);
 
   async function load() {
     entries = await api.history().catch((e) => {
@@ -15,10 +17,17 @@
   }
   onMount(load);
 
-  async function undo(e: JournalEntry) {
+  async function undo(e: JournalEntry, force = false) {
     working = e.id;
     try {
-      store.report(await api.undo(e.id), "deshechos");
+      const r = await api.undo(e.id, force);
+      if (r.conflicts.length) {
+        conflict = { id: e.id, items: r.conflicts };
+        if (r.warning) store.toast("error", r.warning);
+        return;
+      }
+      conflict = null;
+      store.report(r, "deshechos");
       await Promise.all([load(), store.load()]);
     } catch (err) {
       store.toast("error", String(err));
@@ -54,7 +63,7 @@
                 {#if e.undone} · deshecho{/if}
               </div>
             </div>
-            {#if !e.undone && e.changes.length}
+            {#if !e.undone && e.changes.length && conflict?.id !== e.id}
               <button
                 class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12.5px] text-mute hover:bg-card-hi hover:text-ink disabled:opacity-50"
                 disabled={working !== null}
@@ -64,6 +73,24 @@
               </button>
             {/if}
           </div>
+          {#if conflict?.id === e.id}
+            <div class="mt-2.5 border-t border-line pt-2.5 text-[12.5px]">
+              <p class="text-moderate">Estos valores cambiaron después de este cambio. Deshacer los va a pisar:</p>
+              <ul class="mt-1 space-y-0.5 font-mono text-[11px] text-mute">
+                {#each conflict.items as c}<li>{c}</li>{/each}
+              </ul>
+              <div class="mt-2 flex justify-end gap-2">
+                <button class="rounded-md px-2.5 py-1 text-[12px] text-mute hover:text-ink" onclick={() => (conflict = null)}>Cancelar</button>
+                <button
+                  class="rounded-md border border-moderate/50 px-2.5 py-1 text-[12px] text-moderate hover:bg-moderate/10 disabled:opacity-50"
+                  disabled={working !== null}
+                  onclick={() => undo(e, true)}
+                >
+                  Deshacer igual
+                </button>
+              </div>
+            </div>
+          {/if}
         </li>
       {/each}
     </ol>

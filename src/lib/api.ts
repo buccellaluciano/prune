@@ -12,6 +12,8 @@ export interface SystemInfo {
   ubr: number;
   edition: string;
   elevated: boolean;
+  /** Usuario real de la sesión si la app corre con otra cuenta de admin. */
+  foreign_user: string | null;
 }
 
 export interface Category {
@@ -37,6 +39,8 @@ export interface Tweak {
   restart: Restart;
   tags: string[];
   requires_admin: boolean;
+  /** Toca configuración del usuario (HKCU). */
+  per_user: boolean;
   state: TweakState;
   ops: OpView[];
   /** Vacío para tweaks de switch; con opciones se muestra un selector. */
@@ -82,6 +86,9 @@ export interface ApplyReport {
   entry_id: number | null;
   results: ItemResult[];
   restart: Restart;
+  /** Deshacer: valores que cambiaron después; si hay, no se tocó nada. */
+  conflicts: string[];
+  warning: string | null;
 }
 
 export interface JournalEntry {
@@ -120,7 +127,7 @@ export const api = {
   plan: (changes: Desired[]) => call<PlannedChange[]>("plan_changes", { changes }),
   apply: (changes: Desired[]) => call<ApplyReport>("apply_changes", { changes }),
   history: () => call<JournalEntry[]>("history"),
-  undo: (entryId: number) => call<ApplyReport>("undo", { entryId }),
+  undo: (entryId: number, force = false) => call<ApplyReport>("undo", { entryId, force }),
   listBloat: () => call<BloatApp[]>("list_bloat"),
   removeBloat: (ids: string[], deprovision: boolean) =>
     call<RemoveResult[]>("remove_bloat", { ids, deprovision }),

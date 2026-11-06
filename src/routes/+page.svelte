@@ -79,7 +79,13 @@
       </button>
     </div>
 
-    {#if store.overview && !store.overview.system.elevated}
+    {#if store.overview?.system.foreign_user}
+      <div class="infobar flex items-center gap-2 border-b border-line px-6 py-2 text-[12px] text-mute">
+        <ShieldAlert size={14} class="text-advanced" />
+        La app corre con otra cuenta de administrador, no con la de {store.overview.system.foreign_user}. Los tweaks de
+        usuario y quitar apps quedan deshabilitados para no aplicarlos a la cuenta equivocada.
+      </div>
+    {:else if store.overview && !store.overview.system.elevated}
       <div class="infobar flex items-center gap-2 border-b border-line px-6 py-2 text-[12px] text-mute">
         <ShieldAlert size={14} class="text-moderate" />
         Sin permisos de administrador: los tweaks de sistema (HKLM) y evitar reinstalaciones de apps quedan deshabilitados.
