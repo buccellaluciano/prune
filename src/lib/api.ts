@@ -14,6 +14,8 @@ export interface SystemInfo {
   elevated: boolean;
   /** Usuario real de la sesión si la app corre con otra cuenta de admin. */
   foreign_user: string | null;
+  /** UCPD activo: Windows bloquea ciertos valores para programas de terceros. */
+  ucpd_active: boolean;
 }
 
 export interface Category {
@@ -41,6 +43,8 @@ export interface Tweak {
   requires_admin: boolean;
   /** Toca configuración del usuario (HKCU). */
   per_user: boolean;
+  /** Valor protegido por UCPD. */
+  ucpd: boolean;
   state: TweakState;
   ops: OpView[];
   /** Vacío para tweaks de switch; con opciones se muestra un selector. */

@@ -9,7 +9,7 @@ const op = (key: string, name: string, current: string, on: string, off = "(borr
 const A = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced";
 const CDM = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager";
 
-type MockTweak = Omit<Tweak, "choices" | "choice" | "per_user"> & Partial<Pick<Tweak, "choices" | "choice">>;
+type MockTweak = Omit<Tweak, "choices" | "choice" | "per_user" | "ucpd"> & Partial<Pick<Tweak, "choices" | "choice">>;
 
 const SEARCH_VALUES: Record<string, string> = { hidden: "0", icon: "1", icon_label: "3", box: "2" };
 
@@ -25,16 +25,17 @@ const raw: MockTweak[] = [
   { id: "search.web_results", category: "search", title: "Sin resultados web de Bing", description: "Las búsquedas de Inicio quedan solo locales.", risk: "moderate", restart: "explorer", tags: ["bing"], requires_admin: false, state: "default", ops: [op("HKCU\\Software\\Policies\\Microsoft\\Windows\\Explorer", "DisableSearchBoxSuggestions", "(no existe)", "1")] },
   { id: "taskbar.align_left", category: "taskbar", title: "Alinear íconos a la izquierda", description: "Botón de Inicio e íconos a la izquierda, como en Windows 10.", risk: "safe", restart: "none", tags: ["barra"], requires_admin: false, state: "default", ops: [op(A, "TaskbarAl", "(no existe)", "0", "1")] },
   { id: "taskbar.end_task", category: "taskbar", title: "'Finalizar tarea' con clic derecho", description: "Agrega 'Finalizar tarea' al menú contextual de la barra.", risk: "safe", restart: "none", tags: ["productividad"], requires_admin: false, state: "applied", ops: [op(A + "\\TaskbarDeveloperSettings", "TaskbarEndTask", "1", "1")] },
+  { id: "taskbar.disable_widgets", category: "taskbar", title: "Desactivar Widgets", description: "Directiva que desactiva por completo el panel de Widgets (noticias, clima, MSN).", risk: "safe", restart: "explorer", tags: ["widgets"], requires_admin: true, state: "default", ops: [op("HKLM\\SOFTWARE\\Policies\\Microsoft\\Dsh", "AllowNewsAndInterests", "(no existe)", "0")] },
   { id: "explorer.show_extensions", category: "explorer", title: "Mostrar extensiones de archivo", description: "Así 'factura.pdf.exe' no se disfraza.", risk: "safe", restart: "none", tags: ["seguridad"], requires_admin: false, state: "default", ops: [op(A, "HideFileExt", "1", "0", "1")] },
   { id: "explorer.classic_context_menu", category: "explorer", title: "Menú contextual clásico", description: "El clic derecho completo, sin 'Mostrar más opciones'.", risk: "moderate", restart: "explorer", tags: ["menu"], requires_admin: false, state: "default", ops: [op("HKCU\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32", "(Predeterminado)", "(no existe)", "\"\"", "(borra la clave)")] },
   { id: "appearance.dark_mode", category: "appearance", title: "Modo oscuro", description: "Modo oscuro para Windows y para las apps.", risk: "safe", restart: "none", tags: ["tema"], requires_admin: false, state: "applied", ops: [op("HKCU\\...\\Personalize", "AppsUseLightTheme", "0", "0", "1")] },
   { id: "gaming.mouse_acceleration", category: "gaming", title: "Desactivar aceleración del mouse", description: "Movimiento 1:1, ideal para juegos.", risk: "safe", restart: "logoff", tags: ["mouse"], requires_admin: false, state: "default", ops: [op("HKCU\\Control Panel\\Mouse", "MouseSpeed", "\"1\"", "\"0\"", "\"1\"")] },
 ];
 
-const tweaks: Tweak[] = raw.map((t) => ({ choices: [], choice: null, per_user: t.ops.some((o) => o.key.startsWith("HKCU")), ...t }));
+const tweaks: Tweak[] = raw.map((t) => ({ choices: [], choice: null, per_user: t.ops.some((o) => o.key.startsWith("HKCU")), ucpd: t.id === "taskbar.disable_widgets", ...t }));
 
 const overview: Overview = {
-  system: { product: "Windows 11 Pro", display_version: "25H2", build: 26200, ubr: 7019, edition: "Professional", elevated: false, foreign_user: null },
+  system: { product: "Windows 11 Pro", display_version: "25H2", build: 26200, ubr: 7019, edition: "Professional", elevated: false, foreign_user: null, ucpd_active: true },
   categories: [
     { id: "privacy", title: "Privacidad", icon: "shield" },
     { id: "ai", title: "IA y Copilot", icon: "sparkles" },

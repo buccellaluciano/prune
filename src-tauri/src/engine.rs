@@ -39,6 +39,8 @@ pub struct TweakView {
     pub requires_admin: bool,
     /// Toca HKCU (configuración del usuario).
     pub per_user: bool,
+    /// Windows protege este valor (UCPD) y no deja que la app lo escriba.
+    pub ucpd: bool,
     pub state: TweakState,
     pub ops: Vec<OpView>,
     /// Vacío para tweaks de switch.
@@ -290,6 +292,7 @@ pub fn list(build: u32) -> Vec<TweakView> {
                 tags: t.tags.clone(),
                 requires_admin: t.requires_admin(),
                 per_user: t.per_user(),
+                ucpd: t.ucpd,
                 state,
                 ops,
                 choices: t
@@ -350,7 +353,13 @@ fn apply_op(t: &Tweak, op: &Op, target: &Target) -> Result<Change, String> {
         Target::Set(v) => {
             change.created_keys = reg::missing_keys(op.hive, &op.path).map_err(|e| e.to_string())?;
             let raw = reg::encode(op.kind, v);
-            reg::write_raw(op.hive, &op.path, &op.name, &raw).map_err(|e| e.to_string())?;
+            if let Err(e) = reg::write_raw(op.hive, &op.path, &op.name, &raw) {
+                // La clave pudo crearse aunque el valor no: no dejar claves vacías colgadas.
+                for k in &change.created_keys {
+                    let _ = reg::delete_key_if_empty(op.hive, k);
+                }
+                return Err(write_error(&e));
+            }
             change.after = Some(raw);
         }
         Target::DeleteValue => {
@@ -358,6 +367,20 @@ fn apply_op(t: &Tweak, op: &Op, target: &Target) -> Result<Change, String> {
         }
     }
     Ok(change)
+}
+
+pub const UCPD_MSG: &str = "Windows protege este ajuste (UCPD) y solo deja cambiarlo con sus propias \
+herramientas. Alternativas: quitá \"Widgets\" en Bloatware, o en el Editor de directivas de grupo \
+(gpedit.msc) poné Componentes de Windows → Widgets → \"Permitir widgets\" en Deshabilitada.";
+
+/// Mensaje de error de escritura: "acceso denegado" con permisos de admin casi siempre
+/// es una protección de Windows sobre ese valor, no un problema de permisos.
+fn write_error(e: &std::io::Error) -> String {
+    if e.raw_os_error() == Some(5) && crate::system::is_elevated() {
+        format!("{e}. Windows protege este valor y no deja que otros programas lo cambien, ni como administrador")
+    } else {
+        e.to_string()
+    }
 }
 
 /// Deshace un cambio individual devolviendo el valor anterior exacto.
@@ -458,6 +481,10 @@ impl Engine {
             };
             if t.requires_admin() && !elevated {
                 results.push(ItemResult { id: t.id.clone(), ok: false, error: Some("Requiere ejecutar como administrador".into()) });
+                continue;
+            }
+            if t.ucpd && crate::system::ucpd_active() {
+                results.push(ItemResult { id: t.id.clone(), ok: false, error: Some(UCPD_MSG.into()) });
                 continue;
             }
             if let (true, Some(user)) = (t.per_user(), foreign_user) {
@@ -718,5 +745,31 @@ mod tests {
         engine.save(&[entry_for(&key.0, None, Some(dword(1)))]).unwrap();
         assert!(engine.undo(1, true, Some("otra")).is_err());
         let _ = fs::remove_dir_all(&dir);
+    }
+
+    /// Sondeo de UCPD sin cambiar nada: para cada valor HKCU del catálogo que ya existe,
+    /// lo reescribe con exactamente los mismos bytes. Si UCPD lo protegiera, fallaría con
+    /// acceso denegado. Correr con `cargo test -- --ignored --nocapture probe_ucpd`.
+    #[test]
+    #[ignore]
+    fn probe_ucpd_on_catalog_values() {
+        let mut blocked = Vec::new();
+        for t in &catalog::tweaks().tweak {
+            for op in t.ops.iter().filter(|o| o.hive == Hive::HKCU) {
+                let label = format!("{} · {}\\{}", t.id, op.path, op.name);
+                match reg::read(op.hive, &op.path, &op.name) {
+                    Ok(Some(v)) => match reg::write_raw(op.hive, &op.path, &op.name, &v) {
+                        Ok(()) => println!("OK        {label}"),
+                        Err(e) => {
+                            println!("BLOQUEADO {label}: {e}");
+                            blocked.push(label);
+                        }
+                    },
+                    Ok(None) => println!("sin valor {label}"),
+                    Err(e) => println!("error     {label}: {e}"),
+                }
+            }
+        }
+        println!("bloqueados: {}", blocked.len());
     }
 }

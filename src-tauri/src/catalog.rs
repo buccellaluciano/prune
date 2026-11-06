@@ -82,6 +82,10 @@ pub struct Tweak {
     #[serde(default)]
     pub tags: Vec<String>,
     pub ops: Vec<Op>,
+    /// Valor protegido por UCPD (User Choice Protection Driver): Windows bloquea que
+    /// programas de terceros lo escriban, incluso como administrador.
+    #[serde(default)]
+    pub ucpd: bool,
     /// Si hay opciones, el tweak se muestra como selector en vez de switch.
     #[serde(default, rename = "choice")]
     pub choices: Vec<Choice>,
@@ -380,6 +384,15 @@ kind = "dword"
     #[test]
     fn apps_catalog_parses() {
         assert!(apps().app.len() >= 30);
+    }
+
+    #[test]
+    fn widgets_policy_is_marked_ucpd_and_has_an_alternative() {
+        // El valor de la directiva de Widgets lo protege UCPD: el tweak debe marcarlo, y
+        // tiene que existir la alternativa soportada (quitar el paquete de Widgets).
+        assert!(find_tweak("taskbar.disable_widgets").unwrap().ucpd);
+        assert!(bloat().app.iter().any(|a| a.matches("MicrosoftWindows.Client.WebExperience")));
+        assert!(tweaks().tweak.iter().filter(|t| t.ucpd).count() == 1);
     }
 
     #[test]

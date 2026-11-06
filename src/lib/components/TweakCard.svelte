@@ -37,6 +37,15 @@
       <h3 class="text-[13.5px] leading-snug font-medium">{tweak.title}</h3>
       <p class="mt-0.5 text-[12.5px] leading-relaxed text-mute">{tweak.description}</p>
 
+      {#if tweak.ucpd && store.overview?.system.ucpd_active}
+        <p class="mt-1.5 text-[12px] leading-relaxed text-moderate">
+          Windows protege este ajuste y no deja que otros programas lo cambien, ni como administrador.
+          Alternativas: quitá
+          <button class="underline underline-offset-2 hover:text-ink" onclick={() => ((store.view = "bloat"), (store.query = ""))}>Widgets en Bloatware</button>,
+          o en el Editor de directivas (gpedit.msc): Componentes de Windows → Widgets → "Permitir widgets" en Deshabilitada.
+        </p>
+      {/if}
+
       <div class="mt-1.5 flex flex-wrap items-center gap-x-2 text-[11.5px] text-faint">
         {#if isPending}
           <span class="text-accent">

@@ -54,6 +54,12 @@ textarea {
   scrollbar-color: #34332f transparent;
 }
 
+/* Las zonas con scroll reservan siempre el lugar de la barra: así el contenido no se
+   corre a la izquierda cuando la lista crece lo suficiente para que aparezca. */
+.overflow-y-auto {
+  scrollbar-gutter: stable;
+}
+
 /* Nombre histórico: ya no es un degradé. Superficie de acento plana. */
 .accent-grad {
   background: var(--color-accent);

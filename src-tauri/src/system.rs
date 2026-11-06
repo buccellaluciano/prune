@@ -21,6 +21,8 @@ pub struct SystemInfo {
     /// credenciales de un admin), el usuario real de la sesión. HKCU y las apps Appx
     /// serían los de la cuenta admin, no los de esta persona.
     pub foreign_user: Option<String>,
+    /// El controlador UCPD de Windows está activo (bloquea ciertos valores del registro).
+    pub ucpd_active: bool,
 }
 
 /// Usuario dueño de la sesión de Windows en la que corre la app.
@@ -40,6 +42,16 @@ pub fn foreign_user() -> Option<String> {
     let session = session_user()?;
     let me = crate::user::username()?;
     (!session.eq_ignore_ascii_case(&me)).then_some(session)
+}
+
+/// UCPD.sys (User Choice Protection Driver) impide que programas de terceros escriban
+/// ciertos valores (asociaciones de archivos, Widgets, etc.), incluso como admin.
+/// Se considera activo si el servicio existe y no está deshabilitado (Start = 4).
+pub fn ucpd_active() -> bool {
+    match reg::read(Hive::HKLM, r"SYSTEM\CurrentControlSet\Services\UCPD", "Start") {
+        Ok(Some(v)) => reg::describe(Some(&v)) != "4",
+        _ => false,
+    }
 }
 
 const NT_CV: &str = r"SOFTWARE\Microsoft\Windows NT\CurrentVersion";
@@ -72,6 +84,7 @@ pub fn info() -> SystemInfo {
         edition: read_text("EditionID"),
         elevated: is_elevated(),
         foreign_user: foreign_user(),
+        ucpd_active: ucpd_active(),
     }
 }
 

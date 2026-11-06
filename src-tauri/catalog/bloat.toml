@@ -102,6 +102,13 @@ title = "Outlook (nuevo)"
 tier = "moderate"
 note = "Reemplaza a Correo y Calendario. Quitalo solo si usás otro cliente de correo."
 
+# Alternativa soportada al tweak de Widgets, cuyo valor protege UCPD.
+[[app]]
+name = "MicrosoftWindows.Client.WebExperience"
+title = "Widgets (Windows Web Experience Pack)"
+tier = "moderate"
+note = "Quita el panel de Widgets (noticias, clima, MSN). Se reinstala desde Microsoft Store como \"Windows Web Experience Pack\"."
+
 [[app]]
 name = "Microsoft.Copilot"
 title = "Copilot"

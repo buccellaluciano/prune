@@ -556,6 +556,8 @@ description = "Directiva que desactiva por completo el panel de Widgets (noticia
 risk = "safe"
 restart = "explorer"
 tags = ["widgets", "msn", "directiva"]
+# Windows 11 protege este valor con UCPD: solo herramientas de Microsoft (gpedit) pueden escribirlo.
+ucpd = true
 [[tweak.ops]]
 hive = "HKLM"
 path = 'SOFTWARE\Policies\Microsoft\Dsh'
