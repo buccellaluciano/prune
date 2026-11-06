@@ -1,6 +1,6 @@
 // Backend simulado para desarrollar la UI en el navegador (npm run dev).
 // Nunca se usa dentro de Tauri.
-import type { BloatApp, JournalEntry, Overview, Tweak } from "./api";
+import type { AppsOverview, BloatApp, JournalEntry, Overview, Tweak } from "./api";
 
 const op = (key: string, name: string, current: string, on: string, off = "(borra el valor)") => ({
   key, name, current, on, off,
@@ -56,6 +56,23 @@ const bloat: BloatApp[] = [
 ];
 
 const history: JournalEntry[] = [];
+
+const wingetApps: AppsOverview = {
+  winget: "v1.29.380",
+  error: null,
+  groups: [
+    { id: "browsers", title: "Navegadores" },
+    { id: "utilities", title: "Utilidades" },
+    { id: "dev", title: "Desarrollo" },
+  ],
+  apps: [
+    { id: "Mozilla.Firefox", title: "Firefox", group: "browsers", description: "Navegador de Mozilla, independiente de Chromium.", installed: "143.0", available: "144.0.1" },
+    { id: "Brave.Brave", title: "Brave", group: "browsers", description: "Basado en Chromium, con bloqueo de anuncios y rastreadores incluido.", installed: null, available: null },
+    { id: "7zip.7zip", title: "7-Zip", group: "utilities", description: "Comprime y descomprime zip, 7z, rar y más.", installed: "25.01", available: null },
+    { id: "Microsoft.PowerToys", title: "PowerToys", group: "utilities", description: "Utilidades oficiales de Microsoft.", installed: null, available: null },
+    { id: "Git.Git", title: "Git", group: "dev", description: "Control de versiones.", installed: "2.56.0.4", available: null },
+  ],
+};
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export async function mock<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
@@ -96,6 +113,19 @@ export async function mock<T>(cmd: string, args?: Record<string, unknown>): Prom
       e.undone = true;
       return { entry_id: e.id, results: e.changes.map((c) => ({ id: c.tweak_id, ok: true, error: null })), restart: "none" } as T;
     }
+    case "winget_status":
+      await wait(700);
+      return structuredClone(wingetApps) as T;
+    case "winget_action": {
+      await wait(1800);
+      const app = wingetApps.apps.find((x) => x.id === a.id)!;
+      if (a.action === "uninstall") app.installed = null;
+      else app.installed = app.available ?? "1.0.0";
+      app.available = null;
+      return { id: a.id, ok: true, message: null } as T;
+    }
+    case "get_user":
+      return { name: "Usuario de prueba", username: "demo", picture: null } as T;
     case "list_bloat":
       return structuredClone(bloat) as T;
     case "remove_bloat":

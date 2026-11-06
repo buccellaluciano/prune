@@ -1,9 +1,9 @@
-import { api, type ApplyReport, type Desired, type Overview, type Restart, type Tweak } from "./api";
+import { api, userApi, type ApplyReport, type Desired, type Overview, type Restart, type Tweak, type UserInfo } from "./api";
 
 /** Pendiente: true/false para switches, id de opción para selectores. */
 export type Pending = boolean | string;
 
-export type View = "tweaks" | "bloat" | "history";
+export type View = "tweaks" | "apps" | "bloat" | "history";
 
 export interface Toast {
   id: number;
@@ -20,6 +20,7 @@ const RESTART_MSG: Record<Restart, string | null> = {
 
 class AppStore {
   overview = $state<Overview | null>(null);
+  user = $state<UserInfo | null>(null);
   loading = $state(true);
   loadError = $state<string | null>(null);
   view = $state<View>("tweaks");
@@ -43,6 +44,14 @@ class AppStore {
       return normalize(`${t.title} ${t.description} ${t.tags.join(" ")} ${t.id}`).includes(q);
     });
   });
+
+  async loadUser() {
+    try {
+      this.user = await userApi.get();
+    } catch {
+      this.user = null;
+    }
+  }
 
   async load() {
     this.loading = true;

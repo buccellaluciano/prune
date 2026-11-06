@@ -3,11 +3,13 @@ mod catalog;
 mod engine;
 mod registry;
 mod system;
+mod user;
+mod winget;
 
 use catalog::Category;
 use engine::{ApplyReport, Desired, Engine, JournalEntry, PlannedChange, TweakView};
 use serde::Serialize;
-use tauri::Manager;
+use tauri::{Emitter, Manager};
 
 #[derive(Serialize)]
 struct Overview {
@@ -68,6 +70,39 @@ async fn remove_bloat(
     Ok(results)
 }
 
+#[tauri::command]
+async fn winget_status() -> Result<winget::AppsOverview, String> {
+    tauri::async_runtime::spawn_blocking(winget::status)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[derive(Clone, Serialize)]
+struct WingetProgress {
+    id: String,
+    line: String,
+}
+
+#[tauri::command]
+async fn winget_action(app: tauri::AppHandle, id: String, action: winget::Action) -> Result<winget::ActionResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        winget::act(&id, action, |line| {
+            let _ = app.emit("winget-progress", WingetProgress { id: id.clone(), line: line.to_string() });
+        })
+    })
+    .await
+    .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn get_user() -> user::UserInfo {
+    tauri::async_runtime::spawn_blocking(user::info).await.unwrap_or_else(|_| user::UserInfo {
+        name: String::new(),
+        username: String::new(),
+        picture: None,
+    })
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -83,7 +118,10 @@ pub fn run() {
             history,
             undo,
             list_bloat,
-            remove_bloat
+            remove_bloat,
+            winget_status,
+            winget_action,
+            get_user
         ])
         .run(tauri::generate_context!())
         .expect("error al iniciar la aplicación");

@@ -22,6 +22,7 @@
       ? [{ id: "a:plan", group: "Acciones", label: `Revisar y aplicar ${store.pendingCount} cambios`, run: () => (store.planOpen = true) }]
       : []),
     { id: "v:tweaks", group: "Ir a", label: "Todos los tweaks", run: () => ((store.view = "tweaks"), (store.category = null)) },
+    { id: "v:apps", group: "Ir a", label: "Programas (winget)", run: () => ((store.view = "apps"), (store.query = "")) },
     { id: "v:bloat", group: "Ir a", label: "Bloatware", run: () => (store.view = "bloat") },
     { id: "v:history", group: "Ir a", label: "Historial", run: () => (store.view = "history") },
     ...(store.overview?.categories ?? []).map((c) => ({

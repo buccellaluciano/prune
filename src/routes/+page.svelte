@@ -9,11 +9,15 @@
   import CommandPalette from "$lib/components/CommandPalette.svelte";
   import BloatView from "$lib/components/BloatView.svelte";
   import HistoryView from "$lib/components/HistoryView.svelte";
+  import AppsView from "$lib/components/AppsView.svelte";
   import { fly } from "svelte/transition";
   import { flip } from "svelte/animate";
   import { onMount } from "svelte";
 
-  onMount(() => store.load());
+  onMount(() => {
+    store.load();
+    store.loadUser();
+  });
 
   function onkeydown(e: KeyboardEvent) {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
@@ -53,8 +57,8 @@
         <Search size={15} class="absolute top-1/2 left-3 -translate-y-1/2 text-faint" />
         <input
           bind:value={store.query}
-          oninput={() => (store.view = "tweaks")}
-          placeholder="Filtrar tweaks…"
+          oninput={() => { if (store.view !== "apps") store.view = "tweaks"; }}
+          placeholder={store.view === "apps" ? "Filtrar programas…" : "Filtrar tweaks…"}
           class="h-9 w-full max-w-md rounded-xl border border-line bg-card pr-9 pl-9 text-[13px] outline-none placeholder:text-faint focus:border-accent/60"
         />
       </div>
@@ -83,6 +87,8 @@
         <p class="rounded-xl bg-advanced/10 p-4 text-[13px] text-advanced">{store.loadError}</p>
       {:else if store.view === "bloat"}
         <BloatView />
+      {:else if store.view === "apps"}
+        <AppsView />
       {:else if store.view === "history"}
         <HistoryView />
       {:else}

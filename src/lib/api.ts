@@ -125,3 +125,49 @@ export const api = {
   removeBloat: (ids: string[], deprovision: boolean) =>
     call<RemoveResult[]>("remove_bloat", { ids, deprovision }),
 };
+
+export type WingetAction = "install" | "upgrade" | "uninstall";
+
+export interface AppStatus {
+  id: string;
+  title: string;
+  group: string;
+  description: string;
+  installed: string | null;
+  available: string | null;
+}
+
+export interface AppsOverview {
+  winget: string | null;
+  error: string | null;
+  groups: { id: string; title: string }[];
+  apps: AppStatus[];
+}
+
+export interface ActionResult {
+  id: string;
+  ok: boolean;
+  message: string | null;
+}
+
+export const wingetApi = {
+  status: () => call<AppsOverview>("winget_status"),
+  act: (id: string, action: WingetAction) => call<ActionResult>("winget_action", { id, action }),
+  /** Progreso en vivo de la operación en curso (solo dentro de Tauri). */
+  async onProgress(cb: (p: { id: string; line: string }) => void): Promise<() => void> {
+    if (!isTauri) return () => {};
+    const { listen } = await import("@tauri-apps/api/event");
+    return listen<{ id: string; line: string }>("winget-progress", (e) => cb(e.payload));
+  },
+};
+
+export interface UserInfo {
+  name: string;
+  username: string;
+  /** data URL de la foto de la cuenta, o null si no tiene. */
+  picture: string | null;
+}
+
+export const userApi = {
+  get: () => call<UserInfo>("get_user"),
+};

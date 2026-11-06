@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { History, PackageX, SlidersHorizontal, Wand2 } from "@lucide/svelte";
+  import { AppWindow, History, PackageX, ShieldCheck, ShieldOff, SlidersHorizontal, Wand2 } from "@lucide/svelte";
+  import { apps } from "$lib/apps.svelte";
   import { store, PROFILES } from "$lib/store.svelte";
   import CategoryIcon from "./CategoryIcon.svelte";
 
@@ -15,6 +16,11 @@
 
   const applied = $derived(store.tweaks.filter((t) => t.state === "applied").length);
   const pct = $derived(store.tweaks.length ? Math.round((applied / store.tweaks.length) * 100) : 0);
+
+  function initials(name: string) {
+    const parts = name.trim().split(/\s+/);
+    return (parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : name.slice(0, 1)) || "?";
+  }
 
   function goCategory(id: string | null) {
     store.view = "tweaks";
@@ -69,6 +75,11 @@
 
     <div class="my-2 border-t border-line"></div>
 
+    <button class="nav {store.view === 'apps' ? 'active' : ''}" onclick={() => ((store.view = "apps"), (store.query = ""))}>
+      <AppWindow size={16} strokeWidth={1.8} /> <span class="flex-1 text-left">Programas</span>
+      {#if apps.running}<span class="size-2 animate-pulse rounded-full bg-accent" title="winget trabajando"></span>
+      {:else if apps.upgradable.length}<span class="rounded-md bg-moderate/15 px-1.5 font-mono text-[10.5px] text-moderate">{apps.upgradable.length}</span>{/if}
+    </button>
     <button class="nav {store.view === 'bloat' ? 'active' : ''}" onclick={() => (store.view = "bloat")}>
       <PackageX size={16} strokeWidth={1.8} /> <span class="flex-1 text-left">Bloatware</span>
     </button>
@@ -91,6 +102,30 @@
       </button>
     {/each}
   </nav>
+
+  {#if store.user}
+    {@const u = store.user}
+    {@const elevated = store.overview?.system.elevated ?? false}
+    <div class="flex items-center gap-3 border-t border-line px-4 py-3">
+      {#if u.picture}
+        <img src={u.picture} alt="" class="size-9 shrink-0 rounded-full object-cover ring-1 ring-line" />
+      {:else}
+        <div class="accent-grad grid size-9 shrink-0 place-items-center rounded-full text-[14px] font-semibold text-white uppercase" aria-hidden="true">
+          {initials(u.name || u.username)}
+        </div>
+      {/if}
+      <div class="min-w-0 flex-1">
+        <div class="truncate text-[13px] font-medium" title={u.name}>{u.name || u.username}</div>
+        <div
+          class="flex items-center gap-1 text-[11px] {elevated ? 'text-safe' : 'text-faint'}"
+          title={elevated ? "La app corre con permisos de administrador" : "La app corre sin permisos de administrador"}
+        >
+          {#if elevated}<ShieldCheck size={11} /> Administrador{:else}<ShieldOff size={11} /> Sin admin{/if}
+          {#if u.name && u.name !== u.username}<span class="truncate text-faint">· {u.username}</span>{/if}
+        </div>
+      </div>
+    </div>
+  {/if}
 </aside>
 
 <style>

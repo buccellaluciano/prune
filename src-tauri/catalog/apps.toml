@@ -1,0 +1,284 @@
+# Programas instalables con winget (fuente "winget" oficial de Microsoft).
+#
+# Criterios para entrar a la lista:
+# - Proyecto mantenido y con publicador identificable (nada abandonado ni "repacks").
+# - ID exacto del repositorio winget-pkgs: se instala con --exact, nunca por nombre.
+# - Nada que se pueda conseguir mejor por Windows Update o la Store del sistema.
+#
+# Campos: id (PackageIdentifier), title, group, description.
+
+[[group]]
+id = "browsers"
+title = "Navegadores"
+
+[[group]]
+id = "utilities"
+title = "Utilidades"
+
+[[group]]
+id = "security"
+title = "Contraseñas y seguridad"
+
+[[group]]
+id = "media"
+title = "Multimedia"
+
+[[group]]
+id = "office"
+title = "Documentos y notas"
+
+[[group]]
+id = "communication"
+title = "Comunicación"
+
+[[group]]
+id = "dev"
+title = "Desarrollo"
+
+[[group]]
+id = "gaming"
+title = "Gaming"
+
+# ─────────────── Navegadores ───────────────
+
+[[app]]
+id = "Mozilla.Firefox"
+title = "Firefox"
+group = "browsers"
+description = "Navegador de Mozilla, independiente de Chromium."
+
+[[app]]
+id = "Brave.Brave"
+title = "Brave"
+group = "browsers"
+description = "Basado en Chromium, con bloqueo de anuncios y rastreadores incluido."
+
+[[app]]
+id = "Google.Chrome"
+title = "Google Chrome"
+group = "browsers"
+description = "El navegador de Google."
+
+[[app]]
+id = "Vivaldi.Vivaldi"
+title = "Vivaldi"
+group = "browsers"
+description = "Basado en Chromium, muy configurable."
+
+[[app]]
+id = "LibreWolf.LibreWolf"
+title = "LibreWolf"
+group = "browsers"
+description = "Firefox con privacidad reforzada de fábrica."
+
+# ─────────────── Utilidades ───────────────
+
+[[app]]
+id = "7zip.7zip"
+title = "7-Zip"
+group = "utilities"
+description = "Comprime y descomprime zip, 7z, rar y más."
+
+[[app]]
+id = "Microsoft.PowerToys"
+title = "PowerToys"
+group = "utilities"
+description = "Utilidades oficiales de Microsoft: FancyZones, selector de color, renombrado masivo…"
+
+[[app]]
+id = "voidtools.Everything"
+title = "Everything"
+group = "utilities"
+description = "Búsqueda de archivos instantánea por nombre."
+
+[[app]]
+id = "ShareX.ShareX"
+title = "ShareX"
+group = "utilities"
+description = "Capturas y grabaciones de pantalla con edición rápida."
+
+[[app]]
+id = "Notepad++.Notepad++"
+title = "Notepad++"
+group = "utilities"
+description = "Editor de texto liviano con resaltado de sintaxis."
+
+[[app]]
+id = "AntibodySoftware.WizTree"
+title = "WizTree"
+group = "utilities"
+description = "Muestra qué ocupa espacio en el disco, muy rápido."
+
+[[app]]
+id = "Rufus.Rufus"
+title = "Rufus"
+group = "utilities"
+description = "Crea pendrives booteables."
+
+[[app]]
+id = "Flow-Launcher.Flow-Launcher"
+title = "Flow Launcher"
+group = "utilities"
+description = "Lanzador rápido de apps y archivos con Alt+Espacio."
+
+# ─────────────── Seguridad ───────────────
+
+[[app]]
+id = "Bitwarden.Bitwarden"
+title = "Bitwarden"
+group = "security"
+description = "Gestor de contraseñas de código abierto, sincronizado."
+
+[[app]]
+id = "KeePassXCTeam.KeePassXC"
+title = "KeePassXC"
+group = "security"
+description = "Gestor de contraseñas local, sin nube."
+
+# ─────────────── Multimedia ───────────────
+
+[[app]]
+id = "VideoLAN.VLC"
+title = "VLC"
+group = "media"
+description = "Reproduce casi cualquier formato de audio y video."
+
+[[app]]
+id = "OBSProject.OBSStudio"
+title = "OBS Studio"
+group = "media"
+description = "Grabación y streaming."
+
+[[app]]
+id = "Spotify.Spotify"
+title = "Spotify"
+group = "media"
+description = "Música en streaming."
+
+[[app]]
+id = "HandBrake.HandBrake"
+title = "HandBrake"
+group = "media"
+description = "Convierte y comprime videos."
+
+[[app]]
+id = "Audacity.Audacity"
+title = "Audacity"
+group = "media"
+description = "Editor de audio."
+
+[[app]]
+id = "KDE.Krita"
+title = "Krita"
+group = "media"
+description = "Pintura digital e ilustración."
+
+[[app]]
+id = "Inkscape.Inkscape"
+title = "Inkscape"
+group = "media"
+description = "Gráficos vectoriales (SVG)."
+
+# ─────────────── Documentos ───────────────
+
+[[app]]
+id = "TheDocumentFoundation.LibreOffice"
+title = "LibreOffice"
+group = "office"
+description = "Suite de oficina libre: textos, planillas y presentaciones."
+
+[[app]]
+id = "SumatraPDF.SumatraPDF"
+title = "SumatraPDF"
+group = "office"
+description = "Lector de PDF y ebooks muy liviano."
+
+[[app]]
+id = "Obsidian.Obsidian"
+title = "Obsidian"
+group = "office"
+description = "Notas en Markdown con enlaces entre ellas."
+
+# ─────────────── Comunicación ───────────────
+
+[[app]]
+id = "Discord.Discord"
+title = "Discord"
+group = "communication"
+description = "Chat de voz y texto."
+
+[[app]]
+id = "Telegram.TelegramDesktop"
+title = "Telegram"
+group = "communication"
+description = "Mensajería."
+
+[[app]]
+id = "OpenWhisperSystems.Signal"
+title = "Signal"
+group = "communication"
+description = "Mensajería cifrada de extremo a extremo."
+
+[[app]]
+id = "Zoom.Zoom"
+title = "Zoom"
+group = "communication"
+description = "Videollamadas."
+
+[[app]]
+id = "Mozilla.Thunderbird"
+title = "Thunderbird"
+group = "communication"
+description = "Cliente de correo."
+
+# ─────────────── Desarrollo ───────────────
+
+[[app]]
+id = "Microsoft.VisualStudioCode"
+title = "Visual Studio Code"
+group = "dev"
+description = "Editor de código."
+
+[[app]]
+id = "Git.Git"
+title = "Git"
+group = "dev"
+description = "Control de versiones."
+
+[[app]]
+id = "OpenJS.NodeJS.LTS"
+title = "Node.js LTS"
+group = "dev"
+description = "Entorno de JavaScript, versión de soporte extendido."
+
+[[app]]
+id = "Microsoft.PowerShell"
+title = "PowerShell 7"
+group = "dev"
+description = "La versión moderna de PowerShell, en paralelo a la 5.1."
+
+[[app]]
+id = "Rustlang.Rustup"
+title = "Rustup"
+group = "dev"
+description = "Instalador de Rust."
+
+# ─────────────── Gaming ───────────────
+
+[[app]]
+id = "Valve.Steam"
+title = "Steam"
+group = "gaming"
+description = "Tienda y lanzador de Valve."
+
+[[app]]
+id = "EpicGames.EpicGamesLauncher"
+title = "Epic Games Launcher"
+group = "gaming"
+description = "Tienda y lanzador de Epic."
+
+[[app]]
+id = "GOG.Galaxy"
+title = "GOG Galaxy"
+group = "gaming"
+description = "Lanzador de GOG."

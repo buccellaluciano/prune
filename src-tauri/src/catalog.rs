@@ -6,6 +6,7 @@ use std::sync::OnceLock;
 
 const TWEAKS_TOML: &str = include_str!("../catalog/tweaks.toml");
 const BLOAT_TOML: &str = include_str!("../catalog/bloat.toml");
+const APPS_TOML: &str = include_str!("../catalog/apps.toml");
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Hive {
@@ -173,6 +174,70 @@ pub struct BloatCatalog {
     pub app: Vec<BloatApp>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AppGroup {
+    pub id: String,
+    pub title: String,
+}
+
+/// Programa instalable con winget. `id` es el PackageIdentifier exacto.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct WingetApp {
+    pub id: String,
+    pub title: String,
+    pub group: String,
+    pub description: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AppCatalog {
+    pub group: Vec<AppGroup>,
+    pub app: Vec<WingetApp>,
+}
+
+pub fn apps() -> &'static AppCatalog {
+    static C: OnceLock<AppCatalog> = OnceLock::new();
+    C.get_or_init(|| {
+        let c: AppCatalog = toml::from_str(APPS_TOML).expect("apps.toml inválido");
+        validate_apps(&c).expect("apps.toml inconsistente");
+        c
+    })
+}
+
+pub fn find_app(id: &str) -> Option<&'static WingetApp> {
+    apps().app.iter().find(|a| a.id == id)
+}
+
+/// Un PackageIdentifier válido: "Publicador.Nombre", sin espacios ni nada que winget
+/// pueda leer como opción. Se pasa como argumento separado, pero igual lo restringimos.
+pub fn is_valid_package_id(id: &str) -> bool {
+    id.len() <= 128
+        && id.contains('.')
+        && !id.starts_with(['-', '.'])
+        && !id.ends_with('.')
+        && id.chars().all(|c| c.is_ascii_alphanumeric() || "._-+".contains(c))
+}
+
+pub fn validate_apps(c: &AppCatalog) -> Result<(), String> {
+    let groups: HashSet<_> = c.group.iter().map(|g| g.id.as_str()).collect();
+    let mut ids = HashSet::new();
+    for a in &c.app {
+        if !is_valid_package_id(&a.id) {
+            return Err(format!("{}: id de paquete inválido", a.id));
+        }
+        if !ids.insert(a.id.to_ascii_lowercase()) {
+            return Err(format!("{}: duplicado", a.id));
+        }
+        if !groups.contains(a.group.as_str()) {
+            return Err(format!("{}: grupo desconocido '{}'", a.id, a.group));
+        }
+    }
+    Ok(())
+}
+
 pub fn tweaks() -> &'static TweakCatalog {
     static C: OnceLock<TweakCatalog> = OnceLock::new();
     C.get_or_init(|| {
@@ -306,6 +371,21 @@ kind = "dword"
         );
         let c: TweakCatalog = toml::from_str(&src).map_err(|e| e.to_string())?;
         validate_tweaks(&c)
+    }
+
+    #[test]
+    fn apps_catalog_parses() {
+        assert!(apps().app.len() >= 30);
+    }
+
+    #[test]
+    fn package_id_rules() {
+        for ok in ["Mozilla.Firefox", "Notepad++.Notepad++", "Flow-Launcher.Flow-Launcher", "7zip.7zip"] {
+            assert!(is_valid_package_id(ok), "{ok}");
+        }
+        for bad in ["--override", "-h.x", "Firefox", "a b.c", "a.b;calc", "x.\"y\"", ".a.b", "a.b."] {
+            assert!(!is_valid_package_id(bad), "{bad}");
+        }
     }
 
     #[test]
