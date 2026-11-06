@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { LoaderCircle, RefreshCw, Trash2, X } from "@lucide/svelte";
+  import { LoaderCircle, RefreshCw, ShieldCheck, Trash2, X } from "@lucide/svelte";
   import { apps } from "$lib/apps.svelte";
   import { normalize, store } from "$lib/store.svelte";
   import { onMount } from "svelte";
+  import AppIcon from "./AppIcon.svelte";
 
   type Filter = "all" | "installed" | "updates";
   let filter = $state<Filter>("all");
@@ -39,8 +40,16 @@
     </div>
     <div class="flex items-center gap-2">
       <button
+        aria-pressed={apps.reviewFirst}
+        class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[12.5px] hover:text-ink {apps.reviewFirst ? 'text-safe' : 'text-mute'}"
+        onclick={() => apps.setReviewFirst(!apps.reviewFirst)}
+        title="Frenar cada instalación para revisar el SHA-256 del instalador en VirusTotal antes de seguir"
+      >
+        <ShieldCheck size={13} /> Revisar antes de instalar: {apps.reviewFirst ? "sí" : "no"}
+      </button>
+      <button
         class="inline-flex items-center gap-1.5 rounded-md border border-line px-2.5 py-1 text-[12.5px] text-mute hover:text-ink disabled:opacity-50"
-        disabled={apps.loading || !!apps.running}
+        disabled={apps.loading || apps.busy}
         onclick={() => apps.load()}
         title="Volver a consultar winget"
       >
@@ -53,6 +62,7 @@
       {/if}
     </div>
   </header>
+
 
   {#if apps.overview?.error && !apps.overview.apps.length}
     <p class="rounded-md border border-advanced/30 p-4 text-[13px] text-advanced">{apps.overview.error}</p>
@@ -82,15 +92,25 @@
             {#each items as a (a.id)}
               {@const job = apps.jobFor(a.id)}
               <article class="flex items-center gap-4 px-4 py-2.5 transition-colors hover:bg-card-hi">
+                <AppIcon id={a.id} title={a.title} />
                 <div class="min-w-0 flex-1">
                   <div class="flex items-baseline gap-2">
                     <h3 class="truncate text-[13.5px] font-medium">{a.title}</h3>
                     <span class="truncate font-mono text-[10.5px] text-faint">{a.id}</span>
                   </div>
                   {#if job === "running" && apps.running}
-                    <p class="truncate font-mono text-[11px] text-accent" title={apps.running.line}>
-                      {apps.running.line || `${apps.verb(apps.running.action)}…`}
-                    </p>
+                    {@const r = apps.running}
+                    <button class="block w-full text-left" onclick={() => (apps.sheetOpen = true)} title="Ver el progreso">
+                      <span class="block truncate text-[12px] text-accent">
+                        {apps.verb(r.action)}{r.step === "verify" ? " · verificando" : r.step === "download" ? " · descargando" : r.step === "hash" ? " · comprobando" : "…"}
+                        {#if r.fraction !== null && r.step === "download"}<span class="font-mono"> {Math.round(r.fraction * 100)}%</span>{/if}
+                      </span>
+                      {#if r.step === "download" && r.fraction !== null}
+                        <span class="mt-1 block h-0.5 overflow-hidden rounded-full bg-line">
+                          <span class="block h-full rounded-full bg-accent transition-[width] duration-200" style="width:{Math.round(r.fraction * 100)}%"></span>
+                        </span>
+                      {/if}
+                    </button>
                   {:else}
                     <p class="truncate text-[12.5px] text-mute">{a.description}</p>
                   {/if}

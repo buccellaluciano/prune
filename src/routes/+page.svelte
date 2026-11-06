@@ -11,6 +11,7 @@
   import HistoryView from "$lib/components/HistoryView.svelte";
   import AppsView from "$lib/components/AppsView.svelte";
   import DiskView from "$lib/components/DiskView.svelte";
+  import InstallSheet from "$lib/components/InstallSheet.svelte";
   import { fly } from "svelte/transition";
   import { flip } from "svelte/animate";
   import { onMount } from "svelte";
@@ -142,6 +143,7 @@
 
 <PlanSheet />
 <CommandPalette />
+<InstallSheet />
 
 <!-- Toasts -->
 <div class="pointer-events-none fixed right-5 bottom-5 z-[60] flex w-80 flex-col gap-2">

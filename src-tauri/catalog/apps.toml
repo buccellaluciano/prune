@@ -43,30 +43,35 @@ title = "Gaming"
 
 [[app]]
 id = "Mozilla.Firefox"
+site = "https://www.mozilla.org/firefox/"
 title = "Firefox"
 group = "browsers"
 description = "Navegador de Mozilla, independiente de Chromium."
 
 [[app]]
 id = "Brave.Brave"
+site = "https://brave.com/"
 title = "Brave"
 group = "browsers"
 description = "Basado en Chromium, con bloqueo de anuncios y rastreadores incluido."
 
 [[app]]
 id = "Google.Chrome"
+site = "https://www.google.com/chrome/"
 title = "Google Chrome"
 group = "browsers"
 description = "El navegador de Google."
 
 [[app]]
 id = "Vivaldi.Vivaldi"
+site = "https://vivaldi.com/"
 title = "Vivaldi"
 group = "browsers"
 description = "Basado en Chromium, muy configurable."
 
 [[app]]
 id = "LibreWolf.LibreWolf"
+site = "https://librewolf.net/"
 title = "LibreWolf"
 group = "browsers"
 description = "Firefox con privacidad reforzada de fábrica."
@@ -75,48 +80,56 @@ description = "Firefox con privacidad reforzada de fábrica."
 
 [[app]]
 id = "7zip.7zip"
+site = "https://7-zip.org/"
 title = "7-Zip"
 group = "utilities"
 description = "Comprime y descomprime zip, 7z, rar y más."
 
 [[app]]
 id = "Microsoft.PowerToys"
+site = "https://learn.microsoft.com/windows/powertoys/"
 title = "PowerToys"
 group = "utilities"
 description = "Utilidades oficiales de Microsoft: FancyZones, selector de color, renombrado masivo…"
 
 [[app]]
 id = "voidtools.Everything"
+site = "https://www.voidtools.com/"
 title = "Everything"
 group = "utilities"
 description = "Búsqueda de archivos instantánea por nombre."
 
 [[app]]
 id = "ShareX.ShareX"
+site = "https://getsharex.com/"
 title = "ShareX"
 group = "utilities"
 description = "Capturas y grabaciones de pantalla con edición rápida."
 
 [[app]]
 id = "Notepad++.Notepad++"
+site = "https://notepad-plus-plus.org/"
 title = "Notepad++"
 group = "utilities"
 description = "Editor de texto liviano con resaltado de sintaxis."
 
 [[app]]
 id = "AntibodySoftware.WizTree"
+site = "https://diskanalyzer.com/"
 title = "WizTree"
 group = "utilities"
 description = "Muestra qué ocupa espacio en el disco, muy rápido."
 
 [[app]]
 id = "Rufus.Rufus"
+site = "https://rufus.ie/"
 title = "Rufus"
 group = "utilities"
 description = "Crea pendrives booteables."
 
 [[app]]
 id = "Flow-Launcher.Flow-Launcher"
+site = "https://www.flowlauncher.com/"
 title = "Flow Launcher"
 group = "utilities"
 description = "Lanzador rápido de apps y archivos con Alt+Espacio."
@@ -125,12 +138,14 @@ description = "Lanzador rápido de apps y archivos con Alt+Espacio."
 
 [[app]]
 id = "Bitwarden.Bitwarden"
+site = "https://bitwarden.com/"
 title = "Bitwarden"
 group = "security"
 description = "Gestor de contraseñas de código abierto, sincronizado."
 
 [[app]]
 id = "KeePassXCTeam.KeePassXC"
+site = "https://keepassxc.org/"
 title = "KeePassXC"
 group = "security"
 description = "Gestor de contraseñas local, sin nube."
@@ -139,42 +154,49 @@ description = "Gestor de contraseñas local, sin nube."
 
 [[app]]
 id = "VideoLAN.VLC"
+site = "https://www.videolan.org/"
 title = "VLC"
 group = "media"
 description = "Reproduce casi cualquier formato de audio y video."
 
 [[app]]
 id = "OBSProject.OBSStudio"
+site = "https://obsproject.com/"
 title = "OBS Studio"
 group = "media"
 description = "Grabación y streaming."
 
 [[app]]
 id = "Spotify.Spotify"
+site = "https://www.spotify.com/"
 title = "Spotify"
 group = "media"
 description = "Música en streaming."
 
 [[app]]
 id = "HandBrake.HandBrake"
+site = "https://handbrake.fr/"
 title = "HandBrake"
 group = "media"
 description = "Convierte y comprime videos."
 
 [[app]]
 id = "Audacity.Audacity"
+site = "https://www.audacityteam.org/"
 title = "Audacity"
 group = "media"
 description = "Editor de audio."
 
 [[app]]
 id = "KDE.Krita"
+site = "https://krita.org/"
 title = "Krita"
 group = "media"
 description = "Pintura digital e ilustración."
 
 [[app]]
 id = "Inkscape.Inkscape"
+site = "https://inkscape.org/"
 title = "Inkscape"
 group = "media"
 description = "Gráficos vectoriales (SVG)."
@@ -183,18 +205,21 @@ description = "Gráficos vectoriales (SVG)."
 
 [[app]]
 id = "TheDocumentFoundation.LibreOffice"
+site = "https://www.libreoffice.org/"
 title = "LibreOffice"
 group = "office"
 description = "Suite de oficina libre: textos, planillas y presentaciones."
 
 [[app]]
 id = "SumatraPDF.SumatraPDF"
+site = "https://www.sumatrapdfreader.org/"
 title = "SumatraPDF"
 group = "office"
 description = "Lector de PDF y ebooks muy liviano."
 
 [[app]]
 id = "Obsidian.Obsidian"
+site = "https://obsidian.md/"
 title = "Obsidian"
 group = "office"
 description = "Notas en Markdown con enlaces entre ellas."
@@ -203,30 +228,35 @@ description = "Notas en Markdown con enlaces entre ellas."
 
 [[app]]
 id = "Discord.Discord"
+site = "https://discord.com/"
 title = "Discord"
 group = "communication"
 description = "Chat de voz y texto."
 
 [[app]]
 id = "Telegram.TelegramDesktop"
+site = "https://desktop.telegram.org/"
 title = "Telegram"
 group = "communication"
 description = "Mensajería."
 
 [[app]]
 id = "OpenWhisperSystems.Signal"
+site = "https://signal.org/"
 title = "Signal"
 group = "communication"
 description = "Mensajería cifrada de extremo a extremo."
 
 [[app]]
 id = "Zoom.Zoom"
+site = "https://zoom.us/"
 title = "Zoom"
 group = "communication"
 description = "Videollamadas."
 
 [[app]]
 id = "Mozilla.Thunderbird"
+site = "https://www.thunderbird.net/"
 title = "Thunderbird"
 group = "communication"
 description = "Cliente de correo."
@@ -235,30 +265,35 @@ description = "Cliente de correo."
 
 [[app]]
 id = "Microsoft.VisualStudioCode"
+site = "https://code.visualstudio.com/"
 title = "Visual Studio Code"
 group = "dev"
 description = "Editor de código."
 
 [[app]]
 id = "Git.Git"
+site = "https://git-scm.com/"
 title = "Git"
 group = "dev"
 description = "Control de versiones."
 
 [[app]]
 id = "OpenJS.NodeJS.LTS"
+site = "https://nodejs.org/"
 title = "Node.js LTS"
 group = "dev"
 description = "Entorno de JavaScript, versión de soporte extendido."
 
 [[app]]
 id = "Microsoft.PowerShell"
+site = "https://learn.microsoft.com/powershell/"
 title = "PowerShell 7"
 group = "dev"
 description = "La versión moderna de PowerShell, en paralelo a la 5.1."
 
 [[app]]
 id = "Rustlang.Rustup"
+site = "https://www.rust-lang.org/"
 title = "Rustup"
 group = "dev"
 description = "Instalador de Rust."
@@ -267,18 +302,21 @@ description = "Instalador de Rust."
 
 [[app]]
 id = "Valve.Steam"
+site = "https://store.steampowered.com/"
 title = "Steam"
 group = "gaming"
 description = "Tienda y lanzador de Valve."
 
 [[app]]
 id = "EpicGames.EpicGamesLauncher"
+site = "https://www.epicgames.com/site/"
 title = "Epic Games Launcher"
 group = "gaming"
 description = "Tienda y lanzador de Epic."
 
 [[app]]
 id = "GOG.Galaxy"
+site = "https://www.gog.com/"
 title = "GOG Galaxy"
 group = "gaming"
 description = "Lanzador de GOG."

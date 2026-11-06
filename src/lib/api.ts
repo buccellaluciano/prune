@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { mock } from "./mock";
+import { mock, mockProgress } from "./mock";
 
 export type Risk = "safe" | "moderate" | "advanced";
 export type Restart = "none" | "explorer" | "logoff" | "reboot";
@@ -163,15 +163,46 @@ export interface ActionResult {
   message: string | null;
 }
 
+/** Etapa que reporta winget mientras trabaja. */
+export type WingetPhase = "download" | "hash" | "install" | "uninstall" | "done";
+
+export interface WingetProgress {
+  id: string;
+  line: string;
+  phase: WingetPhase | null;
+  /** 0–1 cuando la línea trae avance. */
+  fraction: number | null;
+}
+
+export interface InstallerInfo {
+  url: string | null;
+  sha256: string | null;
+  version: string | null;
+}
+
+export interface SecurityCheck {
+  installer: InstallerInfo | null;
+  error: string | null;
+}
+
 export const wingetApi = {
   status: () => call<AppsOverview>("winget_status"),
   act: (id: string, action: WingetAction) => call<ActionResult>("winget_action", { id, action }),
-  /** Progreso en vivo de la operación en curso (solo dentro de Tauri). */
-  async onProgress(cb: (p: { id: string; line: string }) => void): Promise<() => void> {
-    if (!isTauri) return () => {};
+  /** Íconos del catálogo (data URLs). Con `fetch` busca los que falten. */
+  icons: (fetch: boolean) => call<Record<string, string>>("winget_icons", { fetch }),
+  /** URL y SHA-256 del instalador según winget, para revisarlo antes de instalar. */
+  check: (id: string) => call<SecurityCheck>("winget_check", { id }),
+  /** Progreso en vivo de la operación en curso. */
+  async onProgress(cb: (p: WingetProgress) => void): Promise<() => void> {
+    if (!isTauri) return mockProgress(cb);
     const { listen } = await import("@tauri-apps/api/event");
-    return listen<{ id: string; line: string }>("winget-progress", (e) => cb(e.payload));
+    return listen<WingetProgress>("winget-progress", (e) => cb(e.payload));
   },
+};
+
+export const vtApi = {
+  /** Abre en el navegador el informe de VirusTotal de ese hash. */
+  open: (sha256: string) => call<void>("vt_open", { sha256 }),
 };
 
 export interface UserInfo {

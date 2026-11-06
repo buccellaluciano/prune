@@ -9,4 +9,10 @@ fn main() {
         );
     }
     tauri_build::try_build(attrs).expect("error en tauri-build");
+
+    // DLLs importadas por el exe (las resuelve Windows antes de main): buscarlas solo en
+    // System32 (0x800 = LOAD_LIBRARY_SEARCH_SYSTEM32). Solo para el binario de la app.
+    if std::env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("msvc") {
+        println!("cargo:rustc-link-arg-bins=/DEPENDENTLOADFLAG:0x800");
+    }
 }

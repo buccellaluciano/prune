@@ -2,10 +2,14 @@ mod appx;
 mod catalog;
 mod disk;
 mod engine;
+mod http;
+mod icons;
 mod power;
 mod registry;
+mod sign;
 mod system;
 mod user;
+mod vt;
 mod winget;
 
 use catalog::Category;
@@ -88,13 +92,18 @@ async fn winget_status() -> Result<winget::AppsOverview, String> {
 struct WingetProgress {
     id: String,
     line: String,
+    phase: Option<winget::Phase>,
+    fraction: Option<f32>,
 }
 
 #[tauri::command]
 async fn winget_action(app: tauri::AppHandle, id: String, action: winget::Action) -> Result<winget::ActionResult, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        winget::act(&id, action, |line| {
-            let _ = app.emit("winget-progress", WingetProgress { id: id.clone(), line: line.to_string() });
+        winget::act(&id, action, |p| {
+            let _ = app.emit(
+                "winget-progress",
+                WingetProgress { id: id.clone(), line: p.line, phase: p.phase, fraction: p.fraction },
+            );
         })
     })
     .await
@@ -147,12 +156,73 @@ fn disk_open(id: u32) -> Result<(), String> {
     disk::open(id)
 }
 
+// ───────── Íconos y VirusTotal (Programas) ─────────
+
+/// Íconos del catálogo. Con `fetch` busca en internet los que falten.
+#[tauri::command]
+async fn winget_icons(app: tauri::AppHandle, fetch: bool) -> std::collections::HashMap<String, String> {
+    let Ok(dir) = app.path().app_data_dir() else { return Default::default() };
+    tauri::async_runtime::spawn_blocking(move || icons::all(&dir.join("icons"), fetch)).await.unwrap_or_default()
+}
+
+#[derive(Serialize)]
+struct SecurityCheck {
+    installer: Option<winget::InstallerInfo>,
+    error: Option<String>,
+}
+
+/// Datos del instalador según el manifiesto de winget (URL y SHA-256), para que la
+/// persona lo revise antes de instalar.
+#[tauri::command]
+async fn winget_check(id: String) -> SecurityCheck {
+    tauri::async_runtime::spawn_blocking(move || match winget::installer_info(&id) {
+        Ok(i) => SecurityCheck { installer: Some(i), error: None },
+        Err(e) => SecurityCheck { installer: None, error: Some(e) },
+    })
+    .await
+    .unwrap_or_else(|e| SecurityCheck { installer: None, error: Some(e.to_string()) })
+}
+
+/// Abre en el navegador el informe de VirusTotal de un hash.
+#[tauri::command]
+fn vt_open(sha256: String) -> Result<(), String> {
+    vt::open_report(&sha256)
+}
+
+/// Dónde guardar el historial.
+///
+/// Instalada en Program Files y corriendo como admin, va en `<instalación>\data`: ahí solo
+/// escriben los administradores, así que ningún programa del usuario puede manipularlo.
+/// La primera vez se trae el historial que hubiera en `%APPDATA%` (igual se valida contra el
+/// catálogo antes de deshacer). En desarrollo, sin admin, queda en `%APPDATA%`.
+fn journal_dir(user_dir: &std::path::Path) -> std::path::PathBuf {
+    let protected = (|| {
+        if !system::is_elevated() {
+            return None;
+        }
+        let exe_dir = std::env::current_exe().ok()?.parent()?.to_path_buf();
+        let pf = winget::program_files()?.to_string_lossy().to_ascii_lowercase();
+        if !exe_dir.to_string_lossy().to_ascii_lowercase().starts_with(&format!("{pf}\\")) {
+            return None;
+        }
+        let dir = exe_dir.join("data");
+        std::fs::create_dir_all(&dir).ok()?;
+        Some(dir)
+    })();
+    let Some(dir) = protected else { return user_dir.to_path_buf() };
+    let (old, new) = (user_dir.join("journal.json"), dir.join("journal.json"));
+    if !new.exists() && old.exists() && std::fs::copy(&old, &new).is_ok() {
+        let _ = std::fs::rename(&old, user_dir.join("journal.migrado.json"));
+    }
+    dir
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
             let dir = app.path().app_data_dir()?;
-            app.manage(Engine::new(dir));
+            app.manage(Engine::new(journal_dir(&dir)));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -172,7 +242,10 @@ pub fn run() {
             disk_cancel,
             disk_summary,
             disk_dir,
-            disk_open
+            disk_open,
+            winget_icons,
+            winget_check,
+            vt_open
         ])
         .run(tauri::generate_context!())
         .expect("error al iniciar la aplicación");

@@ -467,6 +467,51 @@ fn write_error(e: &std::io::Error) -> String {
     }
 }
 
+/// El historial vive en `%APPDATA%`, donde cualquier programa del usuario puede escribir,
+/// y "Deshacer" corre como admin. Antes de tocar el registro se verifica que cada cambio
+/// corresponda a una operación real del catálogo para ese tweak.
+fn validate_change(c: &Change) -> Result<(), String> {
+    // Solo en los tests: la clave de prueba propia (no existe en la app compilada).
+    #[cfg(test)]
+    if c.hive == Hive::HKCU && c.path.starts_with(r"Software\DebloaterTest\") && c.tweak_id == "test.tweak" {
+        return Ok(());
+    }
+    let t = catalog::find_tweak(&c.tweak_id).ok_or_else(|| format!("tweak desconocido '{}'", c.tweak_id))?;
+    let op = t
+        .ops
+        .iter()
+        .find(|o| o.hive == c.hive && o.path.eq_ignore_ascii_case(&c.path) && o.name.eq_ignore_ascii_case(&c.name))
+        .ok_or_else(|| format!("{}\\{}\\{} no es parte de '{}'", reg::hive_label(c.hive), c.path, c.name, t.id))?;
+    // Solo se pueden borrar claves que contienen a la de la operación, y nunca de 1-2 niveles.
+    let path = op.path.to_ascii_lowercase();
+    for k in &c.created_keys {
+        let k = k.to_ascii_lowercase();
+        let inside = path == k || path.starts_with(&format!("{k}\\"));
+        if !inside || k.matches('\\').count() < 2 {
+            return Err(format!("clave a borrar no válida '{k}'"));
+        }
+    }
+    Ok(())
+}
+
+/// Lo mismo para el plan de energía: GUIDs válidos, el anterior tiene que existir y el
+/// creado solo puede ser una copia de "Máximo rendimiento".
+fn validate_power(p: &power::PowerChange) -> Result<(), String> {
+    let plans = power::list();
+    let before = power::parse(&p.before).ok_or("GUID anterior inválido")?;
+    power::parse(&p.after).ok_or("GUID nuevo inválido")?;
+    if !plans.iter().any(|x| x.guid == before) {
+        return Err("el plan anterior ya no existe".into());
+    }
+    if let Some(c) = &p.created {
+        let g = power::parse(c).ok_or("GUID creado inválido")?;
+        if power::find_ultimate(&plans) != Some(g) && plans.iter().any(|x| x.guid == g) {
+            return Err("el plan a borrar no es el Máximo rendimiento que creó la app".into());
+        }
+    }
+    Ok(())
+}
+
 /// Deshace un cambio individual devolviendo el valor anterior exacto.
 fn undo_change(c: &Change) -> Result<(), String> {
     match &c.before {
@@ -688,6 +733,13 @@ impl Engine {
                 "La app corre con otra cuenta de administrador: deshacer tocaría esa cuenta y no la de {user}"
             ));
         }
+        // Nada se toca si alguna parte de la entrada no coincide con el catálogo.
+        for c in &entry.changes {
+            validate_change(c).map_err(|e| format!("El historial no coincide con el catálogo ({e}). No se deshizo nada."))?;
+        }
+        if let Some(p) = &entry.power {
+            validate_power(p).map_err(|e| format!("El historial del plan de energía no es válido ({e}). No se deshizo nada."))?;
+        }
 
         if !force {
             let mut conflicts = Vec::new();
@@ -879,6 +931,85 @@ mod tests {
         let old = r#"[{"id":1,"at":1,"label":"x","changes":[],"removed_apps":["a"],"undone":false}]"#;
         let e: Vec<JournalEntry> = serde_json::from_str(old).unwrap();
         assert!(e[0].power.is_none());
+    }
+
+    /// Un historial manipulado no puede hacer que "Deshacer" (que corre como admin)
+    /// escriba claves ajenas al catálogo.
+    #[test]
+    fn tampered_journal_is_rejected_without_touching_anything() {
+        let (engine, dir) = temp_engine("tampered");
+        let mut bad = entry_for(r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", None, Some(dword(1)));
+        bad.changes[0].hive = Hive::HKLM;
+        bad.changes[0].tweak_id = "explorer.show_extensions".into();
+        bad.changes[0].name = "Malware".into();
+        bad.changes[0].before = Some(dword(1));
+        engine.save(&[bad]).unwrap();
+        let err = engine.undo(1, true, None).unwrap_err();
+        assert!(err.contains("no coincide con el catálogo"), "{err}");
+        assert!(!engine.history()[0].undone);
+
+        // Clave del catálogo, pero con una clave "creada" demasiado arriba para borrar.
+        let mut wide = entry_for(r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", Some(dword(1)), Some(dword(0)));
+        wide.changes[0].tweak_id = "explorer.show_extensions".into();
+        wide.changes[0].name = "HideFileExt".into();
+        wide.changes[0].created_keys = vec![r"Software\Microsoft".into()];
+        engine.save(&[wide]).unwrap();
+        assert!(engine.undo(1, true, None).unwrap_err().contains("clave a borrar no válida"));
+
+        // Power: el "plan creado" no puede ser uno de los de Windows.
+        let mut p = entry_for(r"x", None, None);
+        p.changes.clear();
+        p.power = Some(power::PowerChange {
+            before: power::to_string(&power::active().unwrap()),
+            after: power::to_string(&power::HIGH),
+            created: Some(power::to_string(&power::BALANCED)),
+        });
+        engine.save(&[p]).unwrap();
+        assert!(engine.undo(1, true, None).unwrap_err().contains("plan de energía no es válido"));
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    /// Lee (sin modificar) el historial real del usuario y valida cada entrada.
+    #[test]
+    #[ignore]
+    fn real_user_journal_passes_validation() {
+        let path = std::path::PathBuf::from(std::env::var("APPDATA").unwrap()).join(r"com.debloater.app\journal.json");
+        let entries: Vec<JournalEntry> = serde_json::from_slice(&fs::read(path).unwrap()).unwrap();
+        for e in &entries {
+            for c in &e.changes {
+                validate_change(c).unwrap_or_else(|err| panic!("{}: {err}", e.label));
+            }
+            if let Some(p) = &e.power {
+                validate_power(p).unwrap_or_else(|err| panic!("{}: {err}", e.label));
+            }
+        }
+        println!("{} entradas válidas", entries.len());
+    }
+
+    #[test]
+    fn real_catalog_changes_pass_validation() {
+        for t in &catalog::tweaks().tweak {
+            for op in &t.ops {
+                let c = Change {
+                    tweak_id: t.id.clone(),
+                    hive: op.hive,
+                    path: op.path.clone(),
+                    name: op.name.clone(),
+                    before: None,
+                    created_keys: reg_ancestors(&op.path),
+                    deleted_tree: None,
+                    after: None,
+                    tracked: true,
+                };
+                validate_change(&c).unwrap_or_else(|e| panic!("{}: {e}", t.id));
+            }
+        }
+    }
+
+    /// Claves que `missing_keys` podría devolver en la práctica (con al menos 2 niveles).
+    fn reg_ancestors(path: &str) -> Vec<String> {
+        let parts: Vec<&str> = path.split('\\').collect();
+        (3..=parts.len()).rev().map(|i| parts[..i].join("\\")).collect()
     }
 
     #[test]

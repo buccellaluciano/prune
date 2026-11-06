@@ -79,7 +79,7 @@
 
     <button class="nav {store.view === 'apps' ? 'active' : ''}" onclick={() => ((store.view = "apps"), (store.query = ""))}>
       <AppWindow size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">Programas</span>
-      {#if apps.running}<span class="size-1.5 animate-pulse rounded-full bg-accent" title="winget trabajando"></span>
+      {#if apps.busy}<span class="size-1.5 animate-pulse rounded-full bg-accent" title="winget trabajando"></span>
       {:else if apps.upgradable.length}<span class="font-mono text-[11px] text-moderate" title="Actualizaciones disponibles">{apps.upgradable.length}</span>{/if}
     </button>
     <button class="nav {store.view === 'disk' ? 'active' : ''}" onclick={() => ((store.view = "disk"), (store.query = ""))}>

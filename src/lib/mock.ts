@@ -1,6 +1,6 @@
 // Backend simulado para desarrollar la UI en el navegador (npm run dev).
 // Nunca se usa dentro de Tauri.
-import type { AppsOverview, BloatApp, JournalEntry, Overview, Tweak } from "./api";
+import type { AppsOverview, BloatApp, JournalEntry, Overview, Tweak, WingetProgress } from "./api";
 
 const op = (key: string, name: string, current: string, on: string, off = "(borra el valor)") => ({
   key, name, current, on, off,
@@ -121,6 +121,37 @@ const wingetApps: AppsOverview = {
 };
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+// Progreso simulado de winget (en Tauri llega por eventos).
+type ProgressCb = (p: WingetProgress) => void;
+const progressListeners = new Set<ProgressCb>();
+export function mockProgress(cb: ProgressCb): () => void {
+  progressListeners.add(cb);
+  return () => progressListeners.delete(cb);
+}
+const emit = (p: WingetProgress) => progressListeners.forEach((cb) => cb(p));
+
+
+async function simulateWinget(id: string, action: string) {
+  const send = (line: string, phase: WingetProgress["phase"], fraction: number | null = null) =>
+    emit({ id, line, phase, fraction });
+  if (action === "uninstall") {
+    send("Iniciando la desinstalación del paquete...", "uninstall");
+    await wait(1500);
+    send("Desinstalado correctamente", "done");
+    return;
+  }
+  send(`Descargando https://example.com/${id}-setup.exe`, "download", 0);
+  for (let mb = 4; mb <= 48; mb += 4) {
+    await wait(160);
+    send(`  ${"█".repeat(mb / 4)}${"▒".repeat(12 - mb / 4)}  ${mb}.0 MB / 48.0 MB`, "download", mb / 48);
+  }
+  send("Se verificó correctamente el hash del instalador", "hash");
+  await wait(500);
+  send("Iniciando la instalación del paquete...", "install");
+  await wait(1600);
+  send("Instalado correctamente", "done");
+}
+
 export async function mock<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
   await wait(120);
   const a = (args ?? {}) as any;
@@ -162,8 +193,18 @@ export async function mock<T>(cmd: string, args?: Record<string, unknown>): Prom
     case "winget_status":
       await wait(700);
       return structuredClone(wingetApps) as T;
+    case "winget_icons":
+      return {} as T;
+    case "winget_check": {
+      await wait(900);
+      const sha = "3fe4ab99fa15629c652944309a2b2bc6e41fc933fc6b63f5df1ebcf3aea68263";
+      const installer = { url: `https://example.com/${a.id}-setup.exe`, sha256: sha, version: "1.0.0" };
+      return { installer, error: null } as T;
+    }
+    case "vt_open":
+      return undefined as T;
     case "winget_action": {
-      await wait(1800);
+      await simulateWinget(a.id, a.action);
       const app = wingetApps.apps.find((x) => x.id === a.id)!;
       if (a.action === "uninstall") app.installed = null;
       else app.installed = app.available ?? "1.0.0";

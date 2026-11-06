@@ -201,6 +201,9 @@ pub struct AppGroup {
 pub struct WingetApp {
     pub id: String,
     pub title: String,
+    /// Sitio oficial (https): de ahí se toma el ícono.
+    #[serde(default)]
+    pub site: Option<String>,
     pub group: String,
     pub description: String,
 }

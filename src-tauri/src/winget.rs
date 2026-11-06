@@ -60,15 +60,70 @@ pub struct ActionResult {
     pub message: Option<String>,
 }
 
-fn winget_path() -> Result<PathBuf, String> {
-    let base = std::env::var_os("LOCALAPPDATA").ok_or("LOCALAPPDATA no está definido")?;
-    let p = PathBuf::from(base).join(r"Microsoft\WindowsApps\winget.exe");
-    // Es un alias de ejecución (reparse point): `metadata` falla, `symlink_metadata` no.
-    if std::fs::symlink_metadata(&p).is_ok() {
-        Ok(p)
-    } else {
-        Err("No se encontró winget. Instalá o actualizá \"Instalador de aplicación\" desde Microsoft Store.".into())
+const APP_INSTALLER_FAMILY: &str = "Microsoft.DesktopAppInstaller_8wekyb3d8bbwe";
+
+/// Carpeta "Program Files" según Windows (no según variables de entorno, que se pueden cambiar).
+pub(crate) fn program_files() -> Option<PathBuf> {
+    use windows::Win32::System::Com::CoTaskMemFree;
+    use windows::Win32::UI::Shell::{SHGetKnownFolderPath, FOLDERID_ProgramFiles, KF_FLAG_DEFAULT};
+    unsafe {
+        let p = SHGetKnownFolderPath(&FOLDERID_ProgramFiles, KF_FLAG_DEFAULT, None).ok()?;
+        let s = p.to_string().ok();
+        CoTaskMemFree(Some(p.0 as _));
+        s.map(PathBuf::from)
     }
+}
+
+/// winget.exe real, dentro del paquete "Instalador de aplicación" en Program Files\WindowsApps.
+///
+/// No se usa el alias de `%LOCALAPPDATA%\Microsoft\WindowsApps`: esa carpeta la puede
+/// modificar cualquier programa del usuario, y la app (como admin) lo ejecutaría sin aviso.
+fn locate_winget() -> Result<PathBuf, String> {
+    use windows::core::HSTRING;
+    use windows::ApplicationModel::PackageSignatureKind;
+    use windows::Management::Deployment::PackageManager;
+    let not_found = || "No se encontró winget. Instalá o actualizá \"Instalador de aplicación\" desde Microsoft Store.".to_string();
+    let pm = PackageManager::new().map_err(|e| e.to_string())?;
+    let family = HSTRING::from(APP_INSTALLER_FAMILY);
+    let mut dirs: Vec<PathBuf> = Vec::new();
+    // Del usuario actual (no requiere admin); si no, de cualquier usuario (requiere admin).
+    let lists = [pm.FindPackagesByUserSecurityIdPackageFamilyName(&HSTRING::new(), &family), pm.FindPackagesByPackageFamilyName(&family)];
+    for list in lists.into_iter().flatten() {
+        for p in list {
+            // Paquete firmado por Microsoft (Store o sistema), no uno con el mismo nombre.
+            let from_microsoft = p.Id().and_then(|id| id.Publisher()).is_ok_and(|pb| pb.to_string().starts_with("CN=Microsoft Corporation,"));
+            let signed = p.SignatureKind().is_ok_and(|k| k == PackageSignatureKind::Store || k == PackageSignatureKind::System);
+            if !(from_microsoft && signed) {
+                continue;
+            }
+            if let Ok(path) = p.InstalledPath() {
+                dirs.push(PathBuf::from(path.to_string()));
+            }
+        }
+        if !dirs.is_empty() {
+            break;
+        }
+    }
+    let protected = program_files().ok_or_else(not_found)?.join("WindowsApps");
+    let protected = protected.to_string_lossy().to_ascii_lowercase();
+    let exe = dirs
+        .into_iter()
+        .map(|d| d.join("winget.exe"))
+        .find(|exe| exe.to_string_lossy().to_ascii_lowercase().starts_with(&protected) && exe.is_file())
+        .ok_or_else(not_found)?;
+    // Y el ejecutable en sí, con firma válida de Microsoft.
+    crate::sign::require_microsoft(&exe).map_err(|e| format!("winget no pasó la verificación de firma: {e}"))?;
+    Ok(exe)
+}
+
+#[cfg(test)]
+pub(crate) fn winget_exe_for_tests() -> PathBuf {
+    winget_path().unwrap()
+}
+
+fn winget_path() -> Result<PathBuf, String> {
+    static PATH: std::sync::OnceLock<Result<PathBuf, String>> = std::sync::OnceLock::new();
+    PATH.get_or_init(locate_winget).clone()
 }
 
 /// Tiempo máximo para consultas (listar, versiones) y para instalar/actualizar/desinstalar.
@@ -166,15 +221,64 @@ fn version() -> Result<String, String> {
     }
 }
 
+/// Carpeta temporal propia para `winget export`.
+///
+/// `%TEMP%` es del usuario: cualquier programa suyo podría dejar ahí un enlace con el nombre
+/// que vamos a usar y hacer que winget (como admin) escriba en otro lado. Por eso se crea
+/// una carpeta nueva (falla si ya existe algo con ese nombre) y, si la app corre como
+/// admin, nace con permisos solo para Administradores y SYSTEM.
+fn private_dir() -> Result<PathBuf, String> {
+    private_dir_with(crate::system::is_elevated())
+}
+
+fn private_dir_with(elevated: bool) -> Result<PathBuf, String> {
+    use windows::core::PCWSTR;
+    use windows::Win32::Foundation::{LocalFree, HLOCAL};
+    use windows::Win32::Security::Authorization::{ConvertStringSecurityDescriptorToSecurityDescriptorW, SDDL_REVISION_1};
+    use windows::Win32::Security::{PSECURITY_DESCRIPTOR, SECURITY_ATTRIBUTES};
+    use windows::Win32::Storage::FileSystem::CreateDirectoryW;
+
+    let seed = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_nanos());
+    for attempt in 0..8u128 {
+        let path = std::env::temp_dir().join(format!("debloater-{:x}", seed.wrapping_mul(2654435761).wrapping_add(attempt)));
+        let wide: Vec<u16> = path.to_string_lossy().encode_utf16().chain(std::iter::once(0)).collect();
+        let created = unsafe {
+            if elevated {
+                // P = protegida (no hereda de %TEMP%); acceso total solo a SYSTEM y Administradores.
+                let sddl: Vec<u16> = "D:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)".encode_utf16().chain(std::iter::once(0)).collect();
+                let mut sd = PSECURITY_DESCRIPTOR::default();
+                ConvertStringSecurityDescriptorToSecurityDescriptorW(PCWSTR(sddl.as_ptr()), SDDL_REVISION_1, &mut sd, None)
+                    .map_err(|e| e.message())?;
+                let sa = SECURITY_ATTRIBUTES {
+                    nLength: std::mem::size_of::<SECURITY_ATTRIBUTES>() as u32,
+                    lpSecurityDescriptor: sd.0,
+                    bInheritHandle: false.into(),
+                };
+                let r = CreateDirectoryW(PCWSTR(wide.as_ptr()), Some(&sa));
+                let _ = LocalFree(Some(HLOCAL(sd.0)));
+                r
+            } else {
+                CreateDirectoryW(PCWSTR(wide.as_ptr()), None)
+            }
+        };
+        if created.is_ok() {
+            return Ok(path);
+        }
+    }
+    Err("No se pudo crear la carpeta temporal".into())
+}
+
 /// Versiones instaladas, por ID en minúsculas. Usa `winget export`: JSON, sin columnas truncadas.
 fn installed() -> Result<HashMap<String, String>, String> {
-    let tmp = std::env::temp_dir().join(format!("debloater-winget-{}.json", std::process::id()));
+    let dir = private_dir()?;
+    let tmp = dir.join("export.json");
     let tmp_s = tmp.to_string_lossy().to_string();
     let mut args = vec!["export", "-o", &tmp_s, "--source", "winget", "--include-versions"];
     args.extend(COMMON);
-    let (code, lines) = run(&args, QUERY_TIMEOUT, |_| {})?;
+    let res = run(&args, QUERY_TIMEOUT, |_| {});
     let data = std::fs::read(&tmp);
-    let _ = std::fs::remove_file(&tmp);
+    let _ = std::fs::remove_dir_all(&dir);
+    let (code, lines) = res?;
     let data = data.map_err(|_| format!("winget export falló (0x{code:08X}): {}", lines.last().cloned().unwrap_or_default()))?;
     let json: serde_json::Value = serde_json::from_slice(&data).map_err(|e| e.to_string())?;
     let mut map = HashMap::new();
@@ -252,7 +356,130 @@ pub fn status() -> AppsOverview {
     ov
 }
 
-pub fn act(id: &str, action: Action, mut progress: impl FnMut(&str)) -> ActionResult {
+/// Etapa de una operación de winget, deducida de lo que va imprimiendo.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Phase {
+    Download,
+    Hash,
+    Install,
+    Uninstall,
+    Done,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct Progress {
+    pub line: String,
+    pub phase: Option<Phase>,
+    /// 0.0–1.0 si la línea trae avance (bytes descargados o porcentaje).
+    pub fraction: Option<f32>,
+}
+
+fn unit(u: &str) -> Option<f64> {
+    match u.to_ascii_uppercase().as_str() {
+        "B" => Some(1.0),
+        "KB" => Some(1024.0),
+        "MB" => Some(1024.0 * 1024.0),
+        "GB" => Some(1024.0 * 1024.0 * 1024.0),
+        _ => None,
+    }
+}
+
+/// Avance de una barra de winget: "12.0 MB / 50.0 MB" (o con coma decimal) o "45%".
+fn fraction(line: &str) -> Option<f32> {
+    let clean: String = line.chars().map(|c| if c == '█' || c == '▒' { ' ' } else { c }).collect();
+    let toks: Vec<&str> = clean.split_whitespace().collect();
+    // número unidad / número unidad
+    for w in toks.windows(5) {
+        if w[2] == "/" {
+            let a = w[0].replace(',', ".").parse::<f64>().ok().zip(unit(w[1]));
+            let b = w[3].replace(',', ".").parse::<f64>().ok().zip(unit(w[4]));
+            if let (Some((a, ua)), Some((b, ub))) = (a, b) {
+                if b > 0.0 {
+                    return Some(((a * ua) / (b * ub)).clamp(0.0, 1.0) as f32);
+                }
+            }
+        }
+    }
+    toks.iter()
+        .rev()
+        .find_map(|t| t.strip_suffix('%')?.replace(',', ".").parse::<f32>().ok())
+        .map(|p| (p / 100.0).clamp(0.0, 1.0))
+}
+
+/// Clasifica una línea de winget (en inglés o en español) en una etapa.
+pub fn classify(line: &str) -> Progress {
+    let l = line.to_lowercase();
+    let frac = fraction(line);
+    let phase = if l.contains("successfully installed")
+        || l.contains("instalado correctamente")
+        || l.contains("successfully uninstalled")
+        || l.contains("desinstalado correctamente")
+    {
+        Some(Phase::Done)
+    } else if l.contains("uninstall") || l.contains("desinstal") {
+        Some(Phase::Uninstall)
+    } else if l.contains("hash") {
+        Some(Phase::Hash)
+    } else if l.contains("download") || l.contains("descarg") || (frac.is_some() && (l.contains("mb") || l.contains("kb"))) {
+        Some(Phase::Download)
+    } else if l.contains("install") || l.contains("instal") {
+        Some(Phase::Install)
+    } else {
+        None
+    };
+    Progress { line: line.to_string(), phase, fraction: frac }
+}
+
+/// Datos del instalador según el manifiesto de winget (para verificarlo antes).
+#[derive(Debug, Clone, Serialize, PartialEq)]
+pub struct InstallerInfo {
+    pub url: Option<String>,
+    pub sha256: Option<String>,
+    pub version: Option<String>,
+}
+
+/// Interpreta la salida de `winget show`, sin depender del idioma de las etiquetas:
+/// el SHA-256 es el valor de 64 hex; la URL del instalador es la que va justo antes.
+pub fn parse_installer(lines: &[String]) -> InstallerInfo {
+    let value = |l: &str| l.split_once(": ").map(|(_, v)| v.trim().to_string());
+    let is_sha = |v: &str| v.len() == 64 && v.chars().all(|c| c.is_ascii_hexdigit());
+    let mut info = InstallerInfo { url: None, sha256: None, version: None };
+    for (i, l) in lines.iter().enumerate() {
+        let Some(v) = value(l) else { continue };
+        if info.version.is_none() && (l.trim_start().starts_with("Version:") || l.trim_start().starts_with("Versión:")) {
+            info.version = Some(v.clone());
+        }
+        if info.sha256.is_none() && is_sha(&v) {
+            info.sha256 = Some(v.to_ascii_lowercase());
+            info.url = lines[..i]
+                .iter()
+                .rev()
+                .take(3)
+                .filter_map(|p| value(p))
+                .find(|u| u.starts_with("https://") || u.starts_with("http://"));
+        }
+    }
+    info
+}
+
+pub fn installer_info(id: &str) -> Result<InstallerInfo, String> {
+    let app = catalog::find_app(id).ok_or("El programa no está en el catálogo")?;
+    let mut args = vec!["show", "--id", &app.id, "--exact", "--source", "winget"];
+    args.extend(COMMON);
+    let _g = LOCK.lock().unwrap_or_else(|e| e.into_inner());
+    let (code, lines) = run(&args, QUERY_TIMEOUT, |_| {})?;
+    if code != 0 {
+        return Err(format!("winget show falló (0x{code:08X})"));
+    }
+    let info = parse_installer(&lines);
+    if info.sha256.is_none() {
+        return Err("El manifiesto no trae el hash del instalador".into());
+    }
+    Ok(info)
+}
+
+pub fn act(id: &str, action: Action, mut progress: impl FnMut(Progress)) -> ActionResult {
     let fail = |m: String| ActionResult { id: id.to_string(), ok: false, message: Some(m) };
     let Some(app) = catalog::find_app(id) else {
         return fail("El programa no está en el catálogo".into());
@@ -273,11 +500,17 @@ pub fn act(id: &str, action: Action, mut progress: impl FnMut(&str)) -> ActionRe
 
     let _g = LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let mut last = Instant::now() - Duration::from_secs(1);
+    let mut last_phase = None;
     let res = run(&args, ACTION_TIMEOUT, |line| {
-        // Limita la frecuencia de eventos de progreso a la UI.
-        if last.elapsed() >= Duration::from_millis(120) {
+        let p = classify(line);
+        // Los cambios de etapa siempre llegan; el resto, como mucho cada 120 ms.
+        let changed = p.phase.is_some() && p.phase != last_phase;
+        if changed || last.elapsed() >= Duration::from_millis(120) {
             last = Instant::now();
-            progress(line);
+            if p.phase.is_some() {
+                last_phase = p.phase;
+            }
+            progress(p);
         }
     });
     let (code, lines) = match res {
@@ -307,6 +540,66 @@ mod tests {
     use super::*;
 
     #[test]
+    fn classifies_winget_lines_in_both_languages() {
+        let c = |l: &str| classify(l);
+        assert_eq!(c("Downloading https://x/7z.msi").phase, Some(Phase::Download));
+        assert_eq!(c("Descargando https://x/7z.msi").phase, Some(Phase::Download));
+        let p = c("  ██████████▒▒▒▒▒▒▒▒▒▒  12.0 MB / 48.0 MB");
+        assert_eq!(p.phase, Some(Phase::Download));
+        assert!((p.fraction.unwrap() - 0.25).abs() < 0.001);
+        assert!((c("  ███▒▒▒  1,5 MB / 3,0 MB").fraction.unwrap() - 0.5).abs() < 0.001);
+        assert!((c("  ████▒▒▒  1024 KB / 2.0 MB").fraction.unwrap() - 0.5).abs() < 0.001);
+        assert_eq!(c("Successfully verified installer hash").phase, Some(Phase::Hash));
+        assert_eq!(c("Se verificó correctamente el hash del instalador").phase, Some(Phase::Hash));
+        assert_eq!(c("Starting package install...").phase, Some(Phase::Install));
+        assert_eq!(c("Iniciando la instalación del paquete...").phase, Some(Phase::Install));
+        assert_eq!(c("Successfully installed").phase, Some(Phase::Done));
+        assert_eq!(c("Instalado correctamente").phase, Some(Phase::Done));
+        assert_eq!(c("Starting package uninstall...").phase, Some(Phase::Uninstall));
+        assert_eq!(c("Desinstalado correctamente").phase, Some(Phase::Done));
+        assert_eq!(c("  ████████  45%").fraction, Some(0.45));
+        assert_eq!(c("Found 7-Zip [7zip.7zip] Version 26.05").phase, None);
+    }
+
+    #[test]
+    fn parses_installer_from_winget_show() {
+        // Salida real de `winget show --id 7zip.7zip` (recortada).
+        let out: Vec<String> = [
+            "Found 7-Zip [7zip.7zip]",
+            "Version: 26.05",
+            "Homepage: https://7-zip.org/download.html",
+            "Installer:",
+            "  Installer Type: wix",
+            "  Installer Url: https://github.com/ip7z/7zip/releases/download/26.05/7z2605-x64.msi",
+            "  Installer SHA256: 3FE4AB99FA15629C652944309A2B2BC6E41FC933FC6B63F5DF1EBCF3AEA68263",
+            "  Release Date: 2026-10-21",
+        ]
+        .iter()
+        .map(|s| s.to_string())
+        .collect();
+        let i = parse_installer(&out);
+        assert_eq!(i.sha256.as_deref(), Some("3fe4ab99fa15629c652944309a2b2bc6e41fc933fc6b63f5df1ebcf3aea68263"));
+        assert_eq!(i.url.as_deref(), Some("https://github.com/ip7z/7zip/releases/download/26.05/7z2605-x64.msi"));
+        assert_eq!(i.version.as_deref(), Some("26.05"));
+        // Mismas líneas con etiquetas en español: el resultado no depende del idioma.
+        let es: Vec<String> = out
+            .iter()
+            .map(|l| l.replace("Installer Url", "Dirección URL del instalador").replace("Installer SHA256", "SHA256 del instalador"))
+            .collect();
+        assert_eq!(parse_installer(&es).sha256, i.sha256);
+        assert_eq!(parse_installer(&es).url, i.url);
+    }
+
+    /// `winget show` real (solo lectura).
+    #[test]
+    #[ignore]
+    fn real_installer_info() {
+        let i = installer_info("7zip.7zip").unwrap();
+        println!("{i:?}");
+        assert!(i.url.is_some() && i.sha256.is_some());
+    }
+
+    #[test]
     fn splits_progress_and_lines() {
         let mut cur = Vec::new();
         let mut out = Vec::new();
@@ -321,6 +614,49 @@ mod tests {
     fn real_winget_version() {
         let v = version().unwrap();
         assert!(v.starts_with('v'), "{v}");
+    }
+
+    #[test]
+    fn private_dir_is_new_each_time_and_cleaned() {
+        let a = private_dir().unwrap();
+        let b = private_dir().unwrap();
+        assert_ne!(a, b);
+        assert!(a.is_dir() && b.is_dir());
+        std::fs::remove_dir_all(&a).unwrap();
+        std::fs::remove_dir_all(&b).unwrap();
+    }
+
+    /// La versión protegida no deja escribir a un usuario sin admin (lo que haría un
+    /// programa malicioso del usuario contra la app elevada).
+    #[test]
+    fn protected_dir_rejects_non_admin_writes() {
+        if crate::system::is_elevated() {
+            return; // como admin sí se puede escribir: la prueba solo tiene sentido sin admin
+        }
+        let d = private_dir_with(true).unwrap();
+        let err = std::fs::write(d.join("plantado.txt"), b"x").unwrap_err();
+        // Limpieza: ni quien la creó puede borrarla sin admin; como dueño, se le devuelven
+        // los permisos heredados y recién ahí se borra.
+        let _ = Command::new("icacls").arg(&d).arg("/reset").stdout(Stdio::null()).status();
+        let cleaned = std::fs::remove_dir(&d);
+        assert_eq!(err.kind(), std::io::ErrorKind::PermissionDenied);
+        cleaned.unwrap();
+    }
+
+    /// Lista real de instalados con la carpeta privada (solo lectura).
+    #[test]
+    #[ignore]
+    fn real_installed_list() {
+        let m = installed().unwrap();
+        assert!(!m.is_empty());
+    }
+
+    /// winget se busca en el paquete protegido, nunca en la carpeta del usuario.
+    #[test]
+    fn winget_comes_from_protected_program_files() {
+        let p = winget_path().unwrap().to_string_lossy().to_ascii_lowercase();
+        assert!(p.contains(r"\windowsapps\microsoft.desktopappinstaller_"), "{p}");
+        assert!(!p.contains(r"\appdata\"), "{p}");
     }
 
     #[test]
