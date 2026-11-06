@@ -57,6 +57,35 @@ const bloat: BloatApp[] = [
 
 const history: JournalEntry[] = [];
 
+// Disco simulado: un árbol chico con tamaños en GB.
+const GB = 1024 ** 3;
+type MockDir = { id: number; name: string; parent: number; own: number; files: number; kids: number[] };
+const dirs: MockDir[] = [];
+function mkdir(name: string, parent: number, ownGb: number, files: number): number {
+  const id = dirs.length;
+  dirs.push({ id, name, parent, own: ownGb * GB, files, kids: [] });
+  if (parent >= 0) dirs[parent].kids.push(id);
+  return id;
+}
+{
+  const c = mkdir("C:", -1, 12.4, 9);
+  const win = mkdir("Windows", c, 0.4, 120);
+  mkdir("WinSxS", win, 10.1, 61000);
+  mkdir("System32", win, 5.6, 18000);
+  const users = mkdir("Users", c, 0, 2);
+  const me = mkdir("demo", users, 0.1, 40);
+  const local = mkdir("AppData", me, 0, 0);
+  const cache = mkdir("Local", local, 1.2, 9000);
+  mkdir("StreamingApp\\cache", cache, 6.7, 2400);
+  mkdir("Temp", cache, 2.3, 15000);
+  mkdir("Downloads", me, 8.9, 312);
+  mkdir("Program Files", c, 9.8, 41000);
+}
+const dsize = (id: number): number => dirs[id].own + dirs[id].kids.reduce((s, k) => s + dsize(k), 0);
+const dfiles = (id: number): number => dirs[id].files + dirs[id].kids.reduce((s, k) => s + dfiles(k), 0);
+const dpath = (id: number): string => (dirs[id].parent < 0 ? "C:\\" : `${dpath(dirs[id].parent).replace(/\\$/, "")}\\${dirs[id].name}`);
+const scanState = { running: false, done: false, started: 0 };
+
 const wingetApps: AppsOverview = {
   winget: "v1.29.380",
   error: null,
@@ -126,6 +155,50 @@ export async function mock<T>(cmd: string, args?: Record<string, unknown>): Prom
     }
     case "get_user":
       return { name: "Usuario de prueba", username: "demo", picture: null } as T;
+    case "disk_drives":
+      return [
+        { letter: "C", label: "", fs: "NTFS", total: 237 * GB, free: 166 * GB, removable: false },
+        { letter: "D", label: "Datos", fs: "NTFS", total: 931 * GB, free: 50 * GB, removable: false },
+      ] as T;
+    case "disk_scan":
+      Object.assign(scanState, { running: true, done: false, started: Date.now() });
+      setTimeout(() => Object.assign(scanState, { running: false, done: true }), 2500);
+      return undefined as T;
+    case "disk_cancel":
+      Object.assign(scanState, { running: false, done: false });
+      return undefined as T;
+    case "disk_status": {
+      const t = Math.min(1, (Date.now() - scanState.started) / 2500);
+      return {
+        running: scanState.running, done: scanState.done, cancelled: false, root: "C:\\",
+        files: Math.round(160000 * t), dirs: Math.round(30000 * t), bytes: dsize(0) * t, denied: 3,
+        current: "C:\\Users\\demo\\AppData\\Local\\StreamingApp\\cache", elapsed_ms: 1650, error: null,
+      } as T;
+    }
+    case "disk_summary": {
+      const hot = dirs.slice(1).filter((d) => {
+        const s = dsize(d.id);
+        return s > 1 * GB && !d.kids.some((k) => dsize(k) * 2 >= s);
+      });
+      return {
+        root: "C:\\", size: dsize(0), files: dfiles(0), dirs: dirs.length, cloud: 1.4 * GB, denied_dirs: 3, elapsed_ms: 1650,
+        hotspots: hot.map((d) => ({ id: d.id, path: dpath(d.id), size: dsize(d.id), files: dfiles(d.id) })).sort((x, y) => y.size - x.size),
+      } as T;
+    }
+    case "disk_dir": {
+      const d = dirs[a.id];
+      const crumbs: [number, string][] = [];
+      for (let x = d.id; x >= 0; x = dirs[x].parent) crumbs.unshift([x, dirs[x].name]);
+      return {
+        id: d.id, path: dpath(d.id), size: dsize(d.id), files: dfiles(d.id), own: d.own, own_files: d.files, cloud: 0, crumbs,
+        children: d.kids
+          .map((k) => ({ id: k, name: dirs[k].name, size: dsize(k), files: dfiles(k), cloud: 0, denied: false, link: false, has_children: dirs[k].kids.length > 0 }))
+          .sort((x, y) => y.size - x.size),
+        hidden: 0,
+      } as T;
+    }
+    case "disk_open":
+      return undefined as T;
     case "list_bloat":
       return structuredClone(bloat) as T;
     case "remove_bloat":

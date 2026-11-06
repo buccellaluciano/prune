@@ -1,5 +1,6 @@
 mod appx;
 mod catalog;
+mod disk;
 mod engine;
 mod registry;
 mod system;
@@ -103,6 +104,43 @@ async fn get_user() -> user::UserInfo {
     })
 }
 
+// ───────── Disco (solo lectura) ─────────
+
+#[tauri::command]
+async fn disk_drives() -> Vec<disk::Drive> {
+    tauri::async_runtime::spawn_blocking(disk::drives).await.unwrap_or_default()
+}
+
+#[tauri::command]
+fn disk_scan(letter: String) -> Result<(), String> {
+    disk::start(&letter)
+}
+
+#[tauri::command]
+fn disk_status() -> disk::ScanStatus {
+    disk::status()
+}
+
+#[tauri::command]
+fn disk_cancel() {
+    disk::cancel()
+}
+
+#[tauri::command]
+fn disk_summary() -> Result<disk::Summary, String> {
+    disk::summary()
+}
+
+#[tauri::command]
+fn disk_dir(id: u32) -> Result<disk::DirView, String> {
+    disk::dir(id)
+}
+
+#[tauri::command]
+fn disk_open(id: u32) -> Result<(), String> {
+    disk::open(id)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -121,7 +159,14 @@ pub fn run() {
             remove_bloat,
             winget_status,
             winget_action,
-            get_user
+            get_user,
+            disk_drives,
+            disk_scan,
+            disk_status,
+            disk_cancel,
+            disk_summary,
+            disk_dir,
+            disk_open
         ])
         .run(tauri::generate_context!())
         .expect("error al iniciar la aplicación");

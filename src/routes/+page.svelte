@@ -10,6 +10,7 @@
   import BloatView from "$lib/components/BloatView.svelte";
   import HistoryView from "$lib/components/HistoryView.svelte";
   import AppsView from "$lib/components/AppsView.svelte";
+  import DiskView from "$lib/components/DiskView.svelte";
   import { fly } from "svelte/transition";
   import { flip } from "svelte/animate";
   import { onMount } from "svelte";
@@ -94,6 +95,8 @@
         <BloatView />
       {:else if store.view === "apps"}
         <AppsView />
+      {:else if store.view === "disk"}
+        <DiskView />
       {:else if store.view === "history"}
         <HistoryView />
       {:else}

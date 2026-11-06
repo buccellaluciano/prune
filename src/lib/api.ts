@@ -171,3 +171,80 @@ export interface UserInfo {
 export const userApi = {
   get: () => call<UserInfo>("get_user"),
 };
+
+// ───────── Disco (solo lectura) ─────────
+
+export interface Drive {
+  letter: string;
+  label: string;
+  fs: string;
+  total: number;
+  free: number;
+  removable: boolean;
+}
+
+export interface ScanStatus {
+  running: boolean;
+  done: boolean;
+  cancelled: boolean;
+  root: string;
+  files: number;
+  dirs: number;
+  bytes: number;
+  denied: number;
+  current: string;
+  elapsed_ms: number;
+  error: string | null;
+}
+
+export interface Hotspot {
+  id: number;
+  path: string;
+  size: number;
+  files: number;
+}
+
+export interface DiskSummary {
+  root: string;
+  size: number;
+  files: number;
+  dirs: number;
+  cloud: number;
+  denied_dirs: number;
+  elapsed_ms: number;
+  hotspots: Hotspot[];
+}
+
+export interface DirEntry {
+  id: number;
+  name: string;
+  size: number;
+  files: number;
+  cloud: number;
+  denied: boolean;
+  link: boolean;
+  has_children: boolean;
+}
+
+export interface DirView {
+  id: number;
+  path: string;
+  size: number;
+  files: number;
+  own: number;
+  own_files: number;
+  cloud: number;
+  crumbs: [number, string][];
+  children: DirEntry[];
+  hidden: number;
+}
+
+export const diskApi = {
+  drives: () => call<Drive[]>("disk_drives"),
+  scan: (letter: string) => call<void>("disk_scan", { letter }),
+  status: () => call<ScanStatus>("disk_status"),
+  cancel: () => call<void>("disk_cancel"),
+  summary: () => call<DiskSummary>("disk_summary"),
+  dir: (id: number) => call<DirView>("disk_dir", { id }),
+  open: (id: number) => call<void>("disk_open", { id }),
+};

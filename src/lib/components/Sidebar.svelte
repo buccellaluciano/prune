@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { AppWindow, History, PackageX, ShieldCheck, ShieldOff, SlidersHorizontal, Wand2 } from "@lucide/svelte";
+  import { AppWindow, HardDrive, History, PackageX, ShieldCheck, ShieldOff, SlidersHorizontal, Wand2 } from "@lucide/svelte";
+  import { disk } from "$lib/disk.svelte";
   import { apps } from "$lib/apps.svelte";
   import { store, PROFILES } from "$lib/store.svelte";
   import CategoryIcon from "./CategoryIcon.svelte";
@@ -80,6 +81,10 @@
       <AppWindow size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">Programas</span>
       {#if apps.running}<span class="size-1.5 animate-pulse rounded-full bg-accent" title="winget trabajando"></span>
       {:else if apps.upgradable.length}<span class="font-mono text-[11px] text-moderate" title="Actualizaciones disponibles">{apps.upgradable.length}</span>{/if}
+    </button>
+    <button class="nav {store.view === 'disk' ? 'active' : ''}" onclick={() => ((store.view = "disk"), (store.query = ""))}>
+      <HardDrive size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">Disco</span>
+      {#if disk.status?.running}<span class="size-1.5 animate-pulse rounded-full bg-accent" title="Analizando"></span>{/if}
     </button>
     <button class="nav {store.view === 'bloat' ? 'active' : ''}" onclick={() => (store.view = "bloat")}>
       <PackageX size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">Bloatware</span>

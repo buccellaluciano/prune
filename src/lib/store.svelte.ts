@@ -3,7 +3,7 @@ import { api, userApi, type ApplyReport, type Desired, type Overview, type Resta
 /** Pendiente: true/false para switches, id de opción para selectores. */
 export type Pending = boolean | string;
 
-export type View = "tweaks" | "apps" | "bloat" | "history";
+export type View = "tweaks" | "apps" | "disk" | "bloat" | "history";
 
 export interface Toast {
   id: number;
