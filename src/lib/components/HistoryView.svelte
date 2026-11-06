@@ -59,11 +59,11 @@
               <div class="truncate text-[13px] font-medium">{e.label}</div>
               <div class="text-[11.5px] text-mute">
                 {fmt.format(new Date(e.at * 1000))} ·
-                {#if e.removed_apps.length}{e.removed_apps.length} apps quitadas{:else}{e.changes.length} valores{/if}
+                {#if e.removed_apps.length}{e.removed_apps.length} apps quitadas{:else}{e.changes.length + (e.power ? 1 : 0)} {e.changes.length + (e.power ? 1 : 0) === 1 ? "cambio" : "cambios"}{/if}
                 {#if e.undone} · deshecho{/if}
               </div>
             </div>
-            {#if !e.undone && e.changes.length && conflict?.id !== e.id}
+            {#if !e.undone && (e.changes.length || e.power) && conflict?.id !== e.id}
               <button
                 class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12.5px] text-mute hover:bg-card-hi hover:text-ink disabled:opacity-50"
                 disabled={working !== null}

@@ -146,6 +146,10 @@ pub fn encode(kind: ValueKind, v: &Value) -> RawValue {
             }
             RawValue { vtype: REG_SZ as u32, bytes }
         }
+        (ValueKind::Binary, Value::Str(s)) => RawValue {
+            vtype: REG_BINARY as u32,
+            bytes: parse_hex(s).expect("hex validado en el catálogo"),
+        },
         // El catálogo se valida al cargar, esto no debería pasar.
         _ => panic!("tipo de valor inconsistente"),
     }
@@ -175,8 +179,24 @@ pub fn matches(current: Option<&RawValue>, kind: ValueKind, want: &Value) -> boo
     match (kind, want) {
         (ValueKind::Dword, Value::Int(n)) => decode_dword(cur) == Some(*n as u32),
         (ValueKind::Sz, Value::Str(s)) => decode_sz(cur).as_deref() == Some(s.as_str()),
+        (ValueKind::Binary, Value::Str(s)) => {
+            cur.vtype == REG_BINARY as u32 && parse_hex(s).is_some_and(|b| b == cur.bytes)
+        }
         _ => false,
     }
+}
+
+/// "90 12 03 80" → bytes. Exige pares hex separados por espacios y al menos uno.
+pub fn parse_hex(s: &str) -> Option<Vec<u8>> {
+    let bytes: Option<Vec<u8>> = s
+        .split_whitespace()
+        .map(|b| (b.len() == 2).then(|| u8::from_str_radix(b, 16).ok()).flatten())
+        .collect();
+    bytes.filter(|b| !b.is_empty())
+}
+
+fn hex(bytes: &[u8]) -> String {
+    bytes.iter().map(|b| format!("{b:02X}")).collect::<Vec<_>>().join(" ")
 }
 
 /// Representación legible para la vista previa.
@@ -188,6 +208,8 @@ pub fn describe(v: Option<&RawValue>) -> String {
                 format!("{n}")
             } else if let Some(s) = decode_sz(r) {
                 format!("\"{s}\"")
+            } else if r.vtype == REG_BINARY as u32 {
+                hex(&r.bytes)
             } else {
                 format!("<tipo {} · {} bytes>", r.vtype, r.bytes.len())
             }
@@ -195,10 +217,11 @@ pub fn describe(v: Option<&RawValue>) -> String {
     }
 }
 
-pub fn describe_value(v: &Value) -> String {
-    match v {
-        Value::Int(n) => n.to_string(),
-        Value::Str(s) => format!("\"{s}\""),
+pub fn describe_value(kind: ValueKind, v: &Value) -> String {
+    match (kind, v) {
+        (ValueKind::Binary, Value::Str(s)) => parse_hex(s).map_or_else(|| s.clone(), |b| hex(&b)),
+        (_, Value::Int(n)) => n.to_string(),
+        (_, Value::Str(s)) => format!("\"{s}\""),
     }
 }
 
@@ -229,5 +252,22 @@ mod tests {
     fn type_mismatch_is_not_a_match() {
         let s = encode(ValueKind::Sz, &Value::Str("1".into()));
         assert!(!matches(Some(&s), ValueKind::Dword, &Value::Int(1)));
+    }
+
+    #[test]
+    fn binary_roundtrip_and_hex_parsing() {
+        let want = Value::Str("90 12 03 80 10 00 00 00".into());
+        let r = encode(ValueKind::Binary, &want);
+        assert_eq!(r.vtype, REG_BINARY as u32);
+        assert_eq!(r.bytes, [0x90, 0x12, 0x03, 0x80, 0x10, 0, 0, 0]);
+        assert!(matches(Some(&r), ValueKind::Binary, &want));
+        // Minúsculas y espacios extra son el mismo valor.
+        assert!(matches(Some(&r), ValueKind::Binary, &Value::Str(" 90 12 03 80 10 00 00 00 ".to_lowercase())));
+        assert!(!matches(Some(&r), ValueKind::Binary, &Value::Str("9E 1E 07 80 12 00 00 00".into())));
+        assert_eq!(describe(Some(&r)), "90 12 03 80 10 00 00 00");
+        assert_eq!(describe_value(ValueKind::Binary, &Value::Str("9e 1e".into())), "9E 1E");
+        for bad in ["", "9", "zz", "901203", "90 1"] {
+            assert!(parse_hex(bad).is_none(), "{bad:?}");
+        }
     }
 }

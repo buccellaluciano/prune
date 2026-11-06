@@ -51,6 +51,12 @@ id = "gaming"
 title = "Gaming y entrada"
 icon = "gamepad"
 
+# El plan de energía no vive en este archivo: lo arma el motor con la API de energía.
+[[category]]
+id = "power"
+title = "Energía"
+icon = "zap"
+
 # ───────────────────────────── Privacidad ─────────────────────────────
 
 [[tweak]]
@@ -743,6 +749,22 @@ kind = "dword"
 on = 1
 off = 0
 
+[[tweak]]
+id = "explorer.icons_not_thumbnails"
+category = "explorer"
+title = "Íconos en vez de miniaturas"
+description = "El Explorador no genera vistas previas de imágenes y videos. Más rápido en carpetas grandes."
+risk = "safe"
+restart = "explorer"
+tags = ["rendimiento", "miniaturas", "basico"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "IconsOnly"
+kind = "dword"
+on = 1
+off = 0
+
 # ───────────────────────────── Apariencia ─────────────────────────────
 
 [[tweak]]
@@ -797,6 +819,61 @@ name = "MenuShowDelay"
 kind = "sz"
 on = "100"
 off = "400"
+
+# Equivale a "Ajustar para obtener el mejor rendimiento" (SystemPropertiesPerformance),
+# pero deja el suavizado de fuentes: sin él el texto se ve muy mal en pantallas actuales.
+# La transparencia y las animaciones de la barra son tweaks aparte.
+[[tweak]]
+id = "appearance.performance_visuals"
+category = "appearance"
+title = "Efectos visuales al mínimo"
+description = "Como \"Ajustar para obtener el mejor rendimiento\": sin animaciones de ventanas y menús, sombras, desvanecimientos, vista previa del escritorio ni contenido al arrastrar. El texto sigue suavizado."
+risk = "safe"
+restart = "logoff"
+tags = ["rendimiento", "animaciones", "efectos", "basico", "clasico", "liviano"]
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Control Panel\Desktop'
+name = "UserPreferencesMask"
+kind = "binary"
+# Animaciones de menús, listas y combos, desvanecimientos, sombras de ventanas y puntero.
+on = "90 12 03 80 10 00 00 00"
+off = "9E 1E 07 80 12 00 00 00"
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Control Panel\Desktop\WindowMetrics'
+name = "MinAnimate"
+kind = "sz"
+on = "0"
+off = "1"
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Control Panel\Desktop'
+name = "DragFullWindows"
+kind = "sz"
+on = "0"
+off = "1"
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "ListviewAlphaSelect"
+kind = "dword"
+on = 0
+off = 1
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+name = "ListviewShadow"
+kind = "dword"
+on = 0
+off = 1
+[[tweak.ops]]
+hive = "HKCU"
+path = 'Software\Microsoft\Windows\DWM'
+name = "EnableAeroPeek"
+kind = "dword"
+on = 0
+off = 1
 
 # ───────────────────────────── Gaming y entrada ─────────────────────────────
 

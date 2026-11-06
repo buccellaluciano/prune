@@ -214,6 +214,17 @@ export const PROFILES: { id: string; title: string; hint: string; ids: string[] 
     ids: [
       "gaming.game_dvr", "gaming.mouse_acceleration", "gaming.sticky_keys_prompt",
       "taskbar.no_animations", "start.tips", "start.suggested_notifications",
+      // Alto rendimiento (si el equipo tiene ese plan).
+      "power.plan:8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c",
+    ],
+  },
+  {
+    id: "lite",
+    title: "Equipo liviano",
+    hint: "Apariencia básica: sin efectos, transparencias ni miniaturas",
+    ids: [
+      "appearance.performance_visuals", "appearance.no_transparency", "taskbar.no_animations",
+      "explorer.icons_not_thumbnails", "appearance.faster_menus",
     ],
   },
 ];

@@ -1,6 +1,7 @@
 //! Motor de tweaks: estado real, vista previa, aplicar/revertir y deshacer.
 
 use crate::catalog::{self, Hive, Op, Restart, Risk, Tweak, Value};
+use crate::power;
 use crate::registry::{self as reg, RawValue};
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -143,6 +144,71 @@ pub struct JournalEntry {
     pub removed_apps: Vec<String>,
     #[serde(default)]
     pub undone: bool,
+    /// Cambio de plan de energía (no es del registro).
+    #[serde(default)]
+    pub power: Option<power::PowerChange>,
+}
+
+// ───────────────────────────── Plan de energía ─────────────────────────────
+// No es un valor del registro: se maneja con la API de energía, pero se muestra y se
+// deshace como cualquier otro tweak (selector, plan, historial).
+
+pub const POWER_ID: &str = "power.plan";
+
+fn power_choices() -> Vec<ChoiceView> {
+    let plans = power::list();
+    let mut out = Vec::new();
+    for (g, label) in [(power::SAVER, "Economizador"), (power::BALANCED, "Equilibrado"), (power::HIGH, "Alto rendimiento")] {
+        if plans.iter().any(|p| p.guid == g) {
+            out.push(ChoiceView { id: power::to_string(&g), label: label.into(), default: g == power::BALANCED });
+        }
+    }
+    let ultimate = power::find_ultimate(&plans).map_or(power::ULTIMATE_NEW.into(), |g| power::to_string(&g));
+    out.push(ChoiceView { id: ultimate, label: "Máximo rendimiento".into(), default: false });
+    // Un plan propio (del fabricante o del usuario) activo también tiene que verse.
+    if let Ok(a) = power::active() {
+        let id = power::to_string(&a);
+        if !out.iter().any(|c| c.id == id) {
+            out.push(ChoiceView { id, label: power::name(&a), default: false });
+        }
+    }
+    out
+}
+
+fn power_label(choice: &str) -> String {
+    power_choices().into_iter().find(|c| c.id == choice).map_or_else(|| choice.to_string(), |c| c.label)
+}
+
+fn power_view() -> Option<TweakView> {
+    let active = power::active().ok()?;
+    let choices = power_choices();
+    let id = power::to_string(&active);
+    let is_ultimate = power::find_ultimate(&power::list()) == Some(active);
+    let state = if active == power::HIGH || is_ultimate { TweakState::Applied } else { TweakState::Default };
+    Some(TweakView {
+        id: POWER_ID.into(),
+        category: "power".into(),
+        title: "Plan de energía".into(),
+        description: "Alto y Máximo rendimiento no dejan que el procesador baje la frecuencia ni que entre en ahorro: \
+            responde más rápido pero consume y calienta más. En notebooks, conviene usarlos solo enchufado."
+            .into(),
+        risk: Risk::Moderate,
+        restart: Restart::None,
+        tags: vec!["energia".into(), "rendimiento".into(), "maximo".into(), "ultimate".into()],
+        requires_admin: true,
+        per_user: false,
+        ucpd: false,
+        state,
+        ops: vec![OpView {
+            key: "Plan de energía (powrprof)".into(),
+            name: "activo".into(),
+            current: power::name(&active),
+            on: choices.iter().map(|c| c.label.as_str()).collect::<Vec<_>>().join(" · "),
+            off: String::new(),
+        }],
+        choice: Some(id),
+        choices,
+    })
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -198,7 +264,7 @@ fn name_label(op: &Op) -> String {
 fn off_label(op: &Op) -> String {
     match (&op.off, &op.delete_key_on_revert) {
         (_, Some(_)) => "(borra la clave)".into(),
-        (Some(v), None) => reg::describe_value(v),
+        (Some(v), None) => reg::describe_value(op.kind, v),
         (None, None) => "(borra el valor)".into(),
     }
 }
@@ -226,12 +292,12 @@ pub fn tweak_state(t: &Tweak, build: u32) -> Detected {
             let opts = t
                 .choices
                 .iter()
-                .map(|c| format!("{} {}", reg::describe_value(&c.values[i]), c.label))
+                .map(|c| format!("{} {}", reg::describe_value(op.kind, &c.values[i]), c.label))
                 .collect::<Vec<_>>()
                 .join(" · ");
             (opts, String::new())
         } else {
-            (reg::describe_value(op.on.as_ref().expect("op sin on")), off_label(op))
+            (reg::describe_value(op.kind, op.on.as_ref().expect("op sin on")), off_label(op))
         };
         views.push(OpView { key: key_label(op), name: name_label(op), current, on, off });
         current_values.push(cur.ok().flatten());
@@ -304,18 +370,36 @@ pub fn list(build: u32) -> Vec<TweakView> {
                 choice,
             }
         })
+        .chain(power_view())
         .collect()
 }
 
 pub fn plan(desired: &[Desired], build: u32) -> Result<Vec<PlannedChange>, String> {
     let mut out = Vec::new();
     for d in desired {
+        if d.id == POWER_ID {
+            let choice = d.choice.as_deref().ok_or("Falta elegir un plan de energía")?;
+            let active = power::active()?;
+            out.push(PlannedChange {
+                tweak_id: POWER_ID.into(),
+                key: "Plan de energía (powrprof)".into(),
+                name: "activo".into(),
+                from: power::name(&active),
+                to: if choice == power::ULTIMATE_NEW {
+                    "Máximo rendimiento (se crea desde la plantilla de Windows)".into()
+                } else {
+                    power_label(choice)
+                },
+                noop: choice == power::to_string(&active),
+            });
+            continue;
+        }
         let t = catalog::find_tweak(&d.id).ok_or_else(|| format!("tweak desconocido: {}", d.id))?;
         let targets = targets(t, d, build).map_err(|e| format!("{}: {e}", t.title))?;
         for (op, target) in t.ops.iter().zip(&targets) {
             let cur = reg::read(op.hive, &op.path, &op.name).map_err(|e| e.to_string())?;
             let (to, noop) = match target {
-                Target::Set(v) => (reg::describe_value(v), reg::matches(cur.as_ref(), op.kind, v)),
+                Target::Set(v) => (reg::describe_value(op.kind, v), reg::matches(cur.as_ref(), op.kind, v)),
                 Target::DeleteValue => ("(borra el valor)".into(), cur.is_none()),
                 Target::DeleteTree(_) => ("(borra la clave)".into(), cur.is_none()),
             };
@@ -461,6 +545,7 @@ impl Engine {
             changes: vec![],
             removed_apps: apps,
             undone: false,
+            power: None,
         });
         self.save(&entries)
     }
@@ -473,8 +558,25 @@ impl Engine {
         let mut changes = Vec::new();
         let mut restart = Restart::None;
         let mut applied_titles = Vec::new();
+        let mut power_change: Option<power::PowerChange> = None;
 
         for d in desired {
+            if d.id == POWER_ID {
+                let r = if !elevated {
+                    Err("Requiere ejecutar como administrador".to_string())
+                } else {
+                    d.choice.as_deref().ok_or_else(|| "Falta elegir un plan de energía".to_string()).and_then(power::activate)
+                };
+                match r {
+                    Ok(c) => {
+                        applied_titles.push(format!("Plan de energía: {}", power_label(&c.after)));
+                        power_change = Some(c);
+                        results.push(ItemResult { id: POWER_ID.into(), ok: true, error: None });
+                    }
+                    Err(e) => results.push(ItemResult { id: POWER_ID.into(), ok: false, error: Some(e) }),
+                }
+                continue;
+            }
             let Some(t) = catalog::find_tweak(&d.id) else {
                 results.push(ItemResult { id: d.id.clone(), ok: false, error: Some("tweak desconocido".into()) });
                 continue;
@@ -531,7 +633,7 @@ impl Engine {
             }
         }
 
-        let entry_id = if changes.is_empty() {
+        let entry_id = if changes.is_empty() && power_change.is_none() {
             None
         } else {
             let mut entries = self.load();
@@ -542,7 +644,15 @@ impl Engine {
             };
             // Id único aunque dos operaciones caigan en el mismo milisegundo.
             let id = entries.last().map_or(id, |l| id.max(l.id + 1));
-            entries.push(JournalEntry { id, at: id / 1000, label, changes, removed_apps: vec![], undone: false });
+            entries.push(JournalEntry {
+                id,
+                at: id / 1000,
+                label,
+                changes,
+                removed_apps: vec![],
+                undone: false,
+                power: power_change,
+            });
             if let Err(e) = self.save(&entries) {
                 results.push(ItemResult { id: "journal".into(), ok: false, error: Some(format!("No se pudo guardar el historial: {e}")) });
             }
@@ -570,7 +680,7 @@ impl Engine {
         if entry.undone {
             return Err("Ya se deshizo".into());
         }
-        if entry.changes.is_empty() {
+        if entry.changes.is_empty() && entry.power.is_none() {
             return Err("Las apps quitadas no se pueden restaurar desde acá: reinstalalas desde Microsoft Store.".into());
         }
         if let (true, Some(user)) = (entry.changes.iter().any(|c| c.hive == Hive::HKCU), foreign_user) {
@@ -597,6 +707,12 @@ impl Engine {
                     ));
                 }
             }
+            if let Some(p) = &entry.power {
+                let now = power::active().map(|g| power::to_string(&g)).unwrap_or_default();
+                if now != p.after && now != p.before {
+                    conflicts.push(format!("Plan de energía: ahora está en {}", power_label(&now)));
+                }
+            }
             if !conflicts.is_empty() {
                 let mut r = ApplyReport::new(Some(entry_id), vec![], Restart::None);
                 r.conflicts = conflicts;
@@ -613,6 +729,13 @@ impl Engine {
             }
             if let Err(e) = undo_change(c) {
                 results.push(ItemResult { id: c.tweak_id.clone(), ok: false, error: Some(e) });
+            }
+        }
+        if let Some(p) = &entry.power {
+            if let Err(e) = power::revert(p) {
+                results.push(ItemResult { id: POWER_ID.into(), ok: false, error: Some(e) });
+            } else {
+                results.push(ItemResult { id: POWER_ID.into(), ok: true, error: None });
             }
         }
         let mut ids: Vec<String> = entry.changes.iter().map(|c| c.tweak_id.clone()).collect();
@@ -675,6 +798,7 @@ mod tests {
             }],
             removed_apps: vec![],
             undone: false,
+            power: None,
         }
     }
 
@@ -739,6 +863,25 @@ mod tests {
     }
 
     #[test]
+    fn power_plan_is_listed_with_the_active_plan_selected() {
+        let v = list(26100).into_iter().find(|t| t.id == POWER_ID).expect("el plan de energía debe listarse");
+        assert_eq!(v.category, "power");
+        assert!(v.requires_admin);
+        let active = power::to_string(&power::active().unwrap());
+        assert_eq!(v.choice.as_deref(), Some(active.as_str()));
+        assert!(v.choices.iter().any(|c| c.id == active), "la opción activa tiene que estar entre las opciones");
+        assert!(v.choices.iter().any(|c| c.label == "Máximo rendimiento"));
+        assert_eq!(v.choices.iter().filter(|c| c.default).count(), 1);
+    }
+
+    #[test]
+    fn old_journal_entries_without_power_still_load() {
+        let old = r#"[{"id":1,"at":1,"label":"x","changes":[],"removed_apps":["a"],"undone":false}]"#;
+        let e: Vec<JournalEntry> = serde_json::from_str(old).unwrap();
+        assert!(e[0].power.is_none());
+    }
+
+    #[test]
     fn undo_refuses_hkcu_when_running_as_another_account() {
         let key = TestKey::new("foreign");
         let (engine, dir) = temp_engine("foreign");
@@ -757,6 +900,12 @@ mod tests {
         for t in &catalog::tweaks().tweak {
             for op in t.ops.iter().filter(|o| o.hive == Hive::HKCU) {
                 let label = format!("{} · {}\\{}", t.id, op.path, op.name);
+                // Las directivas de usuario solo las escriben los admins: no es UCPD.
+                let policy = op.path.to_ascii_lowercase().starts_with(r"software\policies\");
+                if policy && !crate::system::is_elevated() {
+                    println!("req.admin {label}");
+                    continue;
+                }
                 match reg::read(op.hive, &op.path, &op.name) {
                     Ok(Some(v)) => match reg::write_raw(op.hive, &op.path, &op.name, &v) {
                         Ok(()) => println!("OK        {label}"),

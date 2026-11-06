@@ -102,6 +102,8 @@ export interface JournalEntry {
   changes: { tweak_id: string }[];
   removed_apps: string[];
   undone: boolean;
+  /** Cambio de plan de energía (GUIDs antes/después). */
+  power?: { before: string; after: string; created: string | null } | null;
 }
 
 export interface BloatApp {

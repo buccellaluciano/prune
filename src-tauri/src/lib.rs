@@ -2,6 +2,7 @@ mod appx;
 mod catalog;
 mod disk;
 mod engine;
+mod power;
 mod registry;
 mod system;
 mod user;

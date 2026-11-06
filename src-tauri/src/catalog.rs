@@ -19,6 +19,8 @@ pub enum Hive {
 pub enum ValueKind {
     Dword,
     Sz,
+    /// REG_BINARY. En el catálogo se escribe como bytes hex: "90 12 03 80".
+    Binary,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -118,8 +120,12 @@ impl Tweak {
     pub fn find_choice(&self, id: &str) -> Option<&Choice> {
         self.choices.iter().find(|c| c.id == id)
     }
+    /// HKLM, o directivas de usuario: en `HKCU\Software\Policies` el usuario solo tiene
+    /// lectura (para que no pueda saltearse sus propias directivas); escriben los admins.
     pub fn requires_admin(&self) -> bool {
-        self.ops.iter().any(|o| o.hive == Hive::HKLM)
+        self.ops.iter().any(|o| {
+            o.hive == Hive::HKLM || o.path.to_ascii_lowercase().starts_with(r"software\policies\")
+        })
     }
     /// Toca configuración del usuario (HKCU).
     pub fn per_user(&self) -> bool {
@@ -268,6 +274,7 @@ fn check_value(kind: ValueKind, v: &Value) -> Result<(), String> {
     match (kind, v) {
         (ValueKind::Dword, Value::Int(n)) if (0..=u32::MAX as i64).contains(n) => Ok(()),
         (ValueKind::Sz, Value::Str(_)) => Ok(()),
+        (ValueKind::Binary, Value::Str(s)) if crate::registry::parse_hex(s).is_some() => Ok(()),
         _ => Err(format!("valor {v:?} no corresponde al tipo {kind:?}")),
     }
 }
@@ -384,6 +391,16 @@ kind = "dword"
     #[test]
     fn apps_catalog_parses() {
         assert!(apps().app.len() >= 30);
+    }
+
+    #[test]
+    fn user_policies_require_admin() {
+        // Solo escriben en HKCU\Software\Policies: sin admin daría "acceso denegado".
+        for id in ["ai.copilot_legacy", "search.web_results", "ai.recall"] {
+            assert!(find_tweak(id).unwrap().requires_admin(), "{id}");
+        }
+        assert!(!find_tweak("explorer.show_extensions").unwrap().requires_admin());
+        assert!(!find_tweak("appearance.performance_visuals").unwrap().requires_admin());
     }
 
     #[test]

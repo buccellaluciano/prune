@@ -29,7 +29,22 @@ const raw: MockTweak[] = [
   { id: "explorer.show_extensions", category: "explorer", title: "Mostrar extensiones de archivo", description: "Así 'factura.pdf.exe' no se disfraza.", risk: "safe", restart: "none", tags: ["seguridad"], requires_admin: false, state: "default", ops: [op(A, "HideFileExt", "1", "0", "1")] },
   { id: "explorer.classic_context_menu", category: "explorer", title: "Menú contextual clásico", description: "El clic derecho completo, sin 'Mostrar más opciones'.", risk: "moderate", restart: "explorer", tags: ["menu"], requires_admin: false, state: "default", ops: [op("HKCU\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32", "(Predeterminado)", "(no existe)", "\"\"", "(borra la clave)")] },
   { id: "appearance.dark_mode", category: "appearance", title: "Modo oscuro", description: "Modo oscuro para Windows y para las apps.", risk: "safe", restart: "none", tags: ["tema"], requires_admin: false, state: "applied", ops: [op("HKCU\\...\\Personalize", "AppsUseLightTheme", "0", "0", "1")] },
+  { id: "appearance.performance_visuals", category: "appearance", title: "Efectos visuales al mínimo", description: "Como \"Ajustar para obtener el mejor rendimiento\": sin animaciones de ventanas y menús, sombras, desvanecimientos, vista previa del escritorio ni contenido al arrastrar. El texto sigue suavizado.", risk: "safe", restart: "logoff", tags: ["rendimiento", "basico"], requires_admin: false, state: "partial", ops: [
+    op("HKCU\\Control Panel\\Desktop", "UserPreferencesMask", "92 12 03 80 12 00 00 00", "90 12 03 80 10 00 00 00", "9E 1E 07 80 12 00 00 00"),
+    op("HKCU\\Control Panel\\Desktop\\WindowMetrics", "MinAnimate", "\"1\"", "\"0\"", "\"1\""),
+    op("HKCU\\Control Panel\\Desktop", "DragFullWindows", "\"1\"", "\"0\"", "\"1\""),
+    op("HKCU\\Software\\Microsoft\\Windows\\DWM", "EnableAeroPeek", "0", "0", "1"),
+  ] },
   { id: "gaming.mouse_acceleration", category: "gaming", title: "Desactivar aceleración del mouse", description: "Movimiento 1:1, ideal para juegos.", risk: "safe", restart: "logoff", tags: ["mouse"], requires_admin: false, state: "default", ops: [op("HKCU\\Control Panel\\Mouse", "MouseSpeed", "\"1\"", "\"0\"", "\"1\"")] },
+  { id: "power.plan", category: "power", title: "Plan de energía", description: "Alto y Máximo rendimiento no dejan que el procesador baje la frecuencia ni que entre en ahorro: responde más rápido pero consume y calienta más. En notebooks, conviene usarlos solo enchufado.", risk: "moderate", restart: "none", tags: ["energia"], requires_admin: true, state: "default",
+    choice: "381b4222-f694-41f0-9685-ff5bb260df2e",
+    choices: [
+      { id: "a1841308-3541-4fab-bc81-f71556f20b4a", label: "Economizador", default: false },
+      { id: "381b4222-f694-41f0-9685-ff5bb260df2e", label: "Equilibrado", default: true },
+      { id: "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c", label: "Alto rendimiento", default: false },
+      { id: "ultimate", label: "Máximo rendimiento", default: false },
+    ],
+    ops: [op("Plan de energía (powrprof)", "activo", "Equilibrado", "Economizador · Equilibrado · Alto rendimiento · Máximo rendimiento", "")] },
 ];
 
 const tweaks: Tweak[] = raw.map((t) => ({ choices: [], choice: null, per_user: t.ops.some((o) => o.key.startsWith("HKCU")), ucpd: t.id === "taskbar.disable_widgets", ...t }));
@@ -45,6 +60,7 @@ const overview: Overview = {
     { id: "explorer", title: "Explorador", icon: "folder" },
     { id: "appearance", title: "Apariencia", icon: "palette" },
     { id: "gaming", title: "Gaming y entrada", icon: "gamepad" },
+    { id: "power", title: "Energía", icon: "zap" },
   ],
   tweaks,
 };
