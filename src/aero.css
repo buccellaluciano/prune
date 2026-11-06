@@ -281,8 +281,8 @@
 
 /* ───────── Botones: gris brillante que se pone celeste al pasar el mouse ───────── */
 :root[data-theme="aero"] button.border:not([role]),
-:root[data-theme="aero"] button.bg-card,
-:root[data-theme="aero"] button.bg-card-hi,
+:root[data-theme="aero"] button.bg-card:not([role]),
+:root[data-theme="aero"] button.bg-card-hi:not([role]),
 :root[data-theme="aero"] button.accent-grad,
 :root[data-theme="aero"] button.bg-advanced,
 :root[data-theme="aero"] button.bg-moderate\/15 {
@@ -295,8 +295,8 @@
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.7);
 }
 :root[data-theme="aero"] button.border:not([role]):hover:not(:disabled),
-:root[data-theme="aero"] button.bg-card:hover:not(:disabled),
-:root[data-theme="aero"] button.bg-card-hi:hover:not(:disabled),
+:root[data-theme="aero"] button.bg-card:not([role]):hover:not(:disabled),
+:root[data-theme="aero"] button.bg-card-hi:not([role]):hover:not(:disabled),
 :root[data-theme="aero"] button.accent-grad:hover:not(:disabled),
 :root[data-theme="aero"] button.bg-advanced:hover:not(:disabled),
 :root[data-theme="aero"] button.bg-moderate\/15:hover:not(:disabled) {
@@ -305,8 +305,8 @@
   filter: none;
 }
 :root[data-theme="aero"] button.border:not([role]):active:not(:disabled),
-:root[data-theme="aero"] button.bg-card:active:not(:disabled),
-:root[data-theme="aero"] button.bg-card-hi:active:not(:disabled),
+:root[data-theme="aero"] button.bg-card:not([role]):active:not(:disabled),
+:root[data-theme="aero"] button.bg-card-hi:not([role]):active:not(:disabled),
 :root[data-theme="aero"] button.accent-grad:active:not(:disabled),
 :root[data-theme="aero"] button.bg-advanced:active:not(:disabled),
 :root[data-theme="aero"] button.bg-moderate\/15:active:not(:disabled) {
@@ -524,4 +524,12 @@
 }
 :root[data-theme="aero"] main .bg-card.border-line {
   border-color: #c5d3e3;
+}
+
+/* Filas seleccionables (Bloatware): selección estilo Explorador */
+:root[data-theme="aero"] main button[role="checkbox"].bg-card-hi {
+  background: var(--sel);
+}
+:root[data-theme="aero"] main button[role="checkbox"]:hover {
+  background: var(--sel-hover);
 }

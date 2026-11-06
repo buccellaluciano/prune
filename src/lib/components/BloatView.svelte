@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { LoaderCircle, PackageX, TriangleAlert } from "@lucide/svelte";
+  import { Check, LoaderCircle, PackageX, TriangleAlert } from "@lucide/svelte";
   import { api, type BloatApp, type Risk } from "$lib/api";
   import { store } from "$lib/store.svelte";
   import { onMount } from "svelte";
+  import { fly } from "svelte/transition";
 
   let apps = $state<BloatApp[] | null>(null);
   let error = $state<string | null>(null);
@@ -12,13 +13,14 @@
   let working = $state(false);
 
   const tiers: { id: Risk; title: string; hint: string; cls: string }[] = [
-    { id: "safe", title: "Seguro", hint: "Nadie lo extraña", cls: "text-safe" },
+    { id: "safe", title: "Seguro", hint: "Nadie lo extraña", cls: "" },
     { id: "moderate", title: "Moderado", hint: "Puede que lo uses", cls: "text-moderate" },
     { id: "advanced", title: "Avanzado", hint: "Rompe funciones: leé la nota", cls: "text-advanced" },
   ];
 
   const chosen = $derived(Object.keys(selected).filter((k) => selected[k]));
   const elevated = $derived(store.overview?.system.elevated ?? false);
+  const foreign = $derived(store.overview?.system.foreign_user ?? null);
 
   async function load() {
     apps = null;
@@ -31,21 +33,32 @@
   }
   onMount(load);
 
-  function selectTier(t: Risk) {
+  function toggle(id: string) {
+    selected = { ...selected, [id]: !selected[id] };
+    confirming = false;
+  }
+
+  function toggleTier(list: BloatApp[]) {
+    const all = list.every((a) => selected[a.id]);
     const copy = { ...selected };
-    for (const a of apps ?? []) if (a.tier === t) copy[a.id] = true;
+    for (const a of list) copy[a.id] = !all;
     selected = copy;
+    confirming = false;
+  }
+
+  function clear() {
+    selected = {};
+    confirming = false;
   }
 
   async function remove() {
     working = true;
     try {
-      const res = await api.removeBloat(chosen, deprovision);
+      const res = await api.removeBloat(chosen, deprovision && elevated);
       const ok = res.filter((r) => r.ok).length;
       if (ok) store.toast("ok", `${ok} ${ok === 1 ? "app quitada" : "apps quitadas"}.`);
       for (const r of res.filter((r) => !r.ok)) store.toast("error", `${r.id}: ${r.error}`);
-      selected = {};
-      confirming = false;
+      clear();
       await load();
     } catch (e) {
       store.toast("error", String(e));
@@ -55,86 +68,125 @@
   }
 </script>
 
-<div class="mx-auto max-w-5xl">
-  <header class="mb-5 flex items-end gap-4">
-    <div class="flex-1">
-      <h1 class="font-display text-[20px] font-semibold">Bloatware</h1>
-      <p class="mt-1 max-w-2xl text-[13px] text-mute">
-        Solo se muestran las apps del catálogo que tenés instaladas. Lo esencial (Store, winget, Terminal, Calculadora,
-        Seguridad de Windows) nunca aparece acá. Quitar una app <b class="text-ink">no se puede deshacer</b> desde esta app:
-        se reinstala desde Microsoft Store.
-      </p>
-    </div>
+{#snippet checkbox(on: boolean)}
+  <span
+    class="grid size-4 shrink-0 place-items-center rounded-[4px] border transition-colors
+      {on ? 'border-accent bg-accent text-bg' : 'border-[#3a3935] group-hover:border-mute'}"
+    aria-hidden="true"
+  >
+    {#if on}<Check size={11} strokeWidth={3} />{/if}
+  </span>
+{/snippet}
+
+<div class="mx-auto max-w-4xl">
+  <header class="mb-6">
+    <h1 class="font-display text-[20px] font-semibold">Bloatware</h1>
+    <p class="mt-1 max-w-2xl text-[13px] text-mute">
+      Apps del catálogo que tenés instaladas. Lo esencial (Store, winget, Terminal, Calculadora, Seguridad de Windows)
+      nunca aparece acá. Quitar una app no se deshace desde Debloater: se reinstala desde Microsoft Store.
+    </p>
   </header>
 
   {#if error}
     <p class="rounded-md border border-advanced/30 p-4 text-[13px] text-advanced">{error}</p>
   {:else if !apps}
-    <div class="flex items-center gap-2 text-[13px] text-mute"><LoaderCircle size={16} class="animate-spin" /> Buscando paquetes instalados…</div>
+    <div class="flex items-center gap-2 text-[13px] text-mute"><LoaderCircle size={15} class="animate-spin" /> Buscando paquetes instalados…</div>
   {:else if apps.length === 0}
     <div class="rounded-lg border border-line bg-card p-10 text-center">
-      <PackageX size={28} class="mx-auto text-safe" />
-      <p class="mt-3 text-[14px]">No quedó bloatware del catálogo instalado.</p>
+      <PackageX size={26} strokeWidth={1.6} class="mx-auto text-faint" />
+      <p class="mt-3 text-[13.5px] text-mute">No quedó bloatware del catálogo instalado.</p>
     </div>
   {:else}
     {#each tiers as tier (tier.id)}
       {@const list = apps.filter((a) => a.tier === tier.id)}
       {#if list.length}
-        <section class="mb-6">
-          <div class="mb-2 flex items-baseline gap-3">
+        {@const all = list.every((a) => selected[a.id])}
+        <section class="mb-8">
+          <div class="mb-2 flex items-baseline gap-2">
             <h2 class="section-title text-[13px] font-medium {tier.cls}">{tier.title}</h2>
-            <span class="text-[12px] text-faint">{tier.hint}</span>
-            <button class="ml-auto text-[12px] text-mute hover:text-ink" onclick={() => selectTier(tier.id)}>Seleccionar todo</button>
+            <span class="font-mono text-[11px] text-faint">{list.length}</span>
+            <span class="text-[12px] text-faint">· {tier.hint}</span>
+            <button class="ml-auto text-[12px] text-mute hover:text-ink" onclick={() => toggleTier(list)}>
+              {all ? "Quitar selección" : "Seleccionar todo"}
+            </button>
           </div>
-          <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+          <div class="divide-y divide-line overflow-hidden rounded-lg border border-line bg-card">
             {#each list as app (app.id)}
-              <label
-                class="flex cursor-pointer gap-3 rounded-md border bg-card p-3 transition-colors
-                  {selected[app.id] ? 'border-accent/60 bg-card-hi' : 'border-line hover:bg-card-hi'}"
+              {@const on = !!selected[app.id]}
+              <button
+                role="checkbox"
+                aria-checked={on}
+                class="group relative flex w-full items-start gap-3 px-4 py-2.5 text-left transition-colors hover:bg-card-hi {on ? 'bg-card-hi' : ''}"
+                onclick={() => toggle(app.id)}
               >
-                <input type="checkbox" class="mt-0.5 accent-[#8fb5a0]" bind:checked={selected[app.id]} />
-                <span class="min-w-0">
-                  <span class="block truncate text-[13px] font-medium">{app.title}</span>
-                  <span class="block truncate font-mono text-[10.5px] text-faint">{app.packages[0]?.version} · {app.id}</span>
+                {#if on}<span class="absolute inset-y-2 left-0 w-0.5 rounded-full bg-accent" aria-hidden="true"></span>{/if}
+                <span class="mt-0.5">{@render checkbox(on)}</span>
+                <span class="min-w-0 flex-1">
+                  <span class="flex items-baseline gap-2">
+                    <span class="truncate text-[13.5px] font-medium">{app.title}</span>
+                    <span class="truncate font-mono text-[10.5px] text-faint">{app.id}</span>
+                  </span>
                   {#if app.note}
-                    <span class="mt-1 flex gap-1 text-[11.5px] text-moderate/90"><TriangleAlert size={12} class="mt-0.5 shrink-0" />{app.note}</span>
+                    <span class="mt-0.5 flex gap-1.5 text-[12px] leading-relaxed text-mute">
+                      {#if app.tier === "advanced"}<TriangleAlert size={12} class="mt-[3px] shrink-0 text-advanced" />{/if}
+                      {app.note}
+                    </span>
                   {/if}
                 </span>
-              </label>
+                <span class="shrink-0 pt-0.5 font-mono text-[11px] text-faint">{app.packages[0]?.version}</span>
+              </button>
             {/each}
           </div>
         </section>
       {/if}
     {/each}
-
-    <div class="sticky bottom-4 mt-6 flex items-center gap-3 rounded-lg border border-[#3a3935] bg-panel p-2.5 shadow-lg shadow-black/50">
-      <label class="flex items-center gap-2 text-[12.5px] {elevated ? 'text-mute' : 'text-faint'}" title={elevated ? "" : "Requiere administrador"}>
-        <input
-          type="checkbox"
-          class="accent-[#8fb5a0]"
-          checked={deprovision && elevated}
-          onchange={(e) => (deprovision = e.currentTarget.checked)}
-          disabled={!elevated}
-        />
-        Evitar que se reinstalen en cuentas nuevas
-      </label>
-      <span class="flex-1"></span>
-      {#if confirming}
-        <span class="text-[12.5px] text-moderate">¿Quitar {chosen.length} apps?</span>
-        <button class="rounded-lg px-3 py-1.5 text-[13px] text-mute hover:bg-card-hi" onclick={() => (confirming = false)}>Cancelar</button>
-        <button class="inline-flex items-center gap-2 rounded-md bg-advanced px-3 py-1 text-[13px] font-medium text-bg disabled:opacity-50" disabled={working} onclick={remove}>
-          {#if working}<LoaderCircle size={14} class="animate-spin" />{/if} Sí, quitar
-        </button>
-      {:else}
-        <button
-          class="rounded-md border border-line px-3 py-1 text-[13px] disabled:opacity-40"
-          disabled={!chosen.length || !!store.overview?.system.foreign_user}
-          title={store.overview?.system.foreign_user ? "La app corre con otra cuenta de administrador" : undefined}
-          onclick={() => (confirming = true)}
-        >
-          Quitar {chosen.length || ""} seleccionadas
-        </button>
-      {/if}
-    </div>
   {/if}
 </div>
+
+<!-- Barra de acción: solo aparece cuando hay algo seleccionado. -->
+{#if chosen.length > 0}
+  <div
+    transition:fly={{ y: 24, duration: 180 }}
+    class="pointer-events-auto absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-3 rounded-lg border border-[#3a3935] bg-panel py-1.5 pr-1.5 pl-3.5 whitespace-nowrap shadow-lg shadow-black/50"
+  >
+    {#if confirming}
+      <span class="text-[13px] text-moderate">
+        ¿Quitar {chosen.length} {chosen.length === 1 ? "app" : "apps"}{deprovision && elevated ? " y evitar que se reinstalen" : ""}?
+      </span>
+      <button class="rounded-md px-2.5 py-1 text-[13px] text-mute hover:bg-card-hi hover:text-ink" onclick={() => (confirming = false)}>
+        Cancelar
+      </button>
+      <button
+        class="inline-flex items-center gap-2 rounded-md border border-advanced/60 px-3 py-1 text-[13px] font-medium text-advanced hover:bg-advanced/10 disabled:opacity-50"
+        disabled={working}
+        onclick={remove}
+      >
+        {#if working}<LoaderCircle size={13} class="animate-spin" />{/if} Sí, quitar
+      </button>
+    {:else}
+      <span class="text-[13px] text-mute">
+        <span class="font-mono text-ink">{chosen.length}</span> {chosen.length === 1 ? "seleccionada" : "seleccionadas"}
+      </span>
+      {#if elevated}
+        <button
+          role="checkbox"
+          aria-checked={deprovision}
+          class="group flex items-center gap-2 rounded-md px-2 py-1 text-[12.5px] text-mute hover:bg-card-hi hover:text-ink"
+          title="También la quita de la imagen de Windows, así no se instala en cuentas nuevas"
+          onclick={() => (deprovision = !deprovision)}
+        >
+          {@render checkbox(deprovision)} Evitar reinstalación
+        </button>
+      {/if}
+      <button class="rounded-md px-2.5 py-1 text-[13px] text-mute hover:bg-card-hi hover:text-ink" onclick={clear}>Descartar</button>
+      <button
+        class="accent-grad rounded-md px-3 py-1 text-[13px] font-medium disabled:opacity-40"
+        disabled={!!foreign}
+        title={foreign ? "La app corre con otra cuenta de administrador" : undefined}
+        onclick={() => (confirming = true)}
+      >
+        Quitar
+      </button>
+    {/if}
+  </div>
+{/if}
