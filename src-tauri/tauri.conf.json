@@ -31,7 +31,13 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis"],
+    "targets": ["nsis", "msi"],
+    "publisher": "buccellaluciano",
+    "copyright": "Copyright © 2026 buccellaluciano",
+    "homepage": "https://github.com/buccellaluciano/debloater",
+    "category": "Utility",
+    "shortDescription": "Debloater y ajustes para Windows 11",
+    "longDescription": "Quita apps preinstaladas, aplica ajustes de privacidad y rendimiento con vista previa y deshacer, instala programas con winget y analiza el uso del disco.",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -41,7 +47,12 @@
     ],
     "windows": {
       "nsis": {
-        "installMode": "perMachine"
+        "installMode": "perMachine",
+        "installerHooks": "./installer-hooks.nsh"
+      },
+      "wix": {
+        "language": "es-ES",
+        "upgradeCode": "d27e5eea-24b4-4049-adb9-ed303f693a5d"
       }
     }
   }

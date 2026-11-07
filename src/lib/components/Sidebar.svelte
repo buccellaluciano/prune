@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { AppWindow, HardDrive, History, PackageX, ShieldCheck, ShieldOff, SlidersHorizontal, Wand2 } from "@lucide/svelte";
+  import { AppWindow, Check, HardDrive, History, PackageX, ShieldCheck, ShieldOff, SlidersHorizontal, Wand2 } from "@lucide/svelte";
+  import { isTauri } from "$lib/api";
   import { disk } from "$lib/disk.svelte";
   import { apps } from "$lib/apps.svelte";
   import { store, PROFILES } from "$lib/store.svelte";
@@ -122,6 +123,25 @@
         </button>
       {/each}
     </div>
+    <button
+      aria-pressed={theme.glass}
+      class="glass-toggle group mx-2.5 mt-1.5 flex w-[calc(100%-1.25rem)] items-start gap-2 rounded-md px-1.5 py-1 text-left hover:bg-card-hi disabled:opacity-50"
+      disabled={!isTauri}
+      title={isTauri ? "Desenfoca el escritorio detrás de la ventana, como el vidrio de Windows 7" : "Solo funciona en la app instalada"}
+      onclick={() => theme.setGlass(!theme.glass)}
+    >
+      <span
+        class="mt-0.5 grid size-3.5 shrink-0 place-items-center rounded-[3px] border transition-colors
+          {theme.glass ? 'border-accent bg-accent text-bg' : 'border-[#3a3935] group-hover:border-mute'}"
+        aria-hidden="true"
+      >
+        {#if theme.glass}<Check size={10} strokeWidth={3} />{/if}
+      </span>
+      <span class="min-w-0">
+        <span class="block text-[12px] text-ink">Transparencia real</span>
+        <span class="block text-[11px] text-faint">Vidrio sobre el escritorio. Puede trabar al mover la ventana.</span>
+      </span>
+    </button>
   </nav>
 
   {#if store.user}

@@ -74,6 +74,29 @@ button.accent-grad:hover:not(:disabled) {
   background: #ffffff;
 }
 
+/* ───────── Transparencia real (opcional) en el tema Moderno ─────────
+   Con data-glass, Windows pone acrílico oscuro detrás de la ventana. La barra lateral y las
+   barras dejan ver el escritorio desenfocado; el contenido queda casi opaco para leer bien. */
+:root[data-glass="true"]:not([data-theme="aero"]),
+:root[data-glass="true"]:not([data-theme="aero"]) body {
+  background: transparent;
+}
+:root[data-glass="true"]:not([data-theme="aero"]) .app-frame {
+  background: rgb(17 17 16 / 0.35);
+}
+:root[data-glass="true"]:not([data-theme="aero"]) .sidebar {
+  background: rgb(21 21 20 / 0.45);
+  border-color: rgb(255 255 255 / 0.06);
+}
+:root[data-glass="true"]:not([data-theme="aero"]) main {
+  background: rgb(17 17 16 / 0.78);
+}
+:root[data-glass="true"]:not([data-theme="aero"]) .toolbar,
+:root[data-glass="true"]:not([data-theme="aero"]) .infobar {
+  background: transparent;
+  border-color: rgb(255 255 255 / 0.06);
+}
+
 @layer base {
   :focus-visible {
     outline: 1.5px solid var(--color-accent);

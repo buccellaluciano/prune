@@ -2,6 +2,7 @@
   import { Command, CornerDownLeft } from "@lucide/svelte";
   import { store, normalize, PROFILES } from "$lib/store.svelte";
   import { theme, THEMES } from "$lib/theme.svelte";
+  import { isTauri } from "$lib/api";
   import { fade, scale } from "svelte/transition";
   import { tick } from "svelte";
 
@@ -35,6 +36,14 @@
       id: "th:" + t.id, group: "Acciones", label: `Cambiar al tema ${t.title}`, hint: t.hint,
       run: () => theme.set(t.id),
     })),
+    ...(isTauri
+      ? [{
+          id: "th:glass", group: "Acciones",
+          label: theme.glass ? "Desactivar la transparencia real" : "Activar la transparencia real",
+          hint: "Vidrio sobre el escritorio, como Windows 7",
+          run: () => theme.setGlass(!theme.glass),
+        }]
+      : []),
     ...PROFILES.map((p) => ({
       id: "p:" + p.id, group: "Perfiles", label: `Marcar perfil: ${p.title}`, hint: p.hint,
       run: () => store.stageMany(p.ids, true),

@@ -1,0 +1,63 @@
+<script lang="ts">
+  import { Wand2 } from "@lucide/svelte";
+  import { theme } from "$lib/theme.svelte";
+</script>
+
+<!-- Barra de título propia del tema Moderno cuando la transparencia real está activa:
+     la de Windows no deja ver el acrílico. Arrastrable; doble clic maximiza. -->
+<header class="modern-titlebar flex h-8 shrink-0 items-center select-none" data-tauri-drag-region>
+  <span class="pointer-events-none flex items-center gap-2 pl-3 text-[12px] text-mute" data-tauri-drag-region>
+    <Wand2 size={13} strokeWidth={1.8} class="text-ink" /> Debloater
+  </span>
+
+  <div class="ml-auto flex h-full">
+    <button class="cap" onclick={() => theme.window("minimize")} aria-label="Minimizar" title="Minimizar">
+      <svg viewBox="0 0 10 10" width="10" height="10"><path d="M0 5h10" /></svg>
+    </button>
+    <button
+      class="cap"
+      onclick={() => theme.window("toggleMaximize")}
+      aria-label={theme.maximized ? "Restaurar" : "Maximizar"}
+      title={theme.maximized ? "Restaurar" : "Maximizar"}
+    >
+      {#if theme.maximized}
+        <svg viewBox="0 0 10 10" width="10" height="10"><path d="M2.5 2.5V.5h7v7h-2M.5 2.5h7v7h-7z" /></svg>
+      {:else}
+        <svg viewBox="0 0 10 10" width="10" height="10"><path d="M.5 .5h9v9h-9z" /></svg>
+      {/if}
+    </button>
+    <button class="cap close" onclick={() => theme.window("close")} aria-label="Cerrar" title="Cerrar">
+      <svg viewBox="0 0 10 10" width="10" height="10"><path d="M.5 .5l9 9M9.5 .5l-9 9" /></svg>
+    </button>
+  </div>
+</header>
+
+<style>
+  /* Botones como los de Windows 11: 46 px, íconos de trazo fino, cerrar en rojo al pasar. */
+  .cap {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 100%;
+    color: var(--color-ink);
+    transition: background 80ms;
+  }
+  .cap svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1;
+  }
+  .cap:hover {
+    background: rgb(255 255 255 / 0.08);
+  }
+  .cap:active {
+    background: rgb(255 255 255 / 0.05);
+  }
+  .cap.close:hover {
+    background: #c42b1c;
+    color: #fff;
+  }
+  .cap.close:active {
+    background: #c42b1ccc;
+  }
+</style>

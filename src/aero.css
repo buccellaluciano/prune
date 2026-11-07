@@ -54,12 +54,14 @@
   color: white;
 }
 
-/* Fondo: transparente en la app (se ve el acrílico); en el navegador, un "escritorio" de prueba. */
-:root[data-theme="aero"][data-native="true"],
-:root[data-theme="aero"][data-native="true"] body {
+/* Fondo: con la transparencia real activada se ve el acrílico de Windows detrás; sin ella
+   (por defecto, y en el navegador), un cielo azul fijo que hace de "escritorio". */
+:root[data-theme="aero"][data-glass="true"],
+:root[data-theme="aero"][data-glass="true"] body {
   background: transparent;
 }
-:root[data-theme="aero"][data-native="false"] body {
+:root[data-theme="aero"]:not([data-glass="true"]),
+:root[data-theme="aero"]:not([data-glass="true"]) body {
   background:
     radial-gradient(1200px 700px at 30% 20%, #4aa3e6, transparent 70%),
     radial-gradient(900px 600px at 80% 90%, #1b5aa6, transparent 70%),

@@ -15,12 +15,23 @@ function stored(): ThemeId {
   return "modern";
 }
 
+function storedGlass(): boolean {
+  try {
+    return localStorage.getItem("glass") === "true";
+  } catch {
+    return false;
+  }
+}
+
 /**
- * Tema de la app. Además del CSS, el tema Aero cambia la ventana nativa:
- * sin marco de Windows (dibujamos el nuestro) y con efecto acrílico de DWM detrás.
+ * Tema de la app y apariencia de la ventana nativa.
+ * - Aero: sin marco de Windows (dibujamos el nuestro).
+ * - `glass` (opcional, apagado por defecto): efecto acrílico de DWM detrás de la ventana,
+ *   el desenfoque real del escritorio. Oscuro en Moderno, claro en Aero.
  */
 class ThemeStore {
   current = $state<ThemeId>(stored());
+  glass = $state(storedGlass());
   maximized = $state(false);
   #watching = false;
 
@@ -32,12 +43,14 @@ class ThemeStore {
     const el = document.documentElement;
     el.dataset.theme = this.current;
     el.dataset.native = String(isTauri);
+    el.dataset.glass = String(this.glass && isTauri);
   }
 
   async apply() {
     this.#applyDom();
     try {
       localStorage.setItem("theme", this.current);
+      localStorage.setItem("glass", String(this.glass));
     } catch {}
     if (!isTauri) return;
     const { getCurrentWindow, Effect } = await import("@tauri-apps/api/window");
@@ -48,18 +61,22 @@ class ThemeStore {
       await w.onResized(async () => (this.maximized = await w.isMaximized()));
     }
     try {
-      if (this.current === "aero") {
-        await w.setTheme("light");
-        await w.setDecorations(false);
-        await w.setEffects({ effects: [Effect.Acrylic, Effect.Blur] });
-      } else {
-        await w.clearEffects();
-        await w.setDecorations(true);
-        await w.setTheme("dark");
-      }
+      const aero = this.current === "aero";
+      // El tono del acrílico sigue al tema de la ventana: claro en Aero, oscuro en Moderno.
+      await w.setTheme(aero ? "light" : "dark");
+      // Sin marco de Windows en Aero, y en Moderno con vidrio (la barra nativa no es transparente).
+      await w.setDecorations(!aero && !this.glass);
+      if (this.glass) await w.setEffects({ effects: [Effect.Acrylic, Effect.Blur] });
+      else await w.clearEffects();
     } catch (e) {
       console.error("No se pudo aplicar el efecto de ventana", e);
     }
+  }
+
+  setGlass(on: boolean) {
+    if (on === this.glass) return;
+    this.glass = on;
+    this.apply();
   }
 
   set(id: ThemeId) {

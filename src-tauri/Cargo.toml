@@ -1,8 +1,8 @@
 [package]
 name = "debloater"
 version = "0.1.0"
-description = "Debloater para Windows 11"
-authors = ["you"]
+description = "Debloater y ajustes para Windows 11"
+authors = ["buccellaluciano"]
 edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

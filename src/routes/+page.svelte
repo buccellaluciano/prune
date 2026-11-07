@@ -16,6 +16,7 @@
   import { flip } from "svelte/animate";
   import { onMount } from "svelte";
   import TitleBar from "$lib/components/TitleBar.svelte";
+  import ModernTitleBar from "$lib/components/ModernTitleBar.svelte";
   import { theme } from "$lib/theme.svelte";
 
   onMount(() => {
@@ -53,7 +54,7 @@
 <svelte:window {onkeydown} />
 
 <div class="app-frame flex h-screen flex-col overflow-hidden">
-  {#if theme.current === "aero"}<TitleBar />{/if}
+  {#if theme.current === "aero"}<TitleBar />{:else if theme.glass && isTauri}<ModernTitleBar />{/if}
   <div class="flex min-h-0 flex-1">
   <Sidebar />
 
