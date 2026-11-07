@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Check, LoaderCircle, PackageX, TriangleAlert } from "@lucide/svelte";
-  import { api, type BloatApp, type Risk } from "$lib/api";
-  import { store } from "$lib/store.svelte";
+  import { api, type BloatApp, type Risk } from "#lib/api.ts";
+  import { store } from "#lib/store.svelte.ts";
   import { onMount } from "svelte";
   import { fly } from "svelte/transition";
 

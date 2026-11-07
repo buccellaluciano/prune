@@ -1,7 +1,7 @@
 <script lang="ts">
   import { ArrowRight, LoaderCircle, X } from "@lucide/svelte";
-  import { api, type PlannedChange } from "$lib/api";
-  import { store } from "$lib/store.svelte";
+  import { api, type PlannedChange } from "#lib/api.ts";
+  import { store } from "#lib/store.svelte.ts";
   import { fade, fly } from "svelte/transition";
 
   let plan = $state<PlannedChange[] | null>(null);

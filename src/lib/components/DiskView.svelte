@@ -1,8 +1,8 @@
 <script lang="ts">
   import { ChevronRight, CloudOff, FolderOpen, HardDrive, Link2, Lock, LoaderCircle } from "@lucide/svelte";
-  import { disk } from "$lib/disk.svelte";
-  import { bytes, count, seconds } from "$lib/format";
-  import { store } from "$lib/store.svelte";
+  import { disk } from "#lib/disk.svelte.ts";
+  import { bytes, count, seconds } from "#lib/format.ts";
+  import { store } from "#lib/store.svelte.ts";
   import { onMount } from "svelte";
 
   onMount(() => disk.init());

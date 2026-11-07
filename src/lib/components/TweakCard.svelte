@@ -1,7 +1,7 @@
 <script lang="ts">
   import { ChevronRight } from "@lucide/svelte";
-  import type { Tweak } from "$lib/api";
-  import { store } from "$lib/store.svelte";
+  import type { Tweak } from "#lib/api.ts";
+  import { store } from "#lib/store.svelte.ts";
   import { slide } from "svelte/transition";
 
   let { tweak }: { tweak: Tweak } = $props();

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { Check, ChevronRight, CircleAlert, Copy, ExternalLink, LoaderCircle, ShieldCheck, X } from "@lucide/svelte";
-  import { vtApi } from "$lib/api";
-  import { apps, STEPS, type Step } from "$lib/apps.svelte";
-  import { store } from "$lib/store.svelte";
+  import { vtApi } from "#lib/api.ts";
+  import { apps, STEPS, type Step } from "#lib/apps.svelte.ts";
+  import { store } from "#lib/store.svelte.ts";
   import AppIcon from "./AppIcon.svelte";
   import { fade, scale } from "svelte/transition";
 

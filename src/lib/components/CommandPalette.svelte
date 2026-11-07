@@ -1,8 +1,8 @@
 <script lang="ts">
   import { Command, CornerDownLeft } from "@lucide/svelte";
-  import { store, normalize, PROFILES } from "$lib/store.svelte";
-  import { theme, THEMES } from "$lib/theme.svelte";
-  import { isTauri } from "$lib/api";
+  import { store, normalize, PROFILES } from "#lib/store.svelte.ts";
+  import { theme, THEMES } from "#lib/theme.svelte.ts";
+  import { isTauri } from "#lib/api.ts";
   import { fade, scale } from "svelte/transition";
   import { tick } from "svelte";
 

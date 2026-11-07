@@ -1,7 +1,7 @@
 <script lang="ts">
   import { LoaderCircle, RefreshCw, ShieldCheck, Trash2, X } from "@lucide/svelte";
-  import { apps } from "$lib/apps.svelte";
-  import { normalize, store } from "$lib/store.svelte";
+  import { apps } from "#lib/apps.svelte.ts";
+  import { normalize, store } from "#lib/store.svelte.ts";
   import { onMount } from "svelte";
   import AppIcon from "./AppIcon.svelte";
 

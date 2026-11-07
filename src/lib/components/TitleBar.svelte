@@ -1,6 +1,6 @@
 <script lang="ts">
   import Logo from "./Logo.svelte";
-  import { theme } from "$lib/theme.svelte";
+  import { theme } from "#lib/theme.svelte.ts";
 </script>
 
 <!-- Barra de título propia del tema Aero: arrastrable, doble clic maximiza. -->

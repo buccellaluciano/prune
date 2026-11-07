@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { store } from "$lib/store.svelte";
+  import { store } from "#lib/store.svelte.ts";
   import { fly } from "svelte/transition";
 </script>
 

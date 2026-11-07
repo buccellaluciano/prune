@@ -1,12 +1,12 @@
 <script lang="ts">
   import { AppWindow, Check, HardDrive, History, PackageX, ShieldCheck, ShieldOff, SlidersHorizontal } from "@lucide/svelte";
   import Logo from "./Logo.svelte";
-  import { isTauri } from "$lib/api";
-  import { disk } from "$lib/disk.svelte";
-  import { apps } from "$lib/apps.svelte";
-  import { store, PROFILES } from "$lib/store.svelte";
+  import { isTauri } from "#lib/api.ts";
+  import { disk } from "#lib/disk.svelte.ts";
+  import { apps } from "#lib/apps.svelte.ts";
+  import { store, PROFILES } from "#lib/store.svelte.ts";
   import CategoryIcon from "./CategoryIcon.svelte";
-  import { theme, THEMES } from "$lib/theme.svelte";
+  import { theme, THEMES } from "#lib/theme.svelte.ts";
 
   const counts = $derived.by(() => {
     const c: Record<string, { on: number; total: number }> = {};

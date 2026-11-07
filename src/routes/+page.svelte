@@ -1,23 +1,23 @@
 <script lang="ts">
   import { Command, LoaderCircle, Search, ShieldAlert, X } from "@lucide/svelte";
-  import { isTauri } from "$lib/api";
-  import { store } from "$lib/store.svelte";
-  import Sidebar from "$lib/components/Sidebar.svelte";
-  import TweakCard from "$lib/components/TweakCard.svelte";
-  import PendingBar from "$lib/components/PendingBar.svelte";
-  import PlanSheet from "$lib/components/PlanSheet.svelte";
-  import CommandPalette from "$lib/components/CommandPalette.svelte";
-  import BloatView from "$lib/components/BloatView.svelte";
-  import HistoryView from "$lib/components/HistoryView.svelte";
-  import AppsView from "$lib/components/AppsView.svelte";
-  import DiskView from "$lib/components/DiskView.svelte";
-  import InstallSheet from "$lib/components/InstallSheet.svelte";
+  import { isTauri } from "#lib/api.ts";
+  import { store } from "#lib/store.svelte.ts";
+  import Sidebar from "#lib/components/Sidebar.svelte";
+  import TweakCard from "#lib/components/TweakCard.svelte";
+  import PendingBar from "#lib/components/PendingBar.svelte";
+  import PlanSheet from "#lib/components/PlanSheet.svelte";
+  import CommandPalette from "#lib/components/CommandPalette.svelte";
+  import BloatView from "#lib/components/BloatView.svelte";
+  import HistoryView from "#lib/components/HistoryView.svelte";
+  import AppsView from "#lib/components/AppsView.svelte";
+  import DiskView from "#lib/components/DiskView.svelte";
+  import InstallSheet from "#lib/components/InstallSheet.svelte";
   import { fly } from "svelte/transition";
   import { flip } from "svelte/animate";
   import { onMount } from "svelte";
-  import TitleBar from "$lib/components/TitleBar.svelte";
-  import ModernTitleBar from "$lib/components/ModernTitleBar.svelte";
-  import { theme } from "$lib/theme.svelte";
+  import TitleBar from "#lib/components/TitleBar.svelte";
+  import ModernTitleBar from "#lib/components/ModernTitleBar.svelte";
+  import { theme } from "#lib/theme.svelte.ts";
 
   onMount(() => {
     theme.apply();

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { History, LoaderCircle, Undo2 } from "@lucide/svelte";
-  import { api, type JournalEntry } from "$lib/api";
-  import { store } from "$lib/store.svelte";
+  import { api, type JournalEntry } from "#lib/api.ts";
+  import { store } from "#lib/store.svelte.ts";
   import { onMount } from "svelte";
 
   let entries = $state<JournalEntry[] | null>(null);

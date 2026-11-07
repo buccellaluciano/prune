@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { apps } from "$lib/apps.svelte";
+  import { apps } from "#lib/apps.svelte.ts";
 
   let { id, title, size = 28 }: { id: string; title: string; size?: number } = $props();
   const src = $derived(apps.icons[id]);
