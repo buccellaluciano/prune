@@ -66,6 +66,10 @@ class ThemeStore {
     if (id === this.current) return;
     this.current = id;
     this.apply();
+    // Solo al elegirlo a mano (no al abrir la app con Aero ya activo): el "tada" de Windows.
+    if (id === "aero" && isTauri) {
+      import("@tauri-apps/api/core").then(({ invoke }) => invoke("play_theme_sound")).catch(() => {});
+    }
   }
 
   async window(action: "minimize" | "toggleMaximize" | "close") {

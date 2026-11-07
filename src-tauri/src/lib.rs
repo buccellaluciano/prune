@@ -189,6 +189,27 @@ fn vt_open(sha256: String) -> Result<(), String> {
     vt::open_report(&sha256)
 }
 
+/// Sonido al activar el tema Aero 7: el `tada.wav` clásico que trae el propio Windows
+/// (`%windir%\Media`). Ruta fija, sin parámetros; no se incluye ningún sonido en la app.
+/// Asíncrono: no frena la interfaz. Si el archivo no está, no suena nada.
+#[tauri::command]
+fn play_theme_sound() {
+    use windows::core::PCWSTR;
+    use windows::Win32::Media::Audio::{PlaySoundW, SND_ASYNC, SND_FILENAME, SND_NODEFAULT};
+    use windows::Win32::System::SystemInformation::GetSystemWindowsDirectoryW;
+    let mut buf = [0u16; 260];
+    let n = unsafe { GetSystemWindowsDirectoryW(Some(&mut buf)) } as usize;
+    if n == 0 || n >= buf.len() {
+        return;
+    }
+    let path = std::path::PathBuf::from(String::from_utf16_lossy(&buf[..n])).join(r"Media\tada.wav");
+    if !path.is_file() {
+        return;
+    }
+    let wide: Vec<u16> = path.to_string_lossy().encode_utf16().chain(std::iter::once(0)).collect();
+    let _ = unsafe { PlaySoundW(PCWSTR(wide.as_ptr()), None, SND_FILENAME | SND_ASYNC | SND_NODEFAULT) };
+}
+
 /// Dónde guardar el historial.
 ///
 /// Instalada en Program Files y corriendo como admin, va en `<instalación>\data`: ahí solo
@@ -245,7 +266,8 @@ pub fn run() {
             disk_open,
             winget_icons,
             winget_check,
-            vt_open
+            vt_open,
+            play_theme_sound
         ])
         .run(tauri::generate_context!())
         .expect("error al iniciar la aplicación");
