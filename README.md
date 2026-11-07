@@ -1,4 +1,4 @@
-# Debloater
+# Prune
 
 Debloater para **Windows 11** hecho con Tauri 2 (Rust) + Svelte 5 + Tailwind 4.
 

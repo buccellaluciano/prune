@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { AppWindow, Check, HardDrive, History, PackageX, ShieldCheck, ShieldOff, SlidersHorizontal, Wand2 } from "@lucide/svelte";
+  import { AppWindow, Check, HardDrive, History, PackageX, ShieldCheck, ShieldOff, SlidersHorizontal } from "@lucide/svelte";
+  import Logo from "./Logo.svelte";
   import { isTauri } from "$lib/api";
   import { disk } from "$lib/disk.svelte";
   import { apps } from "$lib/apps.svelte";
@@ -34,11 +35,9 @@
 
 <aside class="sidebar flex h-full w-60 shrink-0 flex-col border-r border-line bg-panel">
   <div class="flex items-center gap-2.5 px-4 pt-4 pb-4">
-    <div class="brand-mark grid size-7 place-items-center rounded-md border border-line text-ink">
-      <Wand2 size={14} strokeWidth={1.8} />
-    </div>
+    <Logo size={28} />
     <div class="min-w-0">
-      <div class="text-[13.5px] leading-tight font-semibold">Debloater</div>
+      <div class="text-[13.5px] leading-tight font-semibold">Prune</div>
       {#if store.overview}
         <div class="font-mono text-[10.5px] text-faint">
           {store.overview.system.display_version} · {store.overview.system.build}.{store.overview.system.ubr}

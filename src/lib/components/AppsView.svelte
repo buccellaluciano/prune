@@ -112,7 +112,7 @@
                       {/if}
                     </button>
                   {:else}
-                    <p class="truncate text-[12.5px] text-mute">{a.description}</p>
+                    <p class="line-clamp-2 text-[12.5px] leading-snug text-mute" title={a.description}>{a.description}</p>
                   {/if}
                 </div>
 

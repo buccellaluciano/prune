@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Wand2 } from "@lucide/svelte";
+  import Logo from "./Logo.svelte";
   import { theme } from "$lib/theme.svelte";
 </script>
 
@@ -7,7 +7,7 @@
      la de Windows no deja ver el acrílico. Arrastrable; doble clic maximiza. -->
 <header class="modern-titlebar flex h-8 shrink-0 items-center select-none" data-tauri-drag-region>
   <span class="pointer-events-none flex items-center gap-2 pl-3 text-[12px] text-mute" data-tauri-drag-region>
-    <Wand2 size={13} strokeWidth={1.8} class="text-ink" /> Debloater
+    <Logo size={16} /> Prune
   </span>
 
   <div class="ml-auto flex h-full">

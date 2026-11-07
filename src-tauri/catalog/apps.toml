@@ -134,6 +134,15 @@ title = "Flow Launcher"
 group = "utilities"
 description = "Lanzador rápido de apps y archivos con Alt+Espacio."
 
+# Mods para personalizar Windows (barra, Inicio, Explorador). Inyecta código en otros
+# procesos: algunos antivirus lo marcan y conviene excluir juegos con anticheat.
+[[app]]
+id = "RamenSoftware.Windhawk"
+site = "https://windhawk.net/"
+title = "Windhawk"
+group = "utilities"
+description = "Mods para personalizar Windows a fondo. Algunos antivirus lo marcan y conviene excluir juegos con anticheat."
+
 # ─────────────── Seguridad ───────────────
 
 [[app]]

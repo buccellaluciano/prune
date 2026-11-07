@@ -83,7 +83,7 @@
     <h1 class="font-display text-[20px] font-semibold">Bloatware</h1>
     <p class="mt-1 max-w-2xl text-[13px] text-mute">
       Apps del catálogo que tenés instaladas. Lo esencial (Store, winget, Terminal, Calculadora, Seguridad de Windows)
-      nunca aparece acá. Quitar una app no se deshace desde Debloater: se reinstala desde Microsoft Store.
+      nunca aparece acá. Quitar una app no se deshace desde Prune: se reinstala desde Microsoft Store.
     </p>
   </header>
 

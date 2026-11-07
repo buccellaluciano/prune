@@ -86,17 +86,12 @@
   padding-left: 10px;
   user-select: none;
 }
-.aero-titlebar-icon {
+.aero-titlebar-logo {
   margin-top: 7px;
   display: grid;
-  place-items: center;
   width: 16px;
   height: 16px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #9fd4ff, #2f7fd8 60%, #164f9a);
-  box-shadow:
-    0 0 0 1px rgb(0 0 0 / 0.35),
-    inset 0 1px 0 rgb(255 255 255 / 0.6);
+  filter: drop-shadow(0 0 2px rgb(255 255 255 / 0.8));
   pointer-events: none;
 }
 .aero-titlebar-text {

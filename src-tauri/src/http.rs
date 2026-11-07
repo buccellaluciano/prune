@@ -57,7 +57,7 @@ pub fn get(url: &str, headers: &[(&str, &str)], max_bytes: usize) -> Result<Resp
     let (host, port, path) = split_https(url)?;
     let err = |what: &str, e: windows::core::Error| format!("{what}: {}", e.message());
     unsafe {
-        let session = Handle(WinHttpOpen(w!("Debloater/0.1"), WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, PCWSTR::null(), PCWSTR::null(), 0));
+        let session = Handle(WinHttpOpen(w!("Prune/0.1"), WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, PCWSTR::null(), PCWSTR::null(), 0));
         if session.0.is_null() {
             return Err("No se pudo iniciar WinHTTP".into());
         }

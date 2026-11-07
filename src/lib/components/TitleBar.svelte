@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { Wand2 } from "@lucide/svelte";
+  import Logo from "./Logo.svelte";
   import { theme } from "$lib/theme.svelte";
 </script>
 
 <!-- Barra de título propia del tema Aero: arrastrable, doble clic maximiza. -->
 <header class="aero-titlebar" data-tauri-drag-region>
-  <span class="aero-titlebar-icon" data-tauri-drag-region><Wand2 size={12} color="white" /></span>
-  <span class="aero-titlebar-text" data-tauri-drag-region>Debloater</span>
+  <span class="aero-titlebar-logo" data-tauri-drag-region><Logo size={16} /></span>
+  <span class="aero-titlebar-text" data-tauri-drag-region>Prune</span>
 
   <div class="aero-caption">
     <button class="cap" onclick={() => theme.window("minimize")} aria-label="Minimizar" title="Minimizar">
