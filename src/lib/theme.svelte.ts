@@ -1,10 +1,12 @@
 import { isTauri } from "./api";
+import type { Key } from "./i18n.svelte";
 
 export type ThemeId = "modern" | "aero";
 
-export const THEMES: { id: ThemeId; title: string; hint: string }[] = [
-  { id: "modern", title: "Moderno", hint: "Oscuro, el tema original" },
-  { id: "aero", title: "Aero 7", hint: "Vidrio y brillos al estilo Windows 7" },
+/** `title` y `hint` son claves de i18n. */
+export const THEMES: { id: ThemeId; title: Key; hint: Key }[] = [
+  { id: "modern", title: "theme.modern", hint: "theme.modern_hint" },
+  { id: "aero", title: "theme.aero", hint: "theme.aero_hint" },
 ];
 
 function stored(): ThemeId {

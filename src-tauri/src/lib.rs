@@ -1,8 +1,19 @@
+/// Mensaje traducido: `t!("clave")` o `t!("clave", nombre = valor, ...)` (ver `i18n`).
+macro_rules! t {
+    ($key:literal) => {
+        $crate::i18n::msg($key)
+    };
+    ($key:literal, $($name:ident = $val:expr),+ $(,)?) => {
+        $crate::i18n::fmt($key, &[$((stringify!($name), &$val as &dyn ::std::fmt::Display)),+])
+    };
+}
+
 mod appx;
 mod catalog;
 mod disk;
 mod engine;
 mod http;
+mod i18n;
 mod icons;
 mod power;
 mod registry;
@@ -24,11 +35,22 @@ struct Overview {
     tweaks: Vec<TweakView>,
 }
 
+/// Idioma de los mensajes y del catálogo (uno de `i18n::LANGS`).
+#[tauri::command]
+fn set_language(lang: String) -> Result<(), String> {
+    i18n::set(&lang)
+}
+
 #[tauri::command]
 async fn get_overview() -> Overview {
     let system = system::info();
     let tweaks = engine::list(system.build);
-    Overview { categories: catalog::tweaks().category.clone(), tweaks, system }
+    let categories = catalog::tweaks()
+        .category
+        .iter()
+        .map(|c| Category { title: i18n::category(&c.id, &c.title), ..c.clone() })
+        .collect();
+    Overview { categories, tweaks, system }
 }
 
 #[tauri::command]
@@ -66,9 +88,7 @@ async fn remove_bloat(
     deprovision: bool,
 ) -> Result<Vec<appx::RemoveResult>, String> {
     if let Some(user) = system::foreign_user() {
-        return Err(format!(
-            "La app corre con otra cuenta de administrador: se quitarían las apps de esa cuenta y no las de {user}"
-        ));
+        return Err(t!("foreign_user_remove", user = user));
     }
     let deprovision = deprovision && system::is_elevated();
     let results = tauri::async_runtime::spawn_blocking(move || appx::remove(&ids, deprovision))
@@ -76,7 +96,7 @@ async fn remove_bloat(
         .map_err(|e| e.to_string())??;
     let removed: Vec<String> = results.iter().flat_map(|r| r.removed.clone()).collect();
     if !removed.is_empty() {
-        let _ = state.record_removed_apps(format!("Quitadas {} apps", removed.len()), removed);
+        let _ = state.record_removed_apps(t!("label_removed_apps", n = removed.len()), removed);
     }
     Ok(results)
 }
@@ -231,7 +251,18 @@ fn journal_dir(user_dir: &std::path::Path) -> std::path::PathBuf {
         Some(dir)
     })();
     let Some(dir) = protected else { return user_dir.to_path_buf() };
-    let (old, new) = (user_dir.join("journal.json"), dir.join("journal.json"));
+    let new = dir.join("journal.json");
+    // La 0.1.0 se llamaba "Prune" y se instalaba en Program Files\Prune: su historial
+    // (solo escribible por admins, igual que este) se trae a la carpeta nueva.
+    let legacy = winget::program_files().map(|pf| pf.join("Prune").join("data").join("journal.json"));
+    if !new.exists() {
+        if let Some(legacy) = legacy.filter(|p| p.exists() && *p != new) {
+            if std::fs::copy(&legacy, &new).is_ok() {
+                let _ = std::fs::rename(&legacy, legacy.with_file_name("journal.migrado.json"));
+            }
+        }
+    }
+    let old = user_dir.join("journal.json");
     if !new.exists() && old.exists() && std::fs::copy(&old, &new).is_ok() {
         let _ = std::fs::rename(&old, user_dir.join("journal.migrado.json"));
     }
@@ -247,6 +278,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            set_language,
             get_overview,
             plan_changes,
             apply_changes,

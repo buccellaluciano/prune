@@ -1,4 +1,5 @@
 import { api, userApi, type ApplyReport, type Desired, type Overview, type Restart, type Tweak, type UserInfo } from "./api";
+import { t, tn, type Key } from "./i18n.svelte";
 
 /** Pendiente: true/false para switches, id de opción para selectores. */
 export type Pending = boolean | string;
@@ -11,16 +12,18 @@ export interface Toast {
   text: string;
 }
 
-const RESTART_MSG: Record<Restart, string | null> = {
+const RESTART_MSG: Record<Restart, Key | null> = {
   none: null,
-  explorer: "Reiniciá el Explorador (o cerrá sesión) para ver todos los cambios.",
-  logoff: "Cerrá sesión y volvé a entrar para que los cambios tengan efecto.",
-  reboot: "Reiniciá la PC para que los cambios tengan efecto.",
+  explorer: "toast.restart_explorer",
+  logoff: "toast.restart_logoff",
+  reboot: "toast.restart_reboot",
 };
 
 class AppStore {
   overview = $state<Overview | null>(null);
   user = $state<UserInfo | null>(null);
+  /** true cuando terminó de leer la cuenta, haya foto o no (la bienvenida lo espera). */
+  userLoaded = $state(false);
   loading = $state(true);
   loadError = $state<string | null>(null);
   view = $state<View>("tweaks");
@@ -50,6 +53,8 @@ class AppStore {
       this.user = await userApi.get();
     } catch {
       this.user = null;
+    } finally {
+      this.userLoaded = true;
     }
   }
 
@@ -81,8 +86,8 @@ class AppStore {
     return typeof p === "string" ? p : t.choice;
   }
 
-  choiceLabel(t: Tweak, id: string | null): string {
-    return t.choices.find((c) => c.id === id)?.label ?? "valor desconocido";
+  choiceLabel(tw: Tweak, id: string | null): string {
+    return tw.choices.find((c) => c.id === id)?.label ?? t("tweak.unknown_value");
   }
 
   choose(t: Tweak, choice: string) {
@@ -100,12 +105,12 @@ class AppStore {
     );
   }
 
-  disabledReason(t: Tweak): string | null {
-    if (t.state === "unsupported") return "No aplica a tu versión de Windows";
-    if (t.ucpd && this.overview?.system.ucpd_active) return "Windows protege este ajuste (UCPD): no deja que otros programas lo cambien";
-    if (t.requires_admin && !this.overview?.system.elevated) return "Requiere ejecutar como administrador";
+  disabledReason(tw: Tweak): string | null {
+    if (tw.state === "unsupported") return t("disabled.unsupported");
+    if (tw.ucpd && this.overview?.system.ucpd_active) return t("disabled.ucpd");
+    if (tw.requires_admin && !this.overview?.system.elevated) return t("disabled.admin");
     const foreign = this.overview?.system.foreign_user;
-    if (t.per_user && foreign) return `La app corre con otra cuenta: se aplicaría a esa cuenta y no a ${foreign}`;
+    if (tw.per_user && foreign) return t("disabled.foreign", { user: foreign });
     return null;
   }
 
@@ -146,7 +151,7 @@ class AppStore {
     this.busy = true;
     try {
       const report = await api.apply(changes);
-      this.report(report, "aplicados");
+      this.report(report, "apply");
       this.pending = {};
       this.planOpen = false;
       await this.load();
@@ -157,17 +162,17 @@ class AppStore {
     }
   }
 
-  report(r: ApplyReport, verb: string) {
+  report(r: ApplyReport, kind: "apply" | "undo") {
     if (r.warning) this.toast("error", r.warning);
     const ok = r.results.filter((x) => x.ok).length;
     const failed = r.results.filter((x) => !x.ok);
-    if (ok) this.toast("ok", `${ok} ${ok === 1 ? "cambio" : "cambios"} ${verb}.`);
+    if (ok) this.toast("ok", tn(kind === "apply" ? "toast.applied" : "toast.undone", ok));
     for (const f of failed) {
-      const t = this.tweaks.find((t) => t.id === f.id);
-      this.toast("error", `${t?.title ?? f.id}: ${f.error}`);
+      const tw = this.tweaks.find((x) => x.id === f.id);
+      this.toast("error", `${tw?.title ?? f.id}: ${f.error}`);
     }
     const msg = RESTART_MSG[r.restart];
-    if (msg && ok) this.toast("info", msg);
+    if (msg && ok) this.toast("info", t(msg));
   }
 
   toast(kind: Toast["kind"], text: string) {
@@ -183,12 +188,12 @@ export function normalize(s: string) {
 
 export const store = new AppStore();
 
-/** Perfiles: conjuntos de tweaks que se marcan como pendientes de una. */
-export const PROFILES: { id: string; title: string; hint: string; ids: string[] }[] = [
+/** Perfiles: conjuntos de tweaks que se marcan como pendientes de una. `title` y `hint` son claves de i18n. */
+export const PROFILES: { id: string; title: Key; hint: Key; ids: string[] }[] = [
   {
     id: "privacy",
-    title: "Privacidad",
-    hint: "Telemetría, anuncios, sugerencias y Recall",
+    title: "profile.privacy",
+    hint: "profile.privacy_hint",
     ids: [
       "privacy.advertising_id", "privacy.tailored_experiences", "privacy.online_speech",
       "privacy.inking_typing", "privacy.typing_insights", "privacy.track_app_launches",
@@ -199,8 +204,8 @@ export const PROFILES: { id: string; title: string; hint: string; ids: string[] 
   },
   {
     id: "clean",
-    title: "Escritorio limpio",
-    hint: "Barra y Explorador sin ruido",
+    title: "profile.clean",
+    hint: "profile.clean_hint",
     ids: [
       "taskbar.hide_task_view", "taskbar.disable_widgets", "search.taskbar_mode:icon", "search.highlights",
       "start.recommendations", "start.account_notifications", "explorer.show_extensions",
@@ -209,8 +214,8 @@ export const PROFILES: { id: string; title: string; hint: string; ids: string[] 
   },
   {
     id: "gaming",
-    title: "Gaming",
-    hint: "Menos interrupciones, entrada 1:1",
+    title: "profile.gaming",
+    hint: "profile.gaming_hint",
     ids: [
       "gaming.game_dvr", "gaming.mouse_acceleration", "gaming.sticky_keys_prompt",
       "taskbar.no_animations", "start.tips", "start.suggested_notifications",
@@ -220,8 +225,8 @@ export const PROFILES: { id: string; title: string; hint: string; ids: string[] 
   },
   {
     id: "lite",
-    title: "Equipo liviano",
-    hint: "Apariencia básica: sin efectos, transparencias ni miniaturas",
+    title: "profile.lite",
+    hint: "profile.lite_hint",
     ids: [
       "appearance.performance_visuals", "appearance.no_transparency", "taskbar.no_animations",
       "explorer.icons_not_thumbnails", "appearance.faster_menus",

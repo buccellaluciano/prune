@@ -12,17 +12,26 @@
   import AppsView from "#lib/components/AppsView.svelte";
   import DiskView from "#lib/components/DiskView.svelte";
   import InstallSheet from "#lib/components/InstallSheet.svelte";
+  import Welcome from "#lib/components/Welcome.svelte";
   import { fly } from "svelte/transition";
   import { flip } from "svelte/animate";
   import { onMount } from "svelte";
   import TitleBar from "#lib/components/TitleBar.svelte";
   import ModernTitleBar from "#lib/components/ModernTitleBar.svelte";
   import { theme } from "#lib/theme.svelte.ts";
+  import { apps } from "#lib/apps.svelte.ts";
+  import { i18n, t } from "#lib/i18n.svelte.ts";
 
   onMount(() => {
     theme.apply();
-    store.load();
     store.loadUser();
+    // El idioma va primero: el backend arma el catálogo y los mensajes en ese idioma.
+    i18n.init().finally(() => store.load());
+    // Al cambiarlo, se vuelve a pedir lo que trae textos del catálogo.
+    i18n.onChange(() => {
+      store.load();
+      if (apps.overview) apps.load();
+    });
   });
 
   function onkeydown(e: KeyboardEvent) {
@@ -36,8 +45,8 @@
 
   const categoryTitle = $derived(
     store.query
-      ? `Resultados para "${store.query}"`
-      : (store.overview?.categories.find((c) => c.id === store.category)?.title ?? "Todos los tweaks"),
+      ? t("page.results", { q: store.query })
+      : (store.overview?.categories.find((c) => c.id === store.category)?.title ?? t("nav.all")),
   );
 
   const grouped = $derived.by(() => {
@@ -66,53 +75,51 @@
         <input
           bind:value={store.query}
           oninput={() => { if (store.view !== "apps") store.view = "tweaks"; }}
-          placeholder={store.view === "apps" ? "Filtrar programas" : "Filtrar tweaks"}
+          placeholder={store.view === "apps" ? t("page.filter_apps") : t("page.filter_tweaks")}
           class="h-8 w-full max-w-sm rounded-md border border-line bg-transparent pr-3 pl-8 text-[13px] outline-none placeholder:text-faint focus:border-mute"
         />
       </div>
       {#if !isTauri}
-        <span class="font-mono text-[11px] text-faint">demo · navegador</span>
+        <span class="font-mono text-[11px] text-faint">{t("page.demo")}</span>
       {/if}
       <button
         class="inline-flex items-center gap-2 rounded-md border border-line px-2.5 py-1 text-[12.5px] text-mute hover:border-[#3a3935] hover:text-ink"
         onclick={() => (store.paletteOpen = true)}
       >
-        <Command size={13} /> Comandos <kbd class="font-mono text-[10.5px] text-faint">Ctrl K</kbd>
+        <Command size={13} /> {t("page.commands")} <kbd class="font-mono text-[10.5px] text-faint">Ctrl K</kbd>
       </button>
     </div>
 
     {#if store.overview?.system.foreign_user}
       <div class="infobar flex items-center gap-2 border-b border-line px-6 py-2 text-[12px] text-mute">
         <ShieldAlert size={14} class="text-advanced" />
-        La app corre con otra cuenta de administrador, no con la de {store.overview.system.foreign_user}. Los tweaks de
-        usuario y quitar apps quedan deshabilitados para no aplicarlos a la cuenta equivocada.
+        {t("page.foreign", { user: store.overview.system.foreign_user })}
       </div>
     {:else if store.overview && !store.overview.system.elevated}
       <div class="infobar flex items-center gap-2 border-b border-line px-6 py-2 text-[12px] text-mute">
         <ShieldAlert size={14} class="text-moderate" />
-        Sin permisos de administrador: los tweaks de sistema (HKLM) y evitar reinstalaciones de apps quedan deshabilitados.
+        {t("page.not_admin")}
       </div>
     {/if}
 
     <div class="flex-1 overflow-y-auto px-6 pt-6 pb-28">
       {#if store.loading && !store.overview}
-        <div class="flex items-center gap-2 text-[13px] text-mute"><LoaderCircle size={16} class="animate-spin" /> Leyendo el estado del sistema…</div>
+        <div class="flex items-center gap-2 text-[13px] text-mute"><LoaderCircle size={16} class="animate-spin" /> {t("page.loading")}</div>
       {:else if store.loadError}
         <p class="rounded-md border border-advanced/30 p-4 text-[13px] text-advanced">{store.loadError}</p>
       {:else if store.view === "bloat"}
-        <BloatView />
+        <!-- Al cambiar de idioma se vuelven a montar: piden sus datos ya traducidos. -->
+        {#key i18n.lang}<BloatView />{/key}
       {:else if store.view === "apps"}
         <AppsView />
       {:else if store.view === "disk"}
         <DiskView />
       {:else if store.view === "history"}
-        <HistoryView />
+        {#key i18n.lang}<HistoryView />{/key}
       {:else}
         <div class="mx-auto max-w-4xl">
           <h1 class="font-display text-[20px] font-semibold">{categoryTitle}</h1>
-          <p class="mt-1 mb-7 text-[13px] text-mute">
-            Nada se aplica hasta que revisás el plan. El estado se lee del registro real.
-          </p>
+          <p class="mt-1 mb-7 text-[13px] text-mute">{t("page.subtitle")}</p>
 
           {#each grouped as g (g.cat?.id ?? "single")}
             {#if g.cat}
@@ -131,7 +138,7 @@
               {/each}
             </div>
           {:else}
-            <p class="text-[13px] text-mute">Ningún tweak coincide con la búsqueda.</p>
+            <p class="text-[13px] text-mute">{t("page.no_match")}</p>
           {/each}
         </div>
       {/if}
@@ -145,16 +152,17 @@
 <PlanSheet />
 <CommandPalette />
 <InstallSheet />
+<Welcome />
 
 <!-- Toasts -->
 <div class="pointer-events-none fixed right-5 bottom-5 z-[60] flex w-80 flex-col gap-2">
-  {#each store.toasts as t (t.id)}
+  {#each store.toasts as toast (toast.id)}
     <div
       transition:fly={{ x: 40, duration: 200 }}
-      class="toast pointer-events-auto flex items-start gap-2 rounded-md border border-l-2 border-line bg-panel p-3 text-[12.5px] shadow-lg shadow-black/40 {toastCls[t.kind]}"
+      class="toast pointer-events-auto flex items-start gap-2 rounded-md border border-l-2 border-line bg-panel p-3 text-[12.5px] shadow-lg shadow-black/40 {toastCls[toast.kind]}"
     >
-      <span class="flex-1">{t.text}</span>
-      <button class="text-faint hover:text-ink" onclick={() => (store.toasts = store.toasts.filter((x) => x.id !== t.id))} aria-label="Cerrar">
+      <span class="flex-1">{toast.text}</span>
+      <button class="text-faint hover:text-ink" onclick={() => (store.toasts = store.toasts.filter((x) => x.id !== toast.id))} aria-label={t("common.close")}>
         <X size={13} />
       </button>
     </div>

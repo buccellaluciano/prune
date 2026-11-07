@@ -2,6 +2,7 @@
   import { ChevronRight } from "@lucide/svelte";
   import type { Tweak } from "#lib/api.ts";
   import { store } from "#lib/store.svelte.ts";
+  import { t } from "#lib/i18n.svelte.ts";
   import { slide } from "svelte/transition";
 
   let { tweak }: { tweak: Tweak } = $props();
@@ -13,15 +14,20 @@
   const isPending = $derived(tweak.id in store.pending);
   const disabled = $derived(store.disabledReason(tweak));
 
-  const riskLabel = { safe: null, moderate: "riesgo moderado", advanced: "riesgo alto" } as const;
+  const riskLabel = $derived({ safe: null, moderate: t("risk.moderate"), advanced: t("risk.advanced") });
   const riskCls = { safe: "", moderate: "text-moderate", advanced: "text-advanced" } as const;
-  const restartLabel = { none: null, explorer: "reinicia Explorador", logoff: "cerrar sesión", reboot: "requiere reinicio" } as const;
+  const restartLabel = $derived({
+    none: null,
+    explorer: t("restart.explorer"),
+    logoff: t("restart.logoff"),
+    reboot: t("restart.reboot"),
+  });
 
   const meta = $derived(
     [
-      tweak.requires_admin ? "admin" : null,
+      tweak.requires_admin ? t("tweak.admin") : null,
       restartLabel[tweak.restart],
-      tweak.state === "unsupported" ? "no aplica a tu build" : null,
+      tweak.state === "unsupported" ? t("tweak.unsupported") : null,
     ].filter(Boolean) as string[],
   );
 </script>
@@ -39,10 +45,8 @@
 
       {#if tweak.ucpd && store.overview?.system.ucpd_active}
         <p class="mt-1.5 text-[12px] leading-relaxed text-moderate">
-          Windows protege este ajuste y no deja que otros programas lo cambien, ni como administrador.
-          Alternativas: quitá
-          <button class="underline underline-offset-2 hover:text-ink" onclick={() => ((store.view = "bloat"), (store.query = ""))}>Widgets en Bloatware</button>,
-          o en el Editor de directivas (gpedit.msc): Componentes de Windows → Widgets → "Permitir widgets" en Deshabilitada.
+          {t("tweak.ucpd.before")}
+          <button class="underline underline-offset-2 hover:text-ink" onclick={() => ((store.view = "bloat"), (store.query = ""))}>{t("tweak.ucpd.link")}</button>{t("tweak.ucpd.after")}
         </p>
       {/if}
 
@@ -52,7 +56,7 @@
             {#if isChoice}
               {store.choiceLabel(tweak, tweak.choice)} → {store.choiceLabel(tweak, current)}
             {:else}
-              {store.pending[tweak.id] ? "se aplicará" : "se revertirá"}
+              {store.pending[tweak.id] ? t("tweak.will_apply") : t("tweak.will_revert")}
             {/if}
           </span>
           <span aria-hidden="true">·</span>
@@ -62,7 +66,7 @@
           <span aria-hidden="true">·</span>
         {/if}
         {#if tweak.state === "partial"}
-          <span class="text-moderate">{isChoice ? "valor no reconocido" : "parcial"}</span>
+          <span class="text-moderate">{isChoice ? t("tweak.unrecognized") : t("tweak.partial")}</span>
           <span aria-hidden="true">·</span>
         {/if}
         {#each meta as m}
@@ -70,7 +74,7 @@
           <span aria-hidden="true">·</span>
         {/each}
         <button class="inline-flex items-center gap-0.5 hover:text-ink" onclick={() => (open = !open)} aria-expanded={open}>
-          registro <ChevronRight size={11} class="transition-transform {open ? 'rotate-90' : ''}" />
+          {t("tweak.registry")} <ChevronRight size={11} class="transition-transform {open ? 'rotate-90' : ''}" />
         </button>
       </div>
     </div>
@@ -95,7 +99,7 @@
           >
             {c.label}
             {#if c.id === tweak.choice && isPending}
-              <span class="absolute top-0.5 right-0.5 size-1 rounded-full bg-mute" title="Actual"></span>
+              <span class="absolute top-0.5 right-0.5 size-1 rounded-full bg-mute" title={t("tweak.current")}></span>
             {/if}
           </button>
         {/each}
@@ -105,7 +109,7 @@
         role="switch"
         aria-checked={on}
         aria-label={tweak.title}
-        title={disabled ?? (on ? "Activado" : "Desactivado")}
+        title={disabled ?? (on ? t("tweak.on") : t("tweak.off"))}
         disabled={!!disabled}
         onclick={() => store.toggle(tweak)}
         class="relative mt-0.5 h-5 w-9 shrink-0 rounded-full border transition-colors duration-150
@@ -126,12 +130,12 @@
           <div class="break-all text-faint">{op.key}</div>
           <div class="mt-0.5 flex flex-wrap gap-x-3 text-mute">
             <span class="text-ink">{op.name}</span>
-            <span>actual <b class="font-normal text-ink">{op.current}</b></span>
+            <span>{t("op.current")} <b class="font-normal text-ink">{op.current}</b></span>
             {#if isChoice}
-              <span>opciones <b class="font-normal text-accent">{op.on}</b></span>
+              <span>{t("op.options")} <b class="font-normal text-accent">{op.on}</b></span>
             {:else}
-              <span>activo <b class="font-normal text-accent">{op.on}</b></span>
-              <span>por defecto <b class="font-normal text-ink">{op.off}</b></span>
+              <span>{t("op.on")} <b class="font-normal text-accent">{op.on}</b></span>
+              <span>{t("op.default")} <b class="font-normal text-ink">{op.off}</b></span>
             {/if}
           </div>
         </div>

@@ -2,6 +2,7 @@
   import { ArrowRight, LoaderCircle, X } from "@lucide/svelte";
   import { api, type PlannedChange } from "#lib/api.ts";
   import { store } from "#lib/store.svelte.ts";
+  import { t } from "#lib/i18n.svelte.ts";
   import { fade, fly } from "svelte/transition";
 
   let plan = $state<PlannedChange[] | null>(null);
@@ -24,9 +25,9 @@
 
   function verb(id: string): { text: string; cls: string } {
     const p = store.pending[id];
-    const t = store.tweaks.find((t) => t.id === id);
-    if (typeof p === "string" && t) return { text: `→ ${store.choiceLabel(t, p)}`, cls: "text-accent" };
-    return p ? { text: "aplicar", cls: "text-safe" } : { text: "revertir", cls: "text-moderate" };
+    const tw = store.tweaks.find((x) => x.id === id);
+    if (typeof p === "string" && tw) return { text: `→ ${store.choiceLabel(tw, p)}`, cls: "text-accent" };
+    return p ? { text: t("plan.apply_one"), cls: "text-safe" } : { text: t("plan.revert_one"), cls: "text-moderate" };
   }
 </script>
 
@@ -35,14 +36,14 @@
   <section
     class="fixed top-0 right-0 bottom-0 z-40 flex w-[min(560px,92vw)] flex-col border-l border-line bg-panel shadow-xl shadow-black/50"
     transition:fly={{ x: 560, duration: 240, opacity: 1 }}
-    aria-label="Plan de cambios"
+    aria-label={t("plan.title")}
   >
     <header class="flex items-center gap-3 border-b border-line px-5 py-4">
       <div class="flex-1">
-        <h2 class="font-display text-[16px] font-semibold">Plan de cambios</h2>
-        <p class="text-[12px] text-mute">Esto es exactamente lo que se va a escribir en el registro. Todo queda en el historial para deshacer.</p>
+        <h2 class="font-display text-[16px] font-semibold">{t("plan.title")}</h2>
+        <p class="text-[12px] text-mute">{t("plan.subtitle")}</p>
       </div>
-      <button class="rounded-lg p-1.5 text-mute hover:bg-card-hi hover:text-ink" onclick={() => (store.planOpen = false)} aria-label="Cerrar">
+      <button class="rounded-lg p-1.5 text-mute hover:bg-card-hi hover:text-ink" onclick={() => (store.planOpen = false)} aria-label={t("common.close")}>
         <X size={18} />
       </button>
     </header>
@@ -51,7 +52,7 @@
       {#if error}
         <p class="rounded-lg bg-advanced/10 p-3 text-[13px] text-advanced">{error}</p>
       {:else if !plan}
-        <div class="flex items-center gap-2 text-[13px] text-mute"><LoaderCircle size={16} class="animate-spin" /> Calculando…</div>
+        <div class="flex items-center gap-2 text-[13px] text-mute"><LoaderCircle size={16} class="animate-spin" /> {t("plan.computing")}</div>
       {:else}
         {#each grouped as [id, ops] (id)}
           <div class="rounded-md border border-line bg-card p-3">
@@ -67,7 +68,7 @@
                   <span class="text-advanced/90 line-through decoration-advanced/50">{c.from}</span>
                   <ArrowRight size={11} class="text-faint" />
                   <span class="text-safe">{c.to}</span>
-                  {#if c.noop}<span class="text-faint">(sin cambios)</span>{/if}
+                  {#if c.noop}<span class="text-faint">{t("plan.noop")}</span>{/if}
                 </div>
               </div>
             {/each}
@@ -77,15 +78,15 @@
     </div>
 
     <footer class="flex items-center gap-2 border-t border-line px-5 py-4">
-      <span class="flex-1 text-[12px] text-mute">{store.pendingCount} tweaks · {plan?.filter((c) => !c.noop).length ?? "…"} valores</span>
-      <button class="rounded-lg px-3 py-2 text-[13px] text-mute hover:bg-card-hi hover:text-ink" onclick={() => (store.planOpen = false)}>Volver</button>
+      <span class="flex-1 text-[12px] text-mute">{t("plan.summary", { tweaks: store.pendingCount, values: plan?.filter((c) => !c.noop).length ?? "…" })}</span>
+      <button class="rounded-lg px-3 py-2 text-[13px] text-mute hover:bg-card-hi hover:text-ink" onclick={() => (store.planOpen = false)}>{t("common.back")}</button>
       <button
         class="accent-grad inline-flex items-center gap-2 rounded-md px-3.5 py-1.5 text-[13px] font-medium disabled:opacity-50"
         disabled={!plan || store.busy}
         onclick={() => store.applyPending()}
       >
         {#if store.busy}<LoaderCircle size={14} class="animate-spin" />{/if}
-        Aplicar cambios
+        {t("plan.apply")}
       </button>
     </footer>
   </section>

@@ -2,6 +2,7 @@
   import { Check, LoaderCircle, PackageX, TriangleAlert } from "@lucide/svelte";
   import { api, type BloatApp, type Risk } from "#lib/api.ts";
   import { store } from "#lib/store.svelte.ts";
+  import { t, tn } from "#lib/i18n.svelte.ts";
   import { onMount } from "svelte";
   import { fly } from "svelte/transition";
 
@@ -12,11 +13,11 @@
   let confirming = $state(false);
   let working = $state(false);
 
-  const tiers: { id: Risk; title: string; hint: string; cls: string }[] = [
-    { id: "safe", title: "Seguro", hint: "Nadie lo extraña", cls: "" },
-    { id: "moderate", title: "Moderado", hint: "Puede que lo uses", cls: "text-moderate" },
-    { id: "advanced", title: "Avanzado", hint: "Rompe funciones: leé la nota", cls: "text-advanced" },
-  ];
+  const tiers = $derived<{ id: Risk; title: string; hint: string; cls: string }[]>([
+    { id: "safe", title: t("bloat.tier.safe"), hint: t("bloat.tier.safe_hint"), cls: "" },
+    { id: "moderate", title: t("bloat.tier.moderate"), hint: t("bloat.tier.moderate_hint"), cls: "text-moderate" },
+    { id: "advanced", title: t("bloat.tier.advanced"), hint: t("bloat.tier.advanced_hint"), cls: "text-advanced" },
+  ]);
 
   const chosen = $derived(Object.keys(selected).filter((k) => selected[k]));
   const elevated = $derived(store.overview?.system.elevated ?? false);
@@ -56,7 +57,7 @@
     try {
       const res = await api.removeBloat(chosen, deprovision && elevated);
       const ok = res.filter((r) => r.ok).length;
-      if (ok) store.toast("ok", `${ok} ${ok === 1 ? "app quitada" : "apps quitadas"}.`);
+      if (ok) store.toast("ok", tn("bloat.removed", ok));
       for (const r of res.filter((r) => !r.ok)) store.toast("error", `${r.id}: ${r.error}`);
       clear();
       await load();
@@ -80,21 +81,18 @@
 
 <div class="mx-auto max-w-4xl">
   <header class="mb-6">
-    <h1 class="font-display text-[20px] font-semibold">Bloatware</h1>
-    <p class="mt-1 max-w-2xl text-[13px] text-mute">
-      Apps del catálogo que tenés instaladas. Lo esencial (Store, winget, Terminal, Calculadora, Seguridad de Windows)
-      nunca aparece acá. Quitar una app no se deshace desde Prune: se reinstala desde Microsoft Store.
-    </p>
+    <h1 class="font-display text-[20px] font-semibold">{t("nav.bloat")}</h1>
+    <p class="mt-1 max-w-2xl text-[13px] text-mute">{t("bloat.subtitle")}</p>
   </header>
 
   {#if error}
     <p class="rounded-md border border-advanced/30 p-4 text-[13px] text-advanced">{error}</p>
   {:else if !apps}
-    <div class="flex items-center gap-2 text-[13px] text-mute"><LoaderCircle size={15} class="animate-spin" /> Buscando paquetes instalados…</div>
+    <div class="flex items-center gap-2 text-[13px] text-mute"><LoaderCircle size={15} class="animate-spin" /> {t("bloat.loading")}</div>
   {:else if apps.length === 0}
     <div class="rounded-lg border border-line bg-card p-10 text-center">
       <PackageX size={26} strokeWidth={1.6} class="mx-auto text-faint" />
-      <p class="mt-3 text-[13.5px] text-mute">No quedó bloatware del catálogo instalado.</p>
+      <p class="mt-3 text-[13.5px] text-mute">{t("bloat.empty")}</p>
     </div>
   {:else}
     {#each tiers as tier (tier.id)}
@@ -107,7 +105,7 @@
             <span class="font-mono text-[11px] text-faint">{list.length}</span>
             <span class="text-[12px] text-faint">· {tier.hint}</span>
             <button class="ml-auto text-[12px] text-mute hover:text-ink" onclick={() => toggleTier(list)}>
-              {all ? "Quitar selección" : "Seleccionar todo"}
+              {all ? t("bloat.unselect_all") : t("bloat.select_all")}
             </button>
           </div>
           <div class="divide-y divide-line overflow-hidden rounded-lg border border-line bg-card">
@@ -151,41 +149,41 @@
   >
     {#if confirming}
       <span class="text-[13px] text-moderate">
-        ¿Quitar {chosen.length} {chosen.length === 1 ? "app" : "apps"}{deprovision && elevated ? " y evitar que se reinstalen" : ""}?
+        {tn(deprovision && elevated ? "bloat.confirm_deprovision" : "bloat.confirm", chosen.length)}
       </span>
       <button class="rounded-md px-2.5 py-1 text-[13px] text-mute hover:bg-card-hi hover:text-ink" onclick={() => (confirming = false)}>
-        Cancelar
+        {t("common.cancel")}
       </button>
       <button
         class="inline-flex items-center gap-2 rounded-md border border-advanced/60 px-3 py-1 text-[13px] font-medium text-advanced hover:bg-advanced/10 disabled:opacity-50"
         disabled={working}
         onclick={remove}
       >
-        {#if working}<LoaderCircle size={13} class="animate-spin" />{/if} Sí, quitar
+        {#if working}<LoaderCircle size={13} class="animate-spin" />{/if} {t("bloat.yes_remove")}
       </button>
     {:else}
       <span class="text-[13px] text-mute">
-        <span class="font-mono text-ink">{chosen.length}</span> {chosen.length === 1 ? "seleccionada" : "seleccionadas"}
+        <span class="font-mono text-ink">{chosen.length}</span> {tn("bloat.selected", chosen.length)}
       </span>
       {#if elevated}
         <button
           role="checkbox"
           aria-checked={deprovision}
           class="group flex items-center gap-2 rounded-md px-2 py-1 text-[12.5px] text-mute hover:bg-card-hi hover:text-ink"
-          title="También la quita de la imagen de Windows, así no se instala en cuentas nuevas"
+          title={t("bloat.deprovision_hint")}
           onclick={() => (deprovision = !deprovision)}
         >
-          {@render checkbox(deprovision)} Evitar reinstalación
+          {@render checkbox(deprovision)} {t("bloat.deprovision")}
         </button>
       {/if}
-      <button class="rounded-md px-2.5 py-1 text-[13px] text-mute hover:bg-card-hi hover:text-ink" onclick={clear}>Descartar</button>
+      <button class="rounded-md px-2.5 py-1 text-[13px] text-mute hover:bg-card-hi hover:text-ink" onclick={clear}>{t("pending.discard")}</button>
       <button
         class="accent-grad rounded-md px-3 py-1 text-[13px] font-medium disabled:opacity-40"
         disabled={!!foreign}
-        title={foreign ? "La app corre con otra cuenta de administrador" : undefined}
+        title={foreign ? t("common.foreign_admin") : undefined}
         onclick={() => (confirming = true)}
       >
-        Quitar
+        {t("bloat.remove")}
       </button>
     {/if}
   </div>

@@ -82,7 +82,7 @@ fn locate_winget() -> Result<PathBuf, String> {
     use windows::core::HSTRING;
     use windows::ApplicationModel::PackageSignatureKind;
     use windows::Management::Deployment::PackageManager;
-    let not_found = || "No se encontró winget. Instalá o actualizá \"Instalador de aplicación\" desde Microsoft Store.".to_string();
+    let not_found = || t!("winget_not_found");
     let pm = PackageManager::new().map_err(|e| e.to_string())?;
     let family = HSTRING::from(APP_INSTALLER_FAMILY);
     let mut dirs: Vec<PathBuf> = Vec::new();
@@ -112,7 +112,7 @@ fn locate_winget() -> Result<PathBuf, String> {
         .find(|exe| exe.to_string_lossy().to_ascii_lowercase().starts_with(&protected) && exe.is_file())
         .ok_or_else(not_found)?;
     // Y el ejecutable en sí, con firma válida de Microsoft.
-    crate::sign::require_microsoft(&exe).map_err(|e| format!("winget no pasó la verificación de firma: {e}"))?;
+    crate::sign::require_microsoft(&exe).map_err(|e| t!("winget_bad_signature", error = e))?;
     Ok(exe)
 }
 
@@ -160,7 +160,7 @@ fn run(args: &[&str], timeout: Duration, mut on_line: impl FnMut(&str)) -> Resul
         .stderr(Stdio::null())
         .creation_flags(CREATE_NO_WINDOW)
         .spawn()
-        .map_err(|e| format!("No se pudo ejecutar winget: {e}"))?;
+        .map_err(|e| t!("winget_run_failed", error = e))?;
 
     // Un hilo lee la salida y la manda por un canal; si queda bloqueado por un proceso
     // heredero, simplemente se abandona (termina solo cuando ese proceso cierre).
@@ -199,7 +199,7 @@ fn run(args: &[&str], timeout: Duration, mut on_line: impl FnMut(&str)) -> Resul
         if started.elapsed() > timeout {
             let _ = child.kill();
             let _ = child.wait();
-            return Err(format!("winget no terminó en {} minutos y se canceló", timeout.as_secs() / 60));
+            return Err(t!("winget_timeout", minutes = timeout.as_secs() / 60));
         }
     };
     // Lo que quedó en el canal, sin esperar a que se cierre la salida.
@@ -319,7 +319,12 @@ fn parse_upgrades(lines: &[String]) -> HashMap<String, String> {
 
 pub fn status() -> AppsOverview {
     let c = catalog::apps();
-    let mut ov = AppsOverview { winget: None, error: None, groups: c.group.clone(), apps: Vec::new() };
+    let groups = c
+        .group
+        .iter()
+        .map(|g| catalog::AppGroup { id: g.id.clone(), title: crate::i18n::app_group(&g.id, &g.title) })
+        .collect();
+    let mut ov = AppsOverview { winget: None, error: None, groups, apps: Vec::new() };
     let _g = LOCK.lock().unwrap_or_else(|e| e.into_inner());
     match version() {
         Ok(v) => ov.winget = Some(v),
@@ -347,7 +352,7 @@ pub fn status() -> AppsOverview {
                 id: a.id.clone(),
                 title: a.title.clone(),
                 group: a.group.clone(),
-                description: a.description.clone(),
+                description: crate::i18n::app_description(a),
                 installed: inst.get(&k).cloned(),
                 available: if inst.contains_key(&k) { upg.get(&k).cloned() } else { None },
             }
@@ -464,17 +469,17 @@ pub fn parse_installer(lines: &[String]) -> InstallerInfo {
 }
 
 pub fn installer_info(id: &str) -> Result<InstallerInfo, String> {
-    let app = catalog::find_app(id).ok_or("El programa no está en el catálogo")?;
+    let app = catalog::find_app(id).ok_or_else(|| t!("app_not_in_catalog"))?;
     let mut args = vec!["show", "--id", &app.id, "--exact", "--source", "winget"];
     args.extend(COMMON);
     let _g = LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let (code, lines) = run(&args, QUERY_TIMEOUT, |_| {})?;
     if code != 0 {
-        return Err(format!("winget show falló (0x{code:08X})"));
+        return Err(t!("winget_show_failed", code = format!("0x{code:08X}")));
     }
     let info = parse_installer(&lines);
     if info.sha256.is_none() {
-        return Err("El manifiesto no trae el hash del instalador".into());
+        return Err(t!("winget_no_hash"));
     }
     Ok(info)
 }
@@ -482,10 +487,10 @@ pub fn installer_info(id: &str) -> Result<InstallerInfo, String> {
 pub fn act(id: &str, action: Action, mut progress: impl FnMut(Progress)) -> ActionResult {
     let fail = |m: String| ActionResult { id: id.to_string(), ok: false, message: Some(m) };
     let Some(app) = catalog::find_app(id) else {
-        return fail("El programa no está en el catálogo".into());
+        return fail(t!("app_not_in_catalog"));
     };
     if !catalog::is_valid_package_id(&app.id) {
-        return fail("ID de paquete inválido".into());
+        return fail(t!("package_id_invalid"));
     }
     let mut args: Vec<&str> = match action {
         Action::Install => vec!["install"],
@@ -520,9 +525,9 @@ pub fn act(id: &str, action: Action, mut progress: impl FnMut(Progress)) -> Acti
     let ok = |m: &str| ActionResult { id: id.to_string(), ok: true, message: Some(m.to_string()) };
     match code {
         0 => ActionResult { id: id.to_string(), ok: true, message: None },
-        UPDATE_NOT_APPLICABLE => ok("Ya estaba en la última versión"),
-        PACKAGE_ALREADY_INSTALLED => ok("Ya estaba instalado"),
-        NO_APPLICATIONS_FOUND => fail("winget no encontró el paquete (¿ya se desinstaló?)".into()),
+        UPDATE_NOT_APPLICABLE => ok(&t!("already_latest")),
+        PACKAGE_ALREADY_INSTALLED => ok(&t!("already_installed")),
+        NO_APPLICATIONS_FOUND => fail(t!("package_not_found")),
         _ => {
             let detail = lines
                 .iter()
@@ -530,7 +535,7 @@ pub fn act(id: &str, action: Action, mut progress: impl FnMut(Progress)) -> Acti
                 .find(|l| !l.contains('█') && !l.contains('▒') && !l.starts_with("--"))
                 .cloned()
                 .unwrap_or_default();
-            fail(format!("{detail} (código 0x{code:08X})").trim_start().to_string())
+            fail(t!("winget_exit_code", detail = detail, code = format!("0x{code:08X}")).trim_start().to_string())
         }
     }
 }

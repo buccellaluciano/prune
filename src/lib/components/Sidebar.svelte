@@ -7,6 +7,8 @@
   import { store, PROFILES } from "#lib/store.svelte.ts";
   import CategoryIcon from "./CategoryIcon.svelte";
   import { theme, THEMES } from "#lib/theme.svelte.ts";
+  import { initials } from "#lib/format.ts";
+  import { i18n, LANGS, t } from "#lib/i18n.svelte.ts";
 
   const counts = $derived.by(() => {
     const c: Record<string, { on: number; total: number }> = {};
@@ -21,10 +23,6 @@
   const applied = $derived(store.tweaks.filter((t) => t.state === "applied").length);
   const pct = $derived(store.tweaks.length ? Math.round((applied / store.tweaks.length) * 100) : 0);
 
-  function initials(name: string) {
-    const parts = name.trim().split(/\s+/);
-    return (parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : name.slice(0, 1)) || "?";
-  }
 
   function goCategory(id: string | null) {
     store.view = "tweaks";
@@ -37,7 +35,7 @@
   <div class="flex items-center gap-2.5 px-4 pt-4 pb-4">
     <Logo size={28} />
     <div class="min-w-0">
-      <div class="text-[13.5px] leading-tight font-semibold">Prune</div>
+      <div class="text-[13.5px] leading-tight font-semibold">P-Rune</div>
       {#if store.overview}
         <div class="font-mono text-[10.5px] text-faint">
           {store.overview.system.display_version} · {store.overview.system.build}.{store.overview.system.ubr}
@@ -49,7 +47,7 @@
   <!-- Progreso global -->
   <div class="mx-4 mb-4">
     <div class="flex items-baseline justify-between text-[11.5px] text-mute">
-      <span>Optimizado</span><span class="font-mono text-[11px] text-ink">{applied}/{store.tweaks.length}</span>
+      <span>{t("side.optimized")}</span><span class="font-mono text-[11px] text-ink">{applied}/{store.tweaks.length}</span>
     </div>
     <div class="mt-1.5 h-[3px] overflow-hidden rounded-full bg-line">
       <div class="progress-fill accent-grad h-full rounded-full transition-all duration-700" style="width:{pct}%"></div>
@@ -61,7 +59,7 @@
       class="nav {store.view === 'tweaks' && !store.category ? 'active' : ''}"
       onclick={() => goCategory(null)}
     >
-      <SlidersHorizontal size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">Todos los tweaks</span>
+      <SlidersHorizontal size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">{t("nav.all")}</span>
     </button>
 
     {#each store.overview?.categories ?? [] as c (c.id)}
@@ -78,47 +76,47 @@
     <div class="my-2 border-t border-line"></div>
 
     <button class="nav {store.view === 'apps' ? 'active' : ''}" onclick={() => ((store.view = "apps"), (store.query = ""))}>
-      <AppWindow size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">Programas</span>
-      {#if apps.busy}<span class="size-1.5 animate-pulse rounded-full bg-accent" title="winget trabajando"></span>
-      {:else if apps.upgradable.length}<span class="font-mono text-[11px] text-moderate" title="Actualizaciones disponibles">{apps.upgradable.length}</span>{/if}
+      <AppWindow size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">{t("nav.apps")}</span>
+      {#if apps.busy}<span class="size-1.5 animate-pulse rounded-full bg-accent" title={t("side.winget_busy")}></span>
+      {:else if apps.upgradable.length}<span class="font-mono text-[11px] text-moderate" title={t("side.updates")}>{apps.upgradable.length}</span>{/if}
     </button>
     <button class="nav {store.view === 'disk' ? 'active' : ''}" onclick={() => ((store.view = "disk"), (store.query = ""))}>
-      <HardDrive size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">Disco</span>
-      {#if disk.status?.running}<span class="size-1.5 animate-pulse rounded-full bg-accent" title="Analizando"></span>{/if}
+      <HardDrive size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">{t("nav.disk")}</span>
+      {#if disk.status?.running}<span class="size-1.5 animate-pulse rounded-full bg-accent" title={t("side.scanning")}></span>{/if}
     </button>
     <button class="nav {store.view === 'bloat' ? 'active' : ''}" onclick={() => (store.view = "bloat")}>
-      <PackageX size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">Bloatware</span>
+      <PackageX size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">{t("nav.bloat")}</span>
     </button>
     <button class="nav {store.view === 'history' ? 'active' : ''}" onclick={() => (store.view = "history")}>
-      <History size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">Historial</span>
+      <History size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">{t("nav.history")}</span>
     </button>
 
-    <div class="mt-5 mb-1 px-2.5 text-[11.5px] text-faint">Perfiles</div>
+    <div class="mt-5 mb-1 px-2.5 text-[11.5px] text-faint">{t("side.profiles")}</div>
     {#each PROFILES as p (p.id)}
       <button
         class="group w-full rounded-md px-2.5 py-1.5 text-left hover:bg-card-hi"
         onclick={() => {
           store.stageMany(p.ids, true);
           store.view = "tweaks";
-          store.toast("info", `Perfil "${p.title}" marcado. Revisá el plan antes de aplicar.`);
+          store.toast("info", t("side.profile_staged", { profile: t(p.title) }));
         }}
       >
-        <div class="text-[13px] text-ink">{p.title}</div>
-        <div class="text-[11px] text-faint">{p.hint}</div>
+        <div class="text-[13px] text-ink">{t(p.title)}</div>
+        <div class="text-[11px] text-faint">{t(p.hint)}</div>
       </button>
     {/each}
 
-    <div class="mt-5 mb-1.5 px-2.5 text-[11.5px] text-faint">Tema</div>
-    <div class="theme-picker mx-2.5 flex gap-1 rounded-md border border-line p-0.5" role="radiogroup" aria-label="Tema">
-      {#each THEMES as t (t.id)}
+    <div class="mt-5 mb-1.5 px-2.5 text-[11.5px] text-faint">{t("side.theme")}</div>
+    <div class="theme-picker mx-2.5 flex gap-1 rounded-md border border-line p-0.5" role="radiogroup" aria-label={t("side.theme")}>
+      {#each THEMES as th (th.id)}
         <button
           role="radio"
-          aria-checked={theme.current === t.id}
-          title={t.hint}
-          class="flex-1 rounded-[4px] px-2 py-1 text-[12px] {theme.current === t.id ? 'bg-card-hi font-medium text-ink' : 'text-mute hover:text-ink'}"
-          onclick={() => theme.set(t.id)}
+          aria-checked={theme.current === th.id}
+          title={t(th.hint)}
+          class="flex-1 rounded-[4px] px-2 py-1 text-[12px] {theme.current === th.id ? 'bg-card-hi font-medium text-ink' : 'text-mute hover:text-ink'}"
+          onclick={() => theme.set(th.id)}
         >
-          {t.title}
+          {t(th.title)}
         </button>
       {/each}
     </div>
@@ -126,7 +124,7 @@
       aria-pressed={theme.glass}
       class="glass-toggle group mx-2.5 mt-1.5 flex w-[calc(100%-1.25rem)] items-start gap-2 rounded-md px-1.5 py-1 text-left hover:bg-card-hi disabled:opacity-50"
       disabled={!isTauri}
-      title={isTauri ? "Desenfoca el escritorio detrás de la ventana, como el vidrio de Windows 7" : "Solo funciona en la app instalada"}
+      title={isTauri ? t("side.glass_title") : t("side.glass_unavailable")}
       onclick={() => theme.setGlass(!theme.glass)}
     >
       <span
@@ -137,10 +135,22 @@
         {#if theme.glass}<Check size={10} strokeWidth={3} />{/if}
       </span>
       <span class="min-w-0">
-        <span class="block text-[12px] text-ink">Transparencia real</span>
-        <span class="block text-[11px] text-faint">Vidrio sobre el escritorio. Puede trabar al mover la ventana.</span>
+        <span class="block text-[12px] text-ink">{t("side.glass")}</span>
+        <span class="block text-[11px] text-faint">{t("side.glass_hint")}</span>
       </span>
     </button>
+
+    <label class="mt-5 mb-1.5 block px-2.5 text-[11.5px] text-faint" for="lang-select">{t("side.language")}</label>
+    <select
+      id="lang-select"
+      class="lang-select mx-2.5 block w-[calc(100%-1.25rem)] rounded-md border border-line bg-panel px-2 py-1 text-[12px] text-ink outline-none focus:border-mute"
+      value={i18n.lang}
+      onchange={(e) => i18n.set(e.currentTarget.value as (typeof LANGS)[number]["code"])}
+    >
+      {#each LANGS as l (l.code)}
+        <option value={l.code}>{l.name}</option>
+      {/each}
+    </select>
   </nav>
 
   {#if store.user}
@@ -158,9 +168,9 @@
         <div class="truncate text-[13px] font-medium" title={u.name}>{u.name || u.username}</div>
         <div
           class="flex items-center gap-1 text-[11px] {elevated ? 'text-safe' : 'text-faint'}"
-          title={elevated ? "La app corre con permisos de administrador" : "La app corre sin permisos de administrador"}
+          title={elevated ? t("side.elevated_title") : t("side.not_elevated_title")}
         >
-          {#if elevated}<ShieldCheck size={11} /> Administrador{:else}<ShieldOff size={11} /> Sin admin{/if}
+          {#if elevated}<ShieldCheck size={11} /> {t("side.admin")}{:else}<ShieldOff size={11} /> {t("side.no_admin")}{/if}
           {#if u.name && u.name !== u.username}<span class="truncate text-faint">· {u.username}</span>{/if}
         </div>
       </div>

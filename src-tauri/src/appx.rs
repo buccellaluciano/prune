@@ -77,9 +77,9 @@ pub fn list() -> Result<Vec<BloatView>, String> {
                 .collect();
             (!packages.is_empty()).then(|| BloatView {
                 id: a.name.clone(),
-                title: a.title.clone(),
+                title: crate::i18n::bloat_title(a),
                 tier: a.tier,
-                note: a.note.clone(),
+                note: crate::i18n::bloat_note(a),
                 packages,
             })
         })
@@ -92,7 +92,7 @@ pub fn remove(ids: &[String], deprovision: bool) -> Result<Vec<RemoveResult>, St
     let mut results = Vec::new();
     for id in ids {
         let Some(app) = catalog::bloat().app.iter().find(|a| &a.name == id) else {
-            results.push(RemoveResult { id: id.clone(), ok: false, removed: vec![], error: Some("No está en el catálogo".into()) });
+            results.push(RemoveResult { id: id.clone(), ok: false, removed: vec![], error: Some(t!("not_in_catalog")) });
             continue;
         };
         let mut removed = Vec::new();

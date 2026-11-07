@@ -1,5 +1,6 @@
 <script lang="ts">
   import { store } from "#lib/store.svelte.ts";
+  import { t, tn } from "#lib/i18n.svelte.ts";
   import { fly } from "svelte/transition";
 </script>
 
@@ -10,13 +11,13 @@
   >
     <span class="text-[13px] text-mute">
       <span class="font-mono text-ink">{store.pendingCount}</span>
-      {store.pendingCount === 1 ? "cambio pendiente" : "cambios pendientes"}
+      {tn("pending.count", store.pendingCount)}
     </span>
     <button class="rounded-md px-2.5 py-1 text-[13px] text-mute hover:bg-card-hi hover:text-ink" onclick={() => store.clearPending()}>
-      Descartar
+      {t("pending.discard")}
     </button>
     <button class="accent-grad rounded-md px-3 py-1 text-[13px] font-medium" onclick={() => (store.planOpen = true)}>
-      Revisar y aplicar
+      {t("pending.review")}
     </button>
   </div>
 {/if}

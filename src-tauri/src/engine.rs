@@ -1,6 +1,7 @@
 //! Motor de tweaks: estado real, vista previa, aplicar/revertir y deshacer.
 
 use crate::catalog::{self, Hive, Op, Restart, Risk, Tweak, Value};
+use crate::i18n;
 use crate::power;
 use crate::registry::{self as reg, RawValue};
 use serde::{Deserialize, Serialize};
@@ -77,10 +78,10 @@ enum Target {
 
 fn targets(t: &Tweak, d: &Desired, build: u32) -> Result<Vec<Target>, String> {
     if t.is_choice() {
-        let id = d.choice.as_deref().ok_or("Falta elegir una opción")?;
-        let c = t.find_choice(id).ok_or_else(|| format!("Opción desconocida: {id}"))?;
+        let id = d.choice.as_deref().ok_or_else(|| t!("choice_missing"))?;
+        let c = t.find_choice(id).ok_or_else(|| t!("choice_unknown", id = id))?;
         if !c.supported_on(build) {
-            return Err(format!("'{}' no está disponible en esta versión de Windows", c.label));
+            return Err(t!("choice_unsupported", label = i18n::choice_label(t, c)));
         }
         return Ok(c.values.iter().cloned().map(Target::Set).collect());
     }
@@ -96,10 +97,38 @@ fn targets(t: &Tweak, d: &Desired, build: u32) -> Result<Vec<Target>, String> {
         .collect())
 }
 
-fn desired_label(t: &Tweak, d: &Desired) -> String {
-    match d.choice.as_deref().and_then(|c| t.find_choice(c)) {
-        Some(c) => format!("{}: {}", t.title, c.label),
-        None => format!("{} {}", if d.applied { "✓" } else { "↺" }, t.title),
+fn desired_label(t: &Tweak, choice: Option<&str>, applied: bool) -> String {
+    match choice.and_then(|c| t.find_choice(c)) {
+        Some(c) => format!("{}: {}", i18n::tweak_title(t), i18n::choice_label(t, c)),
+        None => format!("{} {}", if applied { "✓" } else { "↺" }, i18n::tweak_title(t)),
+    }
+}
+
+/// Qué se aplicó en una entrada del historial, para armar su título en el idioma de
+/// quien la mira (el texto guardado en `label` queda en el idioma del momento).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LabelItem {
+    pub id: String,
+    #[serde(default)]
+    pub choice: Option<String>,
+    #[serde(default)]
+    pub applied: bool,
+}
+
+fn item_label(i: &LabelItem) -> Option<String> {
+    if i.id == POWER_ID {
+        return Some(t!("label_power", plan = power_label(i.choice.as_deref()?)));
+    }
+    Some(desired_label(catalog::find_tweak(&i.id)?, i.choice.as_deref(), i.applied))
+}
+
+/// Título de una entrada en el idioma actual; las entradas viejas conservan el guardado.
+fn entry_label(e: &JournalEntry) -> String {
+    match e.items.as_slice() {
+        [one] => item_label(one).unwrap_or_else(|| e.label.clone()),
+        [] if !e.removed_apps.is_empty() && e.changes.is_empty() => t!("label_removed_apps", n = e.removed_apps.len()),
+        [] => e.label.clone(),
+        many => t!("label_tweaks", n = many.len()),
     }
 }
 
@@ -147,6 +176,9 @@ pub struct JournalEntry {
     /// Cambio de plan de energía (no es del registro).
     #[serde(default)]
     pub power: Option<power::PowerChange>,
+    /// Qué se aplicó (para traducir `label`). Vacío en entradas de versiones anteriores.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub items: Vec<LabelItem>,
 }
 
 // ───────────────────────────── Plan de energía ─────────────────────────────
@@ -158,13 +190,13 @@ pub const POWER_ID: &str = "power.plan";
 fn power_choices() -> Vec<ChoiceView> {
     let plans = power::list();
     let mut out = Vec::new();
-    for (g, label) in [(power::SAVER, "Economizador"), (power::BALANCED, "Equilibrado"), (power::HIGH, "Alto rendimiento")] {
+    for (g, label) in [(power::SAVER, t!("power_saver")), (power::BALANCED, t!("power_balanced")), (power::HIGH, t!("power_high"))] {
         if plans.iter().any(|p| p.guid == g) {
-            out.push(ChoiceView { id: power::to_string(&g), label: label.into(), default: g == power::BALANCED });
+            out.push(ChoiceView { id: power::to_string(&g), label, default: g == power::BALANCED });
         }
     }
     let ultimate = power::find_ultimate(&plans).map_or(power::ULTIMATE_NEW.into(), |g| power::to_string(&g));
-    out.push(ChoiceView { id: ultimate, label: "Máximo rendimiento".into(), default: false });
+    out.push(ChoiceView { id: ultimate, label: t!("power_ultimate"), default: false });
     // Un plan propio (del fabricante o del usuario) activo también tiene que verse.
     if let Ok(a) = power::active() {
         let id = power::to_string(&a);
@@ -188,10 +220,8 @@ fn power_view() -> Option<TweakView> {
     Some(TweakView {
         id: POWER_ID.into(),
         category: "power".into(),
-        title: "Plan de energía".into(),
-        description: "Alto y Máximo rendimiento no dejan que el procesador baje la frecuencia ni que entre en ahorro: \
-            responde más rápido pero consume y calienta más. En notebooks, conviene usarlos solo enchufado."
-            .into(),
+        title: t!("power_title"),
+        description: t!("power_description"),
         risk: Risk::Moderate,
         restart: Restart::None,
         tags: vec!["energia".into(), "rendimiento".into(), "maximo".into(), "ultimate".into()],
@@ -200,8 +230,8 @@ fn power_view() -> Option<TweakView> {
         ucpd: false,
         state,
         ops: vec![OpView {
-            key: "Plan de energía (powrprof)".into(),
-            name: "activo".into(),
+            key: t!("power_key"),
+            name: t!("power_active"),
             current: power::name(&active),
             on: choices.iter().map(|c| c.label.as_str()).collect::<Vec<_>>().join(" · "),
             off: String::new(),
@@ -255,7 +285,7 @@ fn key_label(op: &Op) -> String {
 
 fn name_label(op: &Op) -> String {
     if op.name.is_empty() {
-        "(Predeterminado)".into()
+        t!("default_value")
     } else {
         op.name.clone()
     }
@@ -263,9 +293,9 @@ fn name_label(op: &Op) -> String {
 
 fn off_label(op: &Op) -> String {
     match (&op.off, &op.delete_key_on_revert) {
-        (_, Some(_)) => "(borra la clave)".into(),
+        (_, Some(_)) => t!("deletes_key"),
         (Some(v), None) => reg::describe_value(op.kind, v),
-        (None, None) => "(borra el valor)".into(),
+        (None, None) => t!("deletes_value"),
     }
 }
 
@@ -285,14 +315,14 @@ pub fn tweak_state(t: &Tweak, build: u32) -> Detected {
             Ok(v) => reg::describe(v.as_ref()),
             Err(e) => {
                 error = true;
-                format!("error: {e}")
+                t!("read_error", error = e)
             }
         };
         let (on, off) = if t.is_choice() {
             let opts = t
                 .choices
                 .iter()
-                .map(|c| format!("{} {}", reg::describe_value(op.kind, &c.values[i]), c.label))
+                .map(|c| format!("{} {}", reg::describe_value(op.kind, &c.values[i]), i18n::choice_label(t, c)))
                 .collect::<Vec<_>>()
                 .join(" · ");
             (opts, String::new())
@@ -351,8 +381,8 @@ pub fn list(build: u32) -> Vec<TweakView> {
             TweakView {
                 id: t.id.clone(),
                 category: t.category.clone(),
-                title: t.title.clone(),
-                description: t.description.clone(),
+                title: i18n::tweak_title(t),
+                description: i18n::tweak_description(t),
                 risk: t.risk,
                 restart: t.restart,
                 tags: t.tags.clone(),
@@ -365,7 +395,7 @@ pub fn list(build: u32) -> Vec<TweakView> {
                     .choices
                     .iter()
                     .filter(|c| c.supported_on(build))
-                    .map(|c| ChoiceView { id: c.id.clone(), label: c.label.clone(), default: c.default })
+                    .map(|c| ChoiceView { id: c.id.clone(), label: i18n::choice_label(t, c), default: c.default })
                     .collect(),
                 choice,
             }
@@ -378,15 +408,15 @@ pub fn plan(desired: &[Desired], build: u32) -> Result<Vec<PlannedChange>, Strin
     let mut out = Vec::new();
     for d in desired {
         if d.id == POWER_ID {
-            let choice = d.choice.as_deref().ok_or("Falta elegir un plan de energía")?;
+            let choice = d.choice.as_deref().ok_or_else(|| t!("power_missing"))?;
             let active = power::active()?;
             out.push(PlannedChange {
                 tweak_id: POWER_ID.into(),
-                key: "Plan de energía (powrprof)".into(),
-                name: "activo".into(),
+                key: t!("power_key"),
+                name: t!("power_active"),
                 from: power::name(&active),
                 to: if choice == power::ULTIMATE_NEW {
-                    "Máximo rendimiento (se crea desde la plantilla de Windows)".into()
+                    t!("power_ultimate_new")
                 } else {
                     power_label(choice)
                 },
@@ -394,14 +424,14 @@ pub fn plan(desired: &[Desired], build: u32) -> Result<Vec<PlannedChange>, Strin
             });
             continue;
         }
-        let t = catalog::find_tweak(&d.id).ok_or_else(|| format!("tweak desconocido: {}", d.id))?;
-        let targets = targets(t, d, build).map_err(|e| format!("{}: {e}", t.title))?;
+        let t = catalog::find_tweak(&d.id).ok_or_else(|| t!("tweak_unknown", id = d.id))?;
+        let targets = targets(t, d, build).map_err(|e| format!("{}: {e}", i18n::tweak_title(t)))?;
         for (op, target) in t.ops.iter().zip(&targets) {
             let cur = reg::read(op.hive, &op.path, &op.name).map_err(|e| e.to_string())?;
             let (to, noop) = match target {
                 Target::Set(v) => (reg::describe_value(op.kind, v), reg::matches(cur.as_ref(), op.kind, v)),
-                Target::DeleteValue => ("(borra el valor)".into(), cur.is_none()),
-                Target::DeleteTree(_) => ("(borra la clave)".into(), cur.is_none()),
+                Target::DeleteValue => (t!("deletes_value"), cur.is_none()),
+                Target::DeleteTree(_) => (t!("deletes_key"), cur.is_none()),
             };
             out.push(PlannedChange {
                 tweak_id: t.id.clone(),
@@ -453,15 +483,12 @@ fn apply_op(t: &Tweak, op: &Op, target: &Target) -> Result<Change, String> {
     Ok(change)
 }
 
-pub const UCPD_MSG: &str = "Windows protege este ajuste (UCPD) y solo deja cambiarlo con sus propias \
-herramientas. Alternativas: quitá \"Widgets\" en Bloatware, o en el Editor de directivas de grupo \
-(gpedit.msc) poné Componentes de Windows → Widgets → \"Permitir widgets\" en Deshabilitada.";
 
 /// Mensaje de error de escritura: "acceso denegado" con permisos de admin casi siempre
 /// es una protección de Windows sobre ese valor, no un problema de permisos.
 fn write_error(e: &std::io::Error) -> String {
     if e.raw_os_error() == Some(5) && crate::system::is_elevated() {
-        format!("{e}. Windows protege este valor y no deja que otros programas lo cambien, ni como administrador")
+        t!("write_protected", error = e)
     } else {
         e.to_string()
     }
@@ -476,19 +503,19 @@ fn validate_change(c: &Change) -> Result<(), String> {
     if c.hive == Hive::HKCU && c.path.starts_with(r"Software\DebloaterTest\") && c.tweak_id == "test.tweak" {
         return Ok(());
     }
-    let t = catalog::find_tweak(&c.tweak_id).ok_or_else(|| format!("tweak desconocido '{}'", c.tweak_id))?;
+    let t = catalog::find_tweak(&c.tweak_id).ok_or_else(|| t!("tweak_unknown", id = c.tweak_id))?;
     let op = t
         .ops
         .iter()
         .find(|o| o.hive == c.hive && o.path.eq_ignore_ascii_case(&c.path) && o.name.eq_ignore_ascii_case(&c.name))
-        .ok_or_else(|| format!("{}\\{}\\{} no es parte de '{}'", reg::hive_label(c.hive), c.path, c.name, t.id))?;
+        .ok_or_else(|| t!("journal_not_in_tweak", key = format!("{}\\{}\\{}", reg::hive_label(c.hive), c.path, c.name), id = t.id))?;
     // Solo se pueden borrar claves que contienen a la de la operación, y nunca de 1-2 niveles.
     let path = op.path.to_ascii_lowercase();
     for k in &c.created_keys {
         let k = k.to_ascii_lowercase();
         let inside = path == k || path.starts_with(&format!("{k}\\"));
         if !inside || k.matches('\\').count() < 2 {
-            return Err(format!("clave a borrar no válida '{k}'"));
+            return Err(t!("journal_bad_key", key = k));
         }
     }
     Ok(())
@@ -498,15 +525,15 @@ fn validate_change(c: &Change) -> Result<(), String> {
 /// creado solo puede ser una copia de "Máximo rendimiento".
 fn validate_power(p: &power::PowerChange) -> Result<(), String> {
     let plans = power::list();
-    let before = power::parse(&p.before).ok_or("GUID anterior inválido")?;
-    power::parse(&p.after).ok_or("GUID nuevo inválido")?;
+    let before = power::parse(&p.before).ok_or_else(|| t!("power_guid_invalid"))?;
+    power::parse(&p.after).ok_or_else(|| t!("power_guid_invalid"))?;
     if !plans.iter().any(|x| x.guid == before) {
-        return Err("el plan anterior ya no existe".into());
+        return Err(t!("power_previous_gone"));
     }
     if let Some(c) = &p.created {
-        let g = power::parse(c).ok_or("GUID creado inválido")?;
+        let g = power::parse(c).ok_or_else(|| t!("power_guid_invalid"))?;
         if power::find_ultimate(&plans) != Some(g) && plans.iter().any(|x| x.guid == g) {
-            return Err("el plan a borrar no es el Máximo rendimiento que creó la app".into());
+            return Err(t!("power_not_ours"));
         }
     }
     Ok(())
@@ -547,11 +574,8 @@ impl Engine {
             Err(e) => {
                 let backup = self.journal_path.with_file_name(format!("journal.danado-{}.json", now_ms()));
                 let msg = match fs::rename(&self.journal_path, &backup) {
-                    Ok(()) => format!(
-                        "El historial no se pudo leer ({e}). Se guardó una copia en {} y se empezó uno nuevo.",
-                        backup.display()
-                    ),
-                    Err(re) => format!("El historial no se pudo leer ({e}) ni respaldar ({re})."),
+                    Ok(()) => t!("journal_unreadable_backup", error = e, path = backup.display()),
+                    Err(re) => t!("journal_unreadable", error = e, backup_error = re),
                 };
                 *self.warning.lock().unwrap() = Some(msg);
                 Vec::new()
@@ -576,6 +600,9 @@ impl Engine {
         let _g = self.lock.lock().unwrap();
         let mut h = self.load();
         h.reverse();
+        for e in &mut h {
+            e.label = entry_label(e);
+        }
         h
     }
 
@@ -591,6 +618,7 @@ impl Engine {
             removed_apps: apps,
             undone: false,
             power: None,
+            items: vec![],
         });
         self.save(&entries)
     }
@@ -602,19 +630,19 @@ impl Engine {
         let mut results = Vec::new();
         let mut changes = Vec::new();
         let mut restart = Restart::None;
-        let mut applied_titles = Vec::new();
+        let mut items: Vec<LabelItem> = Vec::new();
         let mut power_change: Option<power::PowerChange> = None;
 
         for d in desired {
             if d.id == POWER_ID {
                 let r = if !elevated {
-                    Err("Requiere ejecutar como administrador".to_string())
+                    Err(t!("requires_admin"))
                 } else {
-                    d.choice.as_deref().ok_or_else(|| "Falta elegir un plan de energía".to_string()).and_then(power::activate)
+                    d.choice.as_deref().ok_or_else(|| t!("power_missing")).and_then(power::activate)
                 };
                 match r {
                     Ok(c) => {
-                        applied_titles.push(format!("Plan de energía: {}", power_label(&c.after)));
+                        items.push(LabelItem { id: POWER_ID.into(), choice: Some(c.after.clone()), applied: true });
                         power_change = Some(c);
                         results.push(ItemResult { id: POWER_ID.into(), ok: true, error: None });
                     }
@@ -623,27 +651,27 @@ impl Engine {
                 continue;
             }
             let Some(t) = catalog::find_tweak(&d.id) else {
-                results.push(ItemResult { id: d.id.clone(), ok: false, error: Some("tweak desconocido".into()) });
+                results.push(ItemResult { id: d.id.clone(), ok: false, error: Some(t!("tweak_unknown", id = d.id)) });
                 continue;
             };
             if t.requires_admin() && !elevated {
-                results.push(ItemResult { id: t.id.clone(), ok: false, error: Some("Requiere ejecutar como administrador".into()) });
+                results.push(ItemResult { id: t.id.clone(), ok: false, error: Some(t!("requires_admin")) });
                 continue;
             }
             if t.ucpd && crate::system::ucpd_active() {
-                results.push(ItemResult { id: t.id.clone(), ok: false, error: Some(UCPD_MSG.into()) });
+                results.push(ItemResult { id: t.id.clone(), ok: false, error: Some(t!("ucpd")) });
                 continue;
             }
             if let (true, Some(user)) = (t.per_user(), foreign_user) {
                 results.push(ItemResult {
                     id: t.id.clone(),
                     ok: false,
-                    error: Some(format!("La app corre con otra cuenta de administrador: se aplicaría a esa cuenta y no a {user}")),
+                    error: Some(t!("foreign_user_apply", user = user)),
                 });
                 continue;
             }
             if (d.applied || t.is_choice()) && !t.supported_on(build) {
-                results.push(ItemResult { id: t.id.clone(), ok: false, error: Some("No aplica a esta versión de Windows".into()) });
+                results.push(ItemResult { id: t.id.clone(), ok: false, error: Some(t!("unsupported_build")) });
                 continue;
             }
             let targets = match targets(t, d, build) {
@@ -672,7 +700,7 @@ impl Engine {
                 results.push(ItemResult { id: t.id.clone(), ok: false, error: Some(e) });
             } else {
                 restart = restart.max(t.restart);
-                applied_titles.push(desired_label(t, d));
+                items.push(LabelItem { id: t.id.clone(), choice: d.choice.clone(), applied: d.applied });
                 changes.extend(done);
                 results.push(ItemResult { id: t.id.clone(), ok: true, error: None });
             }
@@ -683,9 +711,9 @@ impl Engine {
         } else {
             let mut entries = self.load();
             let id = now_ms();
-            let label = match applied_titles.len() {
-                1 => applied_titles.remove(0),
-                n => format!("{n} tweaks"),
+            let label = match items.as_slice() {
+                [one] => item_label(one).unwrap_or_default(),
+                many => t!("label_tweaks", n = many.len()),
             };
             // Id único aunque dos operaciones caigan en el mismo milisegundo.
             let id = entries.last().map_or(id, |l| id.max(l.id + 1));
@@ -697,9 +725,10 @@ impl Engine {
                 removed_apps: vec![],
                 undone: false,
                 power: power_change,
+                items,
             });
             if let Err(e) = self.save(&entries) {
-                results.push(ItemResult { id: "journal".into(), ok: false, error: Some(format!("No se pudo guardar el historial: {e}")) });
+                results.push(ItemResult { id: "journal".into(), ok: false, error: Some(t!("journal_save_failed", error = e)) });
             }
             Some(id)
         };
@@ -721,24 +750,22 @@ impl Engine {
         let entry = entries
             .iter_mut()
             .find(|e| e.id == entry_id)
-            .ok_or("Entrada de historial inexistente")?;
+            .ok_or_else(|| t!("entry_missing"))?;
         if entry.undone {
-            return Err("Ya se deshizo".into());
+            return Err(t!("entry_undone"));
         }
         if entry.changes.is_empty() && entry.power.is_none() {
-            return Err("Las apps quitadas no se pueden restaurar desde acá: reinstalalas desde Microsoft Store.".into());
+            return Err(t!("apps_not_restorable"));
         }
         if let (true, Some(user)) = (entry.changes.iter().any(|c| c.hive == Hive::HKCU), foreign_user) {
-            return Err(format!(
-                "La app corre con otra cuenta de administrador: deshacer tocaría esa cuenta y no la de {user}"
-            ));
+            return Err(t!("foreign_user_undo", user = user));
         }
         // Nada se toca si alguna parte de la entrada no coincide con el catálogo.
         for c in &entry.changes {
-            validate_change(c).map_err(|e| format!("El historial no coincide con el catálogo ({e}). No se deshizo nada."))?;
+            validate_change(c).map_err(|e| t!("journal_mismatch", error = e))?;
         }
         if let Some(p) = &entry.power {
-            validate_power(p).map_err(|e| format!("El historial del plan de energía no es válido ({e}). No se deshizo nada."))?;
+            validate_power(p).map_err(|e| t!("journal_power_invalid", error = e))?;
         }
 
         if !force {
@@ -750,19 +777,19 @@ impl Engine {
                 let current = reg::read(c.hive, &c.path, &c.name).map_err(|e| e.to_string())?;
                 // Igual a lo que dejamos: se puede deshacer. Igual a lo de antes: ya está restaurado.
                 if current != c.after && current != c.before {
-                    let title = catalog::find_tweak(&c.tweak_id).map_or(c.tweak_id.clone(), |t| t.title.clone());
-                    conflicts.push(format!(
-                        "{title}: {}\\{} vale {}",
-                        reg::hive_label(c.hive),
-                        c.name,
-                        reg::describe(current.as_ref())
+                    let title = catalog::find_tweak(&c.tweak_id).map_or(c.tweak_id.clone(), i18n::tweak_title);
+                    conflicts.push(t!(
+                        "conflict_value",
+                        title = title,
+                        key = format!("{}\\{}", reg::hive_label(c.hive), c.name),
+                        value = reg::describe(current.as_ref())
                     ));
                 }
             }
             if let Some(p) = &entry.power {
                 let now = power::active().map(|g| power::to_string(&g)).unwrap_or_default();
                 if now != p.after && now != p.before {
-                    conflicts.push(format!("Plan de energía: ahora está en {}", power_label(&now)));
+                    conflicts.push(t!("conflict_power", plan = power_label(&now)));
                 }
             }
             if !conflicts.is_empty() {
@@ -851,6 +878,7 @@ mod tests {
             removed_apps: vec![],
             undone: false,
             power: None,
+            items: vec![],
         }
     }
 

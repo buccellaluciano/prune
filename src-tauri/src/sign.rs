@@ -54,9 +54,9 @@ pub fn signer(path: &Path) -> Result<String, String> {
     unsafe { WinVerifyTrust(HWND::default(), &mut action, &mut data as *mut _ as *mut _) };
 
     if status != 0 {
-        return Err(format!("firma inválida o ausente (0x{:08X})", status as u32));
+        return Err(t!("signature_invalid", code = format!("0x{:08X}", status as u32)));
     }
-    name.ok_or_else(|| "no se pudo leer el firmante".into())
+    name.ok_or_else(|| t!("signer_unreadable"))
 }
 
 /// La firma tiene que ser válida y de Microsoft.
@@ -65,7 +65,7 @@ pub fn require_microsoft(path: &Path) -> Result<(), String> {
     if who == "Microsoft Corporation" {
         Ok(())
     } else {
-        Err(format!("firmado por \"{who}\", no por Microsoft"))
+        Err(t!("signed_by_other", signer = who))
     }
 }
 

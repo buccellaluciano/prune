@@ -33,7 +33,7 @@ fn wide(s: &str) -> Vec<u16> {
 pub fn split_https(url: &str) -> Result<(String, u16, String), String> {
     let rest = url
         .strip_prefix("https://")
-        .ok_or_else(|| format!("Solo se permiten direcciones https: {url}"))?;
+        .ok_or_else(|| t!("http_only_https", url = url))?;
     let (authority, path) = match rest.find(['/', '?', '#']) {
         Some(i) => (&rest[..i], &rest[i..]),
         None => (rest, "/"),
@@ -41,11 +41,11 @@ pub fn split_https(url: &str) -> Result<(String, u16, String), String> {
     let path = path.split('#').next().unwrap_or("/");
     let path = if path.starts_with('?') { format!("/{path}") } else { path.to_string() };
     if authority.is_empty() || authority.contains('@') || authority.contains(char::is_whitespace) {
-        return Err(format!("Dirección inválida: {url}"));
+        return Err(t!("http_bad_url", url = url));
     }
     let (host, port) = match authority.rsplit_once(':') {
         Some((h, p)) if !h.contains(']') || h.ends_with(']') => {
-            (h.to_string(), p.parse::<u16>().map_err(|_| format!("Puerto inválido: {url}"))?)
+            (h.to_string(), p.parse::<u16>().map_err(|_| t!("http_bad_port", url = url))?)
         }
         _ => (authority.to_string(), 443),
     };
@@ -57,16 +57,16 @@ pub fn get(url: &str, headers: &[(&str, &str)], max_bytes: usize) -> Result<Resp
     let (host, port, path) = split_https(url)?;
     let err = |what: &str, e: windows::core::Error| format!("{what}: {}", e.message());
     unsafe {
-        let session = Handle(WinHttpOpen(w!("Prune/0.1"), WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, PCWSTR::null(), PCWSTR::null(), 0));
+        let session = Handle(WinHttpOpen(w!("P-Rune/0.2"), WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, PCWSTR::null(), PCWSTR::null(), 0));
         if session.0.is_null() {
-            return Err("No se pudo iniciar WinHTTP".into());
+            return Err(t!("http_init_failed"));
         }
         // Resolver, conectar, enviar, recibir (ms).
         let _ = WinHttpSetTimeouts(session.0, 10_000, 10_000, 15_000, 20_000);
         let host_w = wide(&host);
         let connect = Handle(WinHttpConnect(session.0, PCWSTR(host_w.as_ptr()), port, 0));
         if connect.0.is_null() {
-            return Err(format!("No se pudo conectar con {host}"));
+            return Err(t!("http_connect_failed", host = host));
         }
         let path_w = wide(&path);
         let request = Handle(WinHttpOpenRequest(
@@ -79,12 +79,12 @@ pub fn get(url: &str, headers: &[(&str, &str)], max_bytes: usize) -> Result<Resp
             WINHTTP_FLAG_SECURE,
         ));
         if request.0.is_null() {
-            return Err("No se pudo armar la solicitud".into());
+            return Err(t!("http_request_failed"));
         }
         let extra: String = headers.iter().map(|(k, v)| format!("{k}: {v}\r\n")).collect();
         let extra_w: Vec<u16> = extra.encode_utf16().collect();
         WinHttpSendRequest(request.0, (!extra_w.is_empty()).then_some(&extra_w[..]), None, 0, 0, 0)
-            .map_err(|e| err(&format!("No se pudo contactar a {host}"), e))?;
+            .map_err(|e| err(&t!("http_send_failed", host = host), e))?;
         WinHttpReceiveResponse(request.0, std::ptr::null_mut()).map_err(|e| err(&format!("{host} no respondió"), e))?;
 
         let mut status = 0u32;
@@ -97,7 +97,7 @@ pub fn get(url: &str, headers: &[(&str, &str)], max_bytes: usize) -> Result<Resp
             &mut len,
             std::ptr::null_mut(),
         )
-        .map_err(|e| err("Respuesta sin código de estado", e))?;
+        .map_err(|e| err(&t!("http_no_status"), e))?;
 
         let mut ct = [0u16; 256];
         let mut ct_len = (ct.len() * 2) as u32;
@@ -118,13 +118,13 @@ pub fn get(url: &str, headers: &[(&str, &str)], max_bytes: usize) -> Result<Resp
         loop {
             let mut read = 0u32;
             WinHttpReadData(request.0, buf.as_mut_ptr() as *mut _, buf.len() as u32, &mut read)
-                .map_err(|e| err("Se cortó la descarga", e))?;
+                .map_err(|e| err(&t!("http_cut"), e))?;
             if read == 0 {
                 break;
             }
             body.extend_from_slice(&buf[..read as usize]);
             if body.len() > max_bytes {
-                return Err(format!("Respuesta demasiado grande (más de {} KB)", max_bytes / 1024));
+                return Err(t!("http_too_large", kb = max_bytes / 1024));
             }
         }
         Ok(Response { status: status as u16, content_type, body })

@@ -202,7 +202,7 @@ fn hex(bytes: &[u8]) -> String {
 /// Representación legible para la vista previa.
 pub fn describe(v: Option<&RawValue>) -> String {
     match v {
-        None => "(no existe)".into(),
+        None => t!("value_missing"),
         Some(r) => {
             if let Some(n) = decode_dword(r) {
                 format!("{n}")
@@ -211,7 +211,7 @@ pub fn describe(v: Option<&RawValue>) -> String {
             } else if r.vtype == REG_BINARY as u32 {
                 hex(&r.bytes)
             } else {
-                format!("<tipo {} · {} bytes>", r.vtype, r.bytes.len())
+                t!("value_other_type", kind = r.vtype, bytes = r.bytes.len())
             }
         }
     }

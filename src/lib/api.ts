@@ -128,6 +128,11 @@ function call<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
   return isTauri ? invoke<T>(cmd, args) : mock<T>(cmd, args);
 }
 
+/** Idioma del backend (catálogo y mensajes). */
+export const i18nApi = {
+  set: (lang: string) => call<void>("set_language", { lang }),
+};
+
 export const api = {
   overview: () => call<Overview>("get_overview"),
   plan: (changes: Desired[]) => call<PlannedChange[]>("plan_changes", { changes }),

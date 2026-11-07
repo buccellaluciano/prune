@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Prune",
-  "mainBinaryName": "Prune",
-  "version": "0.1.0",
+  "productName": "P-Rune",
+  "mainBinaryName": "P-Rune",
+  "version": "0.2.0",
   "identifier": "com.debloater.app",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Prune",
+        "title": "P-Rune",
         "width": 1240,
         "height": 800,
         "minWidth": 960,

@@ -11,7 +11,7 @@ fn valid_sha256(s: &str) -> bool {
 /// Dirección del informe de VirusTotal para un archivo. Solo virustotal.com y un hash válido.
 pub fn report_url(sha256: &str) -> Result<String, String> {
     if !valid_sha256(sha256) {
-        return Err("Hash inválido".into());
+        return Err(t!("hash_invalid"));
     }
     Ok(format!("https://www.virustotal.com/gui/file/{}", sha256.to_ascii_lowercase()))
 }

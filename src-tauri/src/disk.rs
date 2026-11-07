@@ -186,7 +186,7 @@ pub fn cancel() {
 pub fn start(letter: &str) -> Result<(), String> {
     let letter = letter.trim().trim_end_matches([':', '\\']).to_ascii_uppercase();
     let Some(drive) = drives().into_iter().find(|d| d.letter == letter) else {
-        return Err(format!("Unidad no disponible: {letter}"));
+        return Err(t!("drive_unavailable", letter = letter));
     };
     // Solo NTFS y ReFS dan IDs de archivo únicos y estables. En FAT32/exFAT pueden venir
     // en 0 o repetidos: deduplicar ahí colapsaría archivos distintos en uno.
@@ -194,7 +194,7 @@ pub fn start(letter: &str) -> Result<(), String> {
     DEDUPE.store(fs == "NTFS" || fs == "REFS", Relaxed);
     let s = &*SCAN;
     if s.running.swap(true, Relaxed) {
-        return Err("Ya hay un análisis en curso".into());
+        return Err(t!("scan_running"));
     }
     s.cancel.store(false, Relaxed);
     for c in [&s.files, &s.dirs, &s.bytes, &s.denied, &s.elapsed_ms] {
@@ -478,7 +478,7 @@ pub struct Summary {
 }
 
 fn tree() -> Result<Arc<Tree>, String> {
-    SCAN.tree.lock().unwrap().clone().ok_or_else(|| "Todavía no hay un análisis terminado".into())
+    SCAN.tree.lock().unwrap().clone().ok_or_else(|| t!("scan_missing"))
 }
 
 /// "Dónde está el peso": carpetas pesadas en las que ninguna subcarpeta concentra
@@ -523,7 +523,7 @@ pub fn summary() -> Result<Summary, String> {
 pub fn dir(id: u32) -> Result<DirView, String> {
     const MAX: usize = 300;
     let t = tree()?;
-    let n = t.nodes.get(id as usize).ok_or("Carpeta inexistente")?;
+    let n = t.nodes.get(id as usize).ok_or_else(|| t!("folder_missing"))?;
     let mut crumbs = Vec::new();
     let mut cur = id;
     loop {
@@ -570,7 +570,7 @@ pub fn dir(id: u32) -> Result<DirView, String> {
 pub fn open(id: u32) -> Result<(), String> {
     let t = tree()?;
     if id as usize >= t.nodes.len() {
-        return Err("Carpeta inexistente".into());
+        return Err(t!("folder_missing"));
     }
     let path = wide(&t.path(id));
     let r = unsafe { ShellExecuteW(None, w!("explore"), PCWSTR(path.as_ptr()), PCWSTR::null(), PCWSTR::null(), SW_SHOWNORMAL) };
@@ -578,7 +578,7 @@ pub fn open(id: u32) -> Result<(), String> {
     if r.0 as usize > 32 {
         Ok(())
     } else {
-        Err("No se pudo abrir el Explorador".into())
+        Err(t!("explorer_failed"))
     }
 }
 

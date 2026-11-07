@@ -65,7 +65,7 @@ unsafe fn take_guid(p: *mut GUID) -> GUID {
 
 pub fn active() -> Result<GUID, String> {
     let mut p: *mut GUID = std::ptr::null_mut();
-    check(unsafe { PowerGetActiveScheme(None, &mut p) }, "No se pudo leer el plan activo")?;
+    check(unsafe { PowerGetActiveScheme(None, &mut p) }, &t!("power_read_failed"))?;
     Ok(unsafe { take_guid(p) })
 }
 
@@ -119,20 +119,20 @@ pub fn activate(choice: &str) -> Result<PowerChange, String> {
                 let mut p: *mut GUID = std::ptr::null_mut();
                 check(
                     unsafe { PowerDuplicateScheme(None, &ULTIMATE_TEMPLATE, &mut p) },
-                    "Windows no permitió crear el plan Máximo rendimiento",
+                    &t!("power_create_failed"),
                 )?;
                 let g = unsafe { take_guid(p) };
                 (g, Some(g))
             }
         }
     } else {
-        let g = parse(choice).ok_or("Plan de energía inválido")?;
+        let g = parse(choice).ok_or_else(|| t!("power_invalid"))?;
         if !plans.iter().any(|p| p.guid == g) {
-            return Err("Ese plan de energía no existe en este equipo".into());
+            return Err(t!("power_not_found"));
         }
         (g, None)
     };
-    if let Err(e) = check(unsafe { PowerSetActiveScheme(None, Some(&target)) }, "No se pudo activar el plan") {
+    if let Err(e) = check(unsafe { PowerSetActiveScheme(None, Some(&target)) }, &t!("power_activate_failed")) {
         if let Some(c) = created {
             let _ = unsafe { PowerDeleteScheme(None, &c) };
         }
@@ -143,11 +143,11 @@ pub fn activate(choice: &str) -> Result<PowerChange, String> {
 
 /// Vuelve al plan anterior y borra el que hayamos creado.
 pub fn revert(c: &PowerChange) -> Result<(), String> {
-    let before = parse(&c.before).ok_or("GUID inválido en el historial")?;
+    let before = parse(&c.before).ok_or_else(|| t!("power_guid_invalid"))?;
     check(unsafe { PowerSetActiveScheme(None, Some(&before)) }, "No se pudo volver al plan anterior")?;
     if let Some(created) = c.created.as_deref().and_then(parse) {
         if active().ok() != Some(created) {
-            check(unsafe { PowerDeleteScheme(None, &created) }, "No se pudo borrar el plan creado")?;
+            check(unsafe { PowerDeleteScheme(None, &created) }, &t!("power_delete_failed"))?;
         }
     }
     Ok(())

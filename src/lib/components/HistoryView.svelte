@@ -2,6 +2,7 @@
   import { History, LoaderCircle, Undo2 } from "@lucide/svelte";
   import { api, type JournalEntry } from "#lib/api.ts";
   import { store } from "#lib/store.svelte.ts";
+  import { i18n, t, tn } from "#lib/i18n.svelte.ts";
   import { onMount } from "svelte";
 
   let entries = $state<JournalEntry[] | null>(null);
@@ -27,7 +28,7 @@
         return;
       }
       conflict = null;
-      store.report(r, "deshechos");
+      store.report(r, "undo");
       await Promise.all([load(), store.load()]);
     } catch (err) {
       store.toast("error", String(err));
@@ -36,18 +37,18 @@
     }
   }
 
-  const fmt = new Intl.DateTimeFormat("es-AR", { dateStyle: "medium", timeStyle: "short" });
+  const fmt = $derived(new Intl.DateTimeFormat(i18n.locale, { dateStyle: "medium", timeStyle: "short" }));
 </script>
 
 <div class="mx-auto max-w-3xl">
-  <h1 class="font-display text-[20px] font-semibold">Historial</h1>
-  <p class="mt-1 mb-5 text-[13px] text-mute">Cada cambio guarda el valor anterior exacto del registro. Deshacer lo restaura tal cual estaba.</p>
+  <h1 class="font-display text-[20px] font-semibold">{t("nav.history")}</h1>
+  <p class="mt-1 mb-5 text-[13px] text-mute">{t("history.subtitle")}</p>
 
   {#if !entries}
-    <div class="flex items-center gap-2 text-[13px] text-mute"><LoaderCircle size={16} class="animate-spin" /> Cargando…</div>
+    <div class="flex items-center gap-2 text-[13px] text-mute"><LoaderCircle size={16} class="animate-spin" /> {t("common.loading")}</div>
   {:else if entries.length === 0}
     <div class="rounded-lg border border-line bg-card p-10 text-center text-[13px] text-mute">
-      <History size={26} class="mx-auto mb-3 text-faint" /> Todavía no aplicaste cambios.
+      <History size={26} class="mx-auto mb-3 text-faint" /> {t("history.empty")}
     </div>
   {:else}
     <ol class="relative space-y-2 border-l border-line pl-5">
@@ -59,8 +60,8 @@
               <div class="truncate text-[13px] font-medium">{e.label}</div>
               <div class="text-[11.5px] text-mute">
                 {fmt.format(new Date(e.at * 1000))} ·
-                {#if e.removed_apps.length}{e.removed_apps.length} apps quitadas{:else}{e.changes.length + (e.power ? 1 : 0)} {e.changes.length + (e.power ? 1 : 0) === 1 ? "cambio" : "cambios"}{/if}
-                {#if e.undone} · deshecho{/if}
+                {#if e.removed_apps.length}{tn("history.apps_removed", e.removed_apps.length)}{:else}{tn("history.changes", e.changes.length + (e.power ? 1 : 0))}{/if}
+                {#if e.undone} · {t("history.undone")}{/if}
               </div>
             </div>
             {#if !e.undone && (e.changes.length || e.power) && conflict?.id !== e.id}
@@ -69,24 +70,24 @@
                 disabled={working !== null}
                 onclick={() => undo(e)}
               >
-                {#if working === e.id}<LoaderCircle size={13} class="animate-spin" />{:else}<Undo2 size={13} />{/if} Deshacer
+                {#if working === e.id}<LoaderCircle size={13} class="animate-spin" />{:else}<Undo2 size={13} />{/if} {t("history.undo")}
               </button>
             {/if}
           </div>
           {#if conflict?.id === e.id}
             <div class="mt-2.5 border-t border-line pt-2.5 text-[12.5px]">
-              <p class="text-moderate">Estos valores cambiaron después de este cambio. Deshacer los va a pisar:</p>
+              <p class="text-moderate">{t("history.conflict")}</p>
               <ul class="mt-1 space-y-0.5 font-mono text-[11px] text-mute">
                 {#each conflict.items as c}<li>{c}</li>{/each}
               </ul>
               <div class="mt-2 flex justify-end gap-2">
-                <button class="rounded-md px-2.5 py-1 text-[12px] text-mute hover:text-ink" onclick={() => (conflict = null)}>Cancelar</button>
+                <button class="rounded-md px-2.5 py-1 text-[12px] text-mute hover:text-ink" onclick={() => (conflict = null)}>{t("common.cancel")}</button>
                 <button
                   class="rounded-md border border-moderate/50 px-2.5 py-1 text-[12px] text-moderate hover:bg-moderate/10 disabled:opacity-50"
                   disabled={working !== null}
                   onclick={() => undo(e, true)}
                 >
-                  Deshacer igual
+                  {t("history.undo_anyway")}
                 </button>
               </div>
             </div>

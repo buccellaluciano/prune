@@ -1,5 +1,5 @@
 <script lang="ts">
-  /** Logo de Prune: el mismo monograma que el ícono de la app (src-tauri/icons/prune.svg). */
+  /** Logo de P-Rune: el mismo monograma que el ícono de la app (src-tauri/icons/prune.svg). */
   let { size = 28 }: { size?: number } = $props();
 </script>
 

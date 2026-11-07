@@ -2,6 +2,7 @@
   import { LoaderCircle, RefreshCw, ShieldCheck, Trash2, X } from "@lucide/svelte";
   import { apps } from "#lib/apps.svelte.ts";
   import { normalize, store } from "#lib/store.svelte.ts";
+  import { t } from "#lib/i18n.svelte.ts";
   import { onMount } from "svelte";
   import AppIcon from "./AppIcon.svelte";
 
@@ -32,32 +33,29 @@
 <div class="mx-auto max-w-4xl">
   <header class="mb-6 flex flex-wrap items-end gap-4">
     <div class="min-w-0 flex-1">
-      <h1 class="font-display text-[20px] font-semibold">Programas</h1>
-      <p class="mt-1 max-w-2xl text-[13px] text-mute">
-        Programas confiables desde el repositorio oficial de winget. Instalar acepta la licencia del programa;
-        algunos instaladores piden permiso de administrador.
-      </p>
+      <h1 class="font-display text-[20px] font-semibold">{t("nav.apps")}</h1>
+      <p class="mt-1 max-w-2xl text-[13px] text-mute">{t("apps.subtitle")}</p>
     </div>
     <div class="flex items-center gap-2">
       <button
         aria-pressed={apps.reviewFirst}
         class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[12.5px] hover:text-ink {apps.reviewFirst ? 'text-safe' : 'text-mute'}"
         onclick={() => apps.setReviewFirst(!apps.reviewFirst)}
-        title="Frenar cada instalación para revisar el SHA-256 del instalador en VirusTotal antes de seguir"
+        title={t("apps.review_title")}
       >
-        <ShieldCheck size={13} /> Revisar antes de instalar: {apps.reviewFirst ? "sí" : "no"}
+        <ShieldCheck size={13} /> {apps.reviewFirst ? t("apps.review_on") : t("apps.review_off")}
       </button>
       <button
         class="inline-flex items-center gap-1.5 rounded-md border border-line px-2.5 py-1 text-[12.5px] text-mute hover:text-ink disabled:opacity-50"
         disabled={apps.loading || apps.busy}
         onclick={() => apps.load()}
-        title="Volver a consultar winget"
+        title={t("apps.reload_title")}
       >
-        <RefreshCw size={13} class={apps.loading ? "animate-spin" : ""} /> Recargar
+        <RefreshCw size={13} class={apps.loading ? "animate-spin" : ""} /> {t("apps.reload")}
       </button>
       {#if apps.upgradable.length}
         <button class="accent-grad rounded-md px-3 py-1 text-[12.5px] font-medium" onclick={updateAll}>
-          Actualizar todo ({apps.upgradable.length})
+          {t("apps.update_all", { n: apps.upgradable.length })}
         </button>
       {/if}
     </div>
@@ -68,11 +66,11 @@
     <p class="rounded-md border border-advanced/30 p-4 text-[13px] text-advanced">{apps.overview.error}</p>
   {:else if !apps.overview}
     <div class="flex items-center gap-2 text-[13px] text-mute">
-      <LoaderCircle size={15} class="animate-spin" /> Consultando winget… la primera vez puede tardar unos segundos.
+      <LoaderCircle size={15} class="animate-spin" /> {t("apps.loading")}
     </div>
   {:else}
     <div class="mb-6 flex items-center gap-4 border-b border-line text-[12.5px]">
-      {#each [["all", "Todos", apps.overview.apps.length], ["installed", "Instalados", installedCount], ["updates", "Con actualización", apps.upgradable.length]] as [id, label, n] (id)}
+      {#each [["all", t("apps.filter.all"), apps.overview.apps.length], ["installed", t("apps.filter.installed"), installedCount], ["updates", t("apps.filter.updates"), apps.upgradable.length]] as [id, label, n] (id)}
         <button
           class="-mb-px border-b py-2 {filter === id ? 'border-ink text-ink' : 'border-transparent text-mute hover:text-ink'}"
           onclick={() => (filter = id as Filter)}
@@ -100,9 +98,9 @@
                   </div>
                   {#if job === "running" && apps.running}
                     {@const r = apps.running}
-                    <button class="block w-full text-left" onclick={() => (apps.sheetOpen = true)} title="Ver el progreso">
+                    <button class="block w-full text-left" onclick={() => (apps.sheetOpen = true)} title={t("apps.see_progress")}>
                       <span class="block truncate text-[12px] text-accent">
-                        {apps.verb(r.action)}{r.step === "verify" ? " · verificando" : r.step === "download" ? " · descargando" : r.step === "hash" ? " · comprobando" : "…"}
+                        {apps.verb(r.action)}{r.step === "verify" ? ` · ${t("apps.step.verifying")}` : r.step === "download" ? ` · ${t("apps.step.downloading")}` : r.step === "hash" ? ` · ${t("apps.step.checking")}` : "…"}
                         {#if r.fraction !== null && r.step === "download"}<span class="font-mono"> {Math.round(r.fraction * 100)}%</span>{/if}
                       </span>
                       {#if r.step === "download" && r.fraction !== null}
@@ -128,24 +126,24 @@
                   {#if job === "running"}
                     <LoaderCircle size={14} class="animate-spin text-accent" />
                   {:else if job === "queued"}
-                    <span class="text-[12px] text-faint">En cola</span>
-                    <button class="rounded p-1 text-faint hover:bg-line hover:text-ink" onclick={() => apps.cancelQueued(a.id)} aria-label="Sacar de la cola">
+                    <span class="text-[12px] text-faint">{t("apps.queued")}</span>
+                    <button class="rounded p-1 text-faint hover:bg-line hover:text-ink" onclick={() => apps.cancelQueued(a.id)} aria-label={t("apps.unqueue")}>
                       <X size={13} />
                     </button>
                   {:else if confirmUninstall === a.id}
-                    <button class="rounded-md px-2 py-1 text-[12px] text-mute hover:text-ink" onclick={() => (confirmUninstall = null)}>Cancelar</button>
+                    <button class="rounded-md px-2 py-1 text-[12px] text-mute hover:text-ink" onclick={() => (confirmUninstall = null)}>{t("common.cancel")}</button>
                     <button
                       class="rounded-md border border-advanced/50 px-2.5 py-1 text-[12px] text-advanced hover:bg-advanced/10"
                       onclick={() => { apps.enqueue(a.id, "uninstall"); confirmUninstall = null; }}
                     >
-                      Desinstalar
+                      {t("apps.uninstall")}
                     </button>
                   {:else if !a.installed}
                     <button
                       class="rounded-md border border-line px-2.5 py-1 text-[12px] text-ink hover:border-[#3a3935] hover:bg-line"
                       onclick={() => apps.enqueue(a.id, "install")}
                     >
-                      Instalar
+                      {t("apps.install")}
                     </button>
                   {:else}
                     {#if a.available}
@@ -153,14 +151,14 @@
                         class="rounded-md border border-line px-2.5 py-1 text-[12px] text-ink hover:border-[#3a3935] hover:bg-line"
                         onclick={() => apps.enqueue(a.id, "upgrade")}
                       >
-                        Actualizar
+                        {t("apps.upgrade")}
                       </button>
                     {/if}
                     <button
                       class="rounded p-1.5 text-faint hover:bg-line hover:text-advanced"
                       onclick={() => (confirmUninstall = a.id)}
-                      title="Desinstalar"
-                      aria-label="Desinstalar {a.title}"
+                      title={t("apps.uninstall")}
+                      aria-label={t("apps.uninstall_named", { app: a.title })}
                     >
                       <Trash2 size={13} />
                     </button>
@@ -173,7 +171,7 @@
       {/if}
     {/each}
     {#if !list.length}
-      <p class="text-[13px] text-mute">Nada coincide con el filtro.</p>
+      <p class="text-[13px] text-mute">{t("apps.no_match")}</p>
     {/if}
   {/if}
 </div>

@@ -1,5 +1,6 @@
 import { diskApi, type DirView, type DiskSummary, type Drive, type ScanStatus } from "./api";
 import { store } from "./store.svelte";
+import { t } from "./i18n.svelte";
 
 /** Estado de la vista Disco. Vive fuera del componente: el análisis sigue al cambiar de vista. */
 class DiskStore {
@@ -43,7 +44,7 @@ class DiskStore {
         clearInterval(this.#timer!);
         this.#timer = null;
         if (s.done) await this.#loadResult();
-        else if (s.cancelled) store.toast("info", "Análisis cancelado.");
+        else if (s.cancelled) store.toast("info", t("disk.cancelled"));
         this.drives = await diskApi.drives().catch(() => this.drives);
       }
     }, 250);

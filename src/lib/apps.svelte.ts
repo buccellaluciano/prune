@@ -9,6 +9,7 @@ function storedReview(): boolean {
   }
 }
 import { store } from "./store.svelte";
+import { t, type Key } from "./i18n.svelte";
 
 interface Job {
   id: string;
@@ -37,10 +38,10 @@ export interface Running extends Job {
   result: { ok: boolean; message: string } | null;
 }
 
-const VERB: Record<WingetAction, [string, string]> = {
-  install: ["Instalando", "instalado"],
-  upgrade: ["Actualizando", "actualizado"],
-  uninstall: ["Desinstalando", "desinstalado"],
+const VERB: Record<WingetAction, [Key, Key]> = {
+  install: ["apps.verb.installing", "apps.done.installed"],
+  upgrade: ["apps.verb.upgrading", "apps.done.upgraded"],
+  uninstall: ["apps.verb.uninstalling", "apps.done.uninstalled"],
 };
 
 /** Estado de la vista Programas. Vive fuera del componente para que la cola siga al cambiar de vista. */
@@ -140,7 +141,7 @@ class AppsStore {
     const check = await wingetApi.check(r.id).catch((e) => ({ installer: null, error: String(e) }) as SecurityCheck);
     r.check = check;
     let reason: string | null = null;
-    if (check.error || !check.installer?.sha256) reason = `No se pudo leer el instalador del manifiesto: ${check.error ?? "sin hash"}`;
+    if (check.error || !check.installer?.sha256) reason = t("install.manifest_failed", { error: check.error ?? t("install.no_hash") });
     else if (this.reviewFirst) reason = "review";
     if (!reason) return true;
     r.review = reason;
@@ -164,12 +165,12 @@ class AppsStore {
       const title = this.title(job.id);
       try {
         if (job.action !== "uninstall" && !(await this.#verify(this.running!))) {
-          this.running!.result = { ok: false, message: "Instalación cancelada." };
+          this.running!.result = { ok: false, message: t("install.cancelled") };
           continue;
         }
         const res = await wingetApi.act(job.id, job.action);
-        const msg = res.message ?? `${title} ${VERB[job.action][1]}.`;
-        this.running!.result = { ok: res.ok, message: res.ok ? msg : (res.message ?? "Error") };
+        const msg = res.message ?? t(VERB[job.action][1], { app: title });
+        this.running!.result = { ok: res.ok, message: res.ok ? msg : (res.message ?? t("common.error")) };
         if (res.ok) {
           this.running!.step = "done";
           this.running!.fraction = null;
@@ -188,7 +189,7 @@ class AppsStore {
   }
 
   verb(action: WingetAction) {
-    return VERB[action][0];
+    return t(VERB[action][0]);
   }
 }
 

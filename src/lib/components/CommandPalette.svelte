@@ -3,6 +3,7 @@
   import { store, normalize, PROFILES } from "#lib/store.svelte.ts";
   import { theme, THEMES } from "#lib/theme.svelte.ts";
   import { isTauri } from "#lib/api.ts";
+  import { i18n, LANGS, t, tn } from "#lib/i18n.svelte.ts";
   import { fade, scale } from "svelte/transition";
   import { tick } from "svelte";
 
@@ -21,31 +22,35 @@
 
   const actions = $derived<Item[]>([
     ...(store.pendingCount
-      ? [{ id: "a:plan", group: "Acciones", label: `Revisar y aplicar ${store.pendingCount} cambios`, run: () => (store.planOpen = true) }]
+      ? [{ id: "a:plan", group: t("palette.group.actions"), label: tn("palette.review", store.pendingCount), run: () => (store.planOpen = true) }]
       : []),
-    { id: "v:tweaks", group: "Ir a", label: "Todos los tweaks", run: () => ((store.view = "tweaks"), (store.category = null)) },
-    { id: "v:apps", group: "Ir a", label: "Programas (winget)", run: () => ((store.view = "apps"), (store.query = "")) },
-    { id: "v:disk", group: "Ir a", label: "Disco (uso de espacio)", run: () => ((store.view = "disk"), (store.query = "")) },
-    { id: "v:bloat", group: "Ir a", label: "Bloatware", run: () => (store.view = "bloat") },
-    { id: "v:history", group: "Ir a", label: "Historial", run: () => (store.view = "history") },
+    { id: "v:tweaks", group: t("palette.group.goto"), label: t("nav.all"), run: () => ((store.view = "tweaks"), (store.category = null)) },
+    { id: "v:apps", group: t("palette.group.goto"), label: t("palette.apps"), run: () => ((store.view = "apps"), (store.query = "")) },
+    { id: "v:disk", group: t("palette.group.goto"), label: t("palette.disk"), run: () => ((store.view = "disk"), (store.query = "")) },
+    { id: "v:bloat", group: t("palette.group.goto"), label: t("nav.bloat"), run: () => (store.view = "bloat") },
+    { id: "v:history", group: t("palette.group.goto"), label: t("nav.history"), run: () => (store.view = "history") },
     ...(store.overview?.categories ?? []).map((c) => ({
-      id: "c:" + c.id, group: "Ir a", label: c.title, hint: "categoría",
+      id: "c:" + c.id, group: t("palette.group.goto"), label: c.title, hint: t("palette.category"),
       run: () => ((store.view = "tweaks"), (store.category = c.id), (store.query = "")),
     })),
-    ...THEMES.filter((t) => t.id !== theme.current).map((t) => ({
-      id: "th:" + t.id, group: "Acciones", label: `Cambiar al tema ${t.title}`, hint: t.hint,
-      run: () => theme.set(t.id),
+    ...THEMES.filter((th) => th.id !== theme.current).map((th) => ({
+      id: "th:" + th.id, group: t("palette.group.actions"), label: t("palette.theme", { theme: t(th.title) }), hint: t(th.hint),
+      run: () => theme.set(th.id),
+    })),
+    ...LANGS.filter((l) => l.code !== i18n.lang).map((l) => ({
+      id: "lang:" + l.code, group: t("palette.group.language"), label: l.name, hint: l.english,
+      run: () => i18n.set(l.code),
     })),
     ...(isTauri
       ? [{
-          id: "th:glass", group: "Acciones",
-          label: theme.glass ? "Desactivar la transparencia real" : "Activar la transparencia real",
-          hint: "Vidrio sobre el escritorio, como Windows 7",
+          id: "th:glass", group: t("palette.group.actions"),
+          label: theme.glass ? t("palette.glass_off") : t("palette.glass_on"),
+          hint: t("palette.glass_hint"),
           run: () => theme.setGlass(!theme.glass),
         }]
       : []),
     ...PROFILES.map((p) => ({
-      id: "p:" + p.id, group: "Perfiles", label: `Marcar perfil: ${p.title}`, hint: p.hint,
+      id: "p:" + p.id, group: t("palette.group.profiles"), label: t("palette.profile", { profile: t(p.title) }), hint: t(p.hint),
       run: () => store.stageMany(p.ids, true),
     })),
   ]);
@@ -53,17 +58,17 @@
   const items = $derived.by<Item[]>(() => {
     const n = normalize(q);
     const tweaks: Item[] = store.tweaks
-      .filter((t) => !store.disabledReason(t))
-      .flatMap((t) =>
-        t.choices.length
-          ? t.choices.map((c) => ({
-              id: `t:${t.id}:${c.id}`, group: "Tweaks", label: `${t.title}: ${c.label}`, hint: t.description,
-              state: store.shownChoice(t) === c.id,
-              run: () => store.choose(t, c.id),
+      .filter((tw) => !store.disabledReason(tw))
+      .flatMap((tw) =>
+        tw.choices.length
+          ? tw.choices.map((c) => ({
+              id: `t:${tw.id}:${c.id}`, group: "Tweaks", label: `${tw.title}: ${c.label}`, hint: tw.description,
+              state: store.shownChoice(tw) === c.id,
+              run: () => store.choose(tw, c.id),
             }))
           : [{
-              id: "t:" + t.id, group: "Tweaks", label: t.title, hint: t.description, state: store.shown(t),
-              run: () => store.toggle(t),
+              id: "t:" + tw.id, group: "Tweaks", label: tw.title, hint: tw.description, state: store.shown(tw),
+              run: () => store.toggle(tw),
             }],
       );
     const all = [...actions, ...tweaks];
@@ -108,7 +113,7 @@
     class="fixed top-[12vh] left-1/2 z-50 w-[min(640px,92vw)] -translate-x-1/2 overflow-hidden rounded-lg border border-[#3a3935] bg-panel shadow-xl shadow-black/60"
     transition:scale={{ start: 0.97, duration: 140 }}
     role="dialog"
-    aria-label="Paleta de comandos"
+    aria-label={t("palette.title")}
   >
     <div class="flex items-center gap-3 border-b border-line px-4">
       <Command size={15} class="text-faint" />
@@ -116,7 +121,7 @@
         bind:this={input}
         bind:value={q}
         onkeydown={onkey}
-        placeholder="Buscá un tweak, una categoría o una acción…"
+        placeholder={t("palette.placeholder")}
         class="h-13 flex-1 bg-transparent text-[14px] outline-none placeholder:text-faint"
       />
       <kbd class="rounded border border-line px-1.5 py-0.5 font-mono text-[10px] text-faint">ESC</kbd>
@@ -146,11 +151,11 @@
           </button>
         </li>
       {:else}
-        <li class="px-3 py-6 text-center text-[13px] text-mute">Nada coincide con "{q}"</li>
+        <li class="px-3 py-6 text-center text-[13px] text-mute">{t("palette.empty", { q })}</li>
       {/each}
     </ul>
     <div class="flex gap-4 border-t border-line px-4 py-2 text-[11px] text-faint">
-      <span>↑↓ navegar</span><span>↵ ejecutar / marcar</span><span>Esc cerrar</span>
+      <span>↑↓ {t("palette.nav")}</span><span>↵ {t("palette.run")}</span><span>Esc {t("common.close_lower")}</span>
     </div>
   </div>
 {/if}

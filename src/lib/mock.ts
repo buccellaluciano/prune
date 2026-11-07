@@ -152,12 +152,45 @@ async function simulateWinget(id: string, action: string) {
   send("Instalado correctamente", "done");
 }
 
+// ───────── Idioma ─────────
+// En la app real, el backend traduce el catálogo. En la demo se usan los mismos archivos
+// (src-tauri/locales), cargados aparte para que no pesen en la app compilada.
+const LOCALES = import.meta.glob("../../src-tauri/locales/*.json", { import: "default" }) as Record<string, () => Promise<any>>;
+let L: any = {};
+
+async function setLang(lang: string) {
+  L = lang === "es" ? {} : ((await LOCALES[`../../src-tauri/locales/${lang}.json`]?.()) ?? {});
+}
+
+const POWER_KEYS: Record<string, string> = {
+  "a1841308-3541-4fab-bc81-f71556f20b4a": "power_saver",
+  "381b4222-f694-41f0-9685-ff5bb260df2e": "power_balanced",
+  "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c": "power_high",
+  ultimate: "power_ultimate",
+};
+
+function localized(o: Overview): Overview {
+  const c = structuredClone(o);
+  for (const cat of c.categories) cat.title = L.category?.[cat.id] ?? cat.title;
+  for (const t of c.tweaks) {
+    const x = t.id === "power.plan" ? (L.msg && { title: L.msg.power_title, description: L.msg.power_description }) : L.tweak?.[t.id];
+    if (!x) continue;
+    t.title = x.title;
+    t.description = x.description;
+    for (const ch of t.choices) ch.label = (t.id === "power.plan" ? L.msg?.[POWER_KEYS[ch.id]] : x.choices?.[ch.id]) ?? ch.label;
+  }
+  return c;
+}
+
 export async function mock<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
   await wait(120);
   const a = (args ?? {}) as any;
   switch (cmd) {
+    case "set_language":
+      await setLang(a.lang);
+      return null as T;
     case "get_overview":
-      return structuredClone(overview) as T;
+      return localized(overview) as T;
     case "plan_changes":
       return a.changes.flatMap((d: any) => {
         const t = tweaks.find((t) => t.id === d.id)!;
@@ -192,7 +225,11 @@ export async function mock<T>(cmd: string, args?: Record<string, unknown>): Prom
     }
     case "winget_status":
       await wait(700);
-      return structuredClone(wingetApps) as T;
+      return {
+        ...structuredClone(wingetApps),
+        groups: wingetApps.groups.map((g) => ({ ...g, title: L.app_group?.[g.id] ?? g.title })),
+        apps: wingetApps.apps.map((x) => ({ ...x, description: L.app?.[x.id] ?? x.description })),
+      } as T;
     case "winget_icons":
       return {} as T;
     case "winget_check": {
@@ -258,7 +295,7 @@ export async function mock<T>(cmd: string, args?: Record<string, unknown>): Prom
     case "disk_open":
       return undefined as T;
     case "list_bloat":
-      return structuredClone(bloat) as T;
+      return bloat.map((b) => ({ ...structuredClone(b), title: L.bloat?.[b.id]?.title ?? b.title, note: b.note && (L.bloat?.[b.id]?.note ?? b.note) })) as T;
     case "remove_bloat":
       return a.ids.map((id: string) => {
         const i = bloat.findIndex((b) => b.id === id);
