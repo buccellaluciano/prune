@@ -1,6 +1,6 @@
 // Backend simulado para desarrollar la UI en el navegador (npm run dev).
 // Nunca se usa dentro de Tauri.
-import type { AppsOverview, BloatApp, JournalEntry, Overview, Tweak, WingetProgress } from "./api";
+import type { AppsOverview, BloatApp, CleanView, JournalEntry, Overview, Tweak, WingetProgress } from "./api";
 
 const op = (key: string, name: string, current: string, on: string, off = "(borra el valor)") => ({
   key, name, current, on, off,
@@ -130,6 +130,14 @@ export function mockProgress(cb: ProgressCb): () => void {
 }
 const emit = (p: WingetProgress) => progressListeners.forEach((cb) => cb(p));
 
+// Actualización simulada: en la demo siempre hay una versión nueva para ver la interfaz.
+type UpdateCb = (p: { downloaded: number; total: number | null }) => void;
+const updateListeners = new Set<UpdateCb>();
+export function mockUpdateProgress(cb: UpdateCb): () => void {
+  updateListeners.add(cb);
+  return () => updateListeners.delete(cb);
+}
+
 
 async function simulateWinget(id: string, action: string) {
   const send = (line: string, phase: WingetProgress["phase"], fraction: number | null = null) =>
@@ -182,10 +190,36 @@ function localized(o: Overview): Overview {
   return c;
 }
 
+const MB = 1024 ** 2;
+const cleanup: CleanView[] = [
+  { id: "temp_user", bytes: 1.47 * GB, files: 3434, admin: false, per_user: true, warn: null, available: true },
+  { id: "temp_system", bytes: 0, files: 0, admin: true, per_user: false, warn: null, available: false },
+  { id: "crash", bytes: 0, files: 0, admin: true, per_user: true, warn: null, available: false },
+  { id: "shaders", bytes: 1.4 * MB, files: 61, admin: false, per_user: true, warn: null, available: true },
+  { id: "thumbnails", bytes: 5 * MB, files: 15, admin: false, per_user: true, warn: null, available: true },
+  { id: "update_cache", bytes: 0, files: 0, admin: true, per_user: false, warn: null, available: false },
+  { id: "spotify", bytes: 812 * MB, files: 2210, admin: false, per_user: true, warn: "close_app", available: true },
+  { id: "prefetch", bytes: 0, files: 0, admin: true, per_user: false, warn: "slower_start", available: false },
+  { id: "recycle_bin", bytes: 236 * MB, files: 41, admin: false, per_user: true, warn: "permanent", available: true },
+];
+
 export async function mock<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
   await wait(120);
   const a = (args ?? {}) as any;
   switch (cmd) {
+    case "app_version":
+      return "0.2.0" as T;
+    case "update_check":
+      await wait(600);
+      return { version: "0.3.0", current: "0.2.0", notes: "Servicios descartables como tweaks, limpieza de archivos en Disco y actualización desde la app." } as T;
+    case "update_install": {
+      const total = 2_400_000;
+      for (let d = 0; d <= total; d += 240_000) {
+        updateListeners.forEach((cb) => cb({ downloaded: d, total }));
+        await wait(200);
+      }
+      throw "Demo: en el navegador no se instala nada.";
+    }
     case "set_language":
       await setLang(a.lang);
       return null as T;
@@ -294,6 +328,21 @@ export async function mock<T>(cmd: string, args?: Record<string, unknown>): Prom
     }
     case "disk_open":
       return undefined as T;
+    case "cleanup_scan":
+      await wait(900);
+      return structuredClone(cleanup) as T;
+    case "cleanup_run": {
+      await wait(1200);
+      const res = (a.ids as string[]).map((id) => {
+        const c = cleanup.find((x) => x.id === id)!;
+        const freed = c.available ? c.bytes : 0;
+        const skipped = id === "temp_user" ? 12 : 0;
+        const out = { id: c.id, freed, deleted: c.available ? c.files - skipped : 0, skipped, error: c.available ? null : "Requiere ejecutar como administrador" };
+        if (c.available) (c.bytes = 0), (c.files = skipped);
+        return out;
+      });
+      return res as T;
+    }
     case "list_bloat":
       return bloat.map((b) => ({ ...structuredClone(b), title: L.bloat?.[b.id]?.title ?? b.title, note: b.note && (L.bloat?.[b.id]?.note ?? b.note) })) as T;
     case "remove_bloat":

@@ -17,7 +17,6 @@
     "deletes_value": "（删除该值）",
     "value_missing": "（不存在）",
     "value_other_type": "<类型 {kind} · {bytes} 字节>",
-
     "power_title": "电源计划",
     "power_description": "高性能和卓越性能会阻止处理器降频或进入节能状态：响应更快，但功耗和发热也更高。笔记本电脑最好只在接通电源时使用。",
     "power_key": "电源计划（powrprof）",
@@ -37,11 +36,9 @@
     "power_guid_invalid": "历史记录中的 GUID 无效",
     "power_previous_gone": "之前的计划已不存在",
     "power_not_ours": "要删除的计划不是本应用创建的卓越性能计划",
-
     "label_power": "电源计划：{plan}",
     "label_tweaks": "{n} 项优化",
     "label_removed_apps": "删除了 {n} 个应用",
-
     "journal_unreadable_backup": "无法读取历史记录（{error}）。已将副本保存到 {path}，并开始新的历史记录。",
     "journal_unreadable": "无法读取历史记录（{error}），也无法备份（{backup_error}）。",
     "journal_save_failed": "无法保存历史记录：{error}",
@@ -54,15 +51,12 @@
     "journal_bad_key": "要删除的项无效：“{key}”",
     "conflict_value": "{title}：{key} 的值为 {value}",
     "conflict_power": "电源计划：现在是 {plan}",
-
     "not_in_catalog": "不在目录中",
-
     "drive_unavailable": "驱动器不可用：{letter}",
     "scan_running": "已有分析正在进行",
     "scan_missing": "还没有已完成的分析",
     "folder_missing": "文件夹不存在",
     "explorer_failed": "无法打开文件资源管理器",
-
     "winget_not_found": "找不到 winget。请从 Microsoft Store 安装或更新“应用安装程序”。",
     "winget_bad_signature": "winget 未通过签名校验：{error}",
     "winget_run_failed": "无法运行 winget：{error}",
@@ -75,13 +69,10 @@
     "already_latest": "已经是最新版本",
     "already_installed": "已经安装",
     "package_not_found": "winget 找不到该软件包（是否已卸载？）",
-
     "signature_invalid": "签名无效或缺失（{code}）",
     "signer_unreadable": "无法读取签名者",
     "signed_by_other": "签名者是“{signer}”，而不是 Microsoft",
-
     "hash_invalid": "无效的哈希",
-
     "http_only_https": "只允许 https 地址：{url}",
     "http_bad_url": "无效的地址：{url}",
     "http_bad_port": "无效的端口：{url}",
@@ -91,7 +82,16 @@
     "http_send_failed": "无法访问 {host}",
     "http_no_status": "响应中没有状态码",
     "http_cut": "下载中断",
-    "http_too_large": "响应过大（超过 {kb} KB）"
+    "http_too_large": "响应过大（超过 {kb} KB）",
+    "key_missing": "此版本的 Windows 中不存在该服务",
+    "cleanup_foreign_user": "应用正以另一个管理员帐户运行：会清理那个帐户的文件夹",
+    "update_failed": "无法更新：{error}",
+    "update_none": "没有待安装的更新",
+    "update_bad_format": "下载的文件不是 P-Rune 安装程序",
+    "cleanup_unsafe": "无法以普通用户权限清理，因此没有删除任何内容（{error}）",
+    "update_verify_message": "请确认是你本人，以安装 P-Rune {version}。",
+    "update_not_verified": "未确认你的身份：没有安装任何内容。",
+    "update_verify_failed": "无法请求 Windows 确认：没有安装任何内容。"
   },
   "category": {
     "ai": "AI 与 Copilot",
@@ -102,100 +102,385 @@
     "privacy": "隐私",
     "search": "搜索",
     "start": "开始菜单与建议",
-    "taskbar": "任务栏"
+    "taskbar": "任务栏",
+    "services": "服务"
   },
   "tweak": {
-    "ai.copilot_legacy": { "title": "关闭内置 Copilot（23H2）", "description": "针对 23H2 内置 Copilot 的策略。从 24H2 起 Copilot 是一个应用：请在“预装软件”中删除它。" },
-    "ai.recall": { "title": "关闭 Recall（快照）", "description": "阻止 Recall 保存你活动截图的策略。仅在 Copilot+ PC 上生效。" },
-    "appearance.dark_mode": { "title": "深色模式", "description": "Windows 和应用都使用深色模式。" },
-    "appearance.faster_menus": { "title": "更快的菜单", "description": "将子菜单的展开延迟从 400 毫秒降到 100 毫秒。" },
-    "appearance.no_transparency": { "title": "关闭透明效果", "description": "关闭透明效果（Mica/Acrylic）。对显卡较弱的电脑有帮助。" },
-    "appearance.performance_visuals": { "title": "视觉效果降到最低", "description": "相当于“调整为最佳性能”：没有窗口和菜单动画、阴影、淡入淡出、桌面预览，拖动时不显示窗口内容。文字仍保持平滑。" },
-    "explorer.checkboxes": { "title": "使用复选框选择", "description": "显示用于选择文件的复选框。" },
-    "explorer.classic_context_menu": { "title": "经典右键菜单", "description": "恢复完整的右键菜单，不再需要“显示更多选项”。" },
-    "explorer.compact_mode": { "title": "紧凑视图", "description": "缩小资源管理器中各项之间的间距。" },
-    "explorer.full_path_title": { "title": "不“美化”名称", "description": "按原样显示文件和文件夹名称，不改变大小写。" },
-    "explorer.icons_not_thumbnails": { "title": "显示图标而非缩略图", "description": "资源管理器不再生成图片和视频的预览。在大文件夹中更快。" },
-    "explorer.no_aero_shake": { "title": "关闭“晃动以最小化”", "description": "晃动窗口不再最小化其他所有窗口。" },
-    "explorer.open_this_pc": { "title": "打开时显示“此电脑”", "description": "资源管理器打开时显示“此电脑”而不是“主文件夹”。" },
-    "explorer.separate_process": { "title": "在单独进程中打开文件夹", "description": "某个资源管理器窗口卡死时不会连带任务栏。会多占用一些内存。" },
-    "explorer.show_extensions": { "title": "显示文件扩展名", "description": "显示 .exe、.pdf 等扩展名。出于安全考虑推荐开启：这样“发票.pdf.exe”就无法伪装。" },
-    "explorer.show_hidden": { "title": "显示隐藏的文件", "description": "显示隐藏的文件和文件夹（不包括受保护的系统文件）。" },
-    "gaming.game_dvr": { "title": "关闭后台录制（Game DVR）", "description": "关闭 Xbox Game Bar 的后台录制。在配置一般的电脑上可以提高帧率。" },
-    "gaming.mouse_acceleration": { "title": "关闭鼠标加速", "description": "关闭“提高指针精确度”：移动变为 1:1。非常适合游戏。" },
-    "gaming.sticky_keys_prompt": { "title": "不弹出粘滞键提示（按 5 次 Shift）", "description": "连按五次 Shift 不会再在游戏中弹出粘滞键提示。" },
-    "privacy.activity_history": { "title": "关闭活动历史记录", "description": "不保存也不上传活动历史记录（你用过的应用、文件和网站）。" },
-    "privacy.advertising_id": { "title": "关闭广告 ID", "description": "禁止应用使用你的广告 ID 投放个性化广告。" },
-    "privacy.feedback_frequency": { "title": "不要求反馈", "description": "Windows 不再弹出反馈调查。" },
-    "privacy.inking_typing": { "title": "关闭墨迹书写和键入个性化", "description": "Windows 不再收集你输入和书写的内容来建立个人词典。" },
-    "privacy.online_speech": { "title": "关闭联机语音识别", "description": "语音不会发送到云端。联机听写将无法使用。" },
-    "privacy.tailored_experiences": { "title": "关闭量身定制的体验", "description": "Microsoft 不再使用你的诊断数据提供个性化提示和广告。" },
-    "privacy.telemetry_policy": { "title": "遥测降到最低（策略）", "description": "将诊断数据设为你的版本所允许的最低级别。家庭版和专业版的实际最低级别是“必需”。" },
-    "privacy.track_app_launches": { "title": "不跟踪应用启动", "description": "Windows 不再记录你打开了哪些应用来排序开始菜单和搜索结果。" },
-    "privacy.typing_insights": { "title": "关闭键入见解", "description": "关闭键入统计数据的收集（键入见解）。" },
-    "search.highlights": { "title": "关闭搜索要点", "description": "去掉搜索框里的每日插图和主题。" },
-    "search.taskbar_mode": { "title": "任务栏上的搜索", "description": "搜索的显示方式：隐藏、仅图标、图标和标签，或完整的搜索框。", "choices": { "box": "搜索框", "hidden": "隐藏", "icon": "图标", "icon_label": "图标和标签" } },
-    "search.web_results": { "title": "搜索中不显示 Bing 网页结果", "description": "关闭开始菜单搜索中网页建议的策略。搜索只在本地进行。" },
-    "start.account_notifications": { "title": "在开始菜单中隐藏帐户通知", "description": "去掉开始菜单里“完成你的 Microsoft 帐户设置”“进行备份”之类的提示。" },
-    "start.finish_setup_nag": { "title": "不再显示“让我们完成设备的设置”", "description": "关闭不断推销 OneDrive、Microsoft 365 和 Microsoft 帐户的界面。" },
-    "start.lockscreen_tips": { "title": "锁屏界面不显示趣闻", "description": "去掉锁屏界面上的提示和“趣闻”。" },
-    "start.recommendations": { "title": "在开始菜单中隐藏推荐和提示", "description": "去掉开始菜单中的推广推荐（Iris）。" },
-    "start.settings_suggestions": { "title": "设置中不显示建议内容", "description": "去掉“设置”应用中的建议和推广。" },
-    "start.silent_installs": { "title": "阻止静默安装推荐应用", "description": "阻止 Windows 未经询问就安装推广的游戏和应用（如 Candy Crush 等）。" },
-    "start.suggested_notifications": { "title": "不显示“建议”通知", "description": "屏蔽推荐功能和应用的系统通知。" },
-    "start.suggestions": { "title": "开始菜单中不显示建议", "description": "关闭开始菜单中出现的推荐应用。" },
-    "start.sync_provider_ads": { "title": "资源管理器中不显示广告", "description": "去掉资源管理器中同步服务提供商（OneDrive、Microsoft 365）的提示。" },
-    "start.tips": { "title": "不显示提示和技巧", "description": "关闭“提示、技巧和建议”通知。" },
-    "start.welcome_experience": { "title": "更新后不显示“欢迎体验”", "description": "更新后不再显示新功能介绍界面。" },
-    "taskbar.align_left": { "title": "图标靠左对齐", "description": "开始按钮和图标靠左，就像 Windows 10。" },
-    "taskbar.clock_seconds": { "title": "时钟显示秒", "description": "任务栏时钟显示秒数。会多耗一点电。" },
-    "taskbar.disable_widgets": { "title": "关闭小组件", "description": "彻底关闭小组件面板（新闻、天气、MSN）的策略。" },
-    "taskbar.end_task": { "title": "右键“结束任务”", "description": "在任务栏应用的右键菜单中添加“结束任务”。" },
-    "taskbar.hide_task_view": { "title": "隐藏“任务视图”按钮", "description": "去掉“任务视图”按钮（Win+Tab 仍然可用）。" },
-    "taskbar.no_animations": { "title": "关闭任务栏动画", "description": "关闭任务栏动画，感觉更流畅。" }
+    "ai.copilot_legacy": {
+      "title": "关闭内置 Copilot（23H2）",
+      "description": "针对 23H2 内置 Copilot 的策略。从 24H2 起 Copilot 是一个应用：请在“预装软件”中删除它。"
+    },
+    "ai.recall": {
+      "title": "关闭 Recall（快照）",
+      "description": "阻止 Recall 保存你活动截图的策略。仅在 Copilot+ PC 上生效。"
+    },
+    "appearance.dark_mode": {
+      "title": "深色模式",
+      "description": "Windows 和应用都使用深色模式。"
+    },
+    "appearance.faster_menus": {
+      "title": "更快的菜单",
+      "description": "将子菜单的展开延迟从 400 毫秒降到 100 毫秒。"
+    },
+    "appearance.no_transparency": {
+      "title": "关闭透明效果",
+      "description": "关闭透明效果（Mica/Acrylic）。对显卡较弱的电脑有帮助。"
+    },
+    "appearance.performance_visuals": {
+      "title": "视觉效果降到最低",
+      "description": "相当于“调整为最佳性能”：没有窗口和菜单动画、阴影、淡入淡出、桌面预览，拖动时不显示窗口内容。文字仍保持平滑。"
+    },
+    "explorer.checkboxes": {
+      "title": "使用复选框选择",
+      "description": "显示用于选择文件的复选框。"
+    },
+    "explorer.classic_context_menu": {
+      "title": "经典右键菜单",
+      "description": "恢复完整的右键菜单，不再需要“显示更多选项”。"
+    },
+    "explorer.compact_mode": {
+      "title": "紧凑视图",
+      "description": "缩小资源管理器中各项之间的间距。"
+    },
+    "explorer.full_path_title": {
+      "title": "不“美化”名称",
+      "description": "按原样显示文件和文件夹名称，不改变大小写。"
+    },
+    "explorer.icons_not_thumbnails": {
+      "title": "显示图标而非缩略图",
+      "description": "资源管理器不再生成图片和视频的预览。在大文件夹中更快。"
+    },
+    "explorer.no_aero_shake": {
+      "title": "关闭“晃动以最小化”",
+      "description": "晃动窗口不再最小化其他所有窗口。"
+    },
+    "explorer.open_this_pc": {
+      "title": "打开时显示“此电脑”",
+      "description": "资源管理器打开时显示“此电脑”而不是“主文件夹”。"
+    },
+    "explorer.separate_process": {
+      "title": "在单独进程中打开文件夹",
+      "description": "某个资源管理器窗口卡死时不会连带任务栏。会多占用一些内存。"
+    },
+    "explorer.show_extensions": {
+      "title": "显示文件扩展名",
+      "description": "显示 .exe、.pdf 等扩展名。出于安全考虑推荐开启：这样“发票.pdf.exe”就无法伪装。"
+    },
+    "explorer.show_hidden": {
+      "title": "显示隐藏的文件",
+      "description": "显示隐藏的文件和文件夹（不包括受保护的系统文件）。"
+    },
+    "gaming.game_dvr": {
+      "title": "关闭后台录制（Game DVR）",
+      "description": "关闭 Xbox Game Bar 的后台录制。在配置一般的电脑上可以提高帧率。"
+    },
+    "gaming.mouse_acceleration": {
+      "title": "关闭鼠标加速",
+      "description": "关闭“提高指针精确度”：移动变为 1:1。非常适合游戏。"
+    },
+    "gaming.sticky_keys_prompt": {
+      "title": "不弹出粘滞键提示（按 5 次 Shift）",
+      "description": "连按五次 Shift 不会再在游戏中弹出粘滞键提示。"
+    },
+    "privacy.activity_history": {
+      "title": "关闭活动历史记录",
+      "description": "不保存也不上传活动历史记录（你用过的应用、文件和网站）。"
+    },
+    "privacy.advertising_id": {
+      "title": "关闭广告 ID",
+      "description": "禁止应用使用你的广告 ID 投放个性化广告。"
+    },
+    "privacy.feedback_frequency": {
+      "title": "不要求反馈",
+      "description": "Windows 不再弹出反馈调查。"
+    },
+    "privacy.inking_typing": {
+      "title": "关闭墨迹书写和键入个性化",
+      "description": "Windows 不再收集你输入和书写的内容来建立个人词典。"
+    },
+    "privacy.online_speech": {
+      "title": "关闭联机语音识别",
+      "description": "语音不会发送到云端。联机听写将无法使用。"
+    },
+    "privacy.tailored_experiences": {
+      "title": "关闭量身定制的体验",
+      "description": "Microsoft 不再使用你的诊断数据提供个性化提示和广告。"
+    },
+    "privacy.telemetry_policy": {
+      "title": "遥测降到最低（策略）",
+      "description": "将诊断数据设为你的版本所允许的最低级别。家庭版和专业版的实际最低级别是“必需”。"
+    },
+    "privacy.track_app_launches": {
+      "title": "不跟踪应用启动",
+      "description": "Windows 不再记录你打开了哪些应用来排序开始菜单和搜索结果。"
+    },
+    "privacy.typing_insights": {
+      "title": "关闭键入见解",
+      "description": "关闭键入统计数据的收集（键入见解）。"
+    },
+    "search.highlights": {
+      "title": "关闭搜索要点",
+      "description": "去掉搜索框里的每日插图和主题。"
+    },
+    "search.taskbar_mode": {
+      "title": "任务栏上的搜索",
+      "description": "搜索的显示方式：隐藏、仅图标、图标和标签，或完整的搜索框。",
+      "choices": {
+        "box": "搜索框",
+        "hidden": "隐藏",
+        "icon": "图标",
+        "icon_label": "图标和标签"
+      }
+    },
+    "search.web_results": {
+      "title": "搜索中不显示 Bing 网页结果",
+      "description": "关闭开始菜单搜索中网页建议的策略。搜索只在本地进行。"
+    },
+    "start.account_notifications": {
+      "title": "在开始菜单中隐藏帐户通知",
+      "description": "去掉开始菜单里“完成你的 Microsoft 帐户设置”“进行备份”之类的提示。"
+    },
+    "start.finish_setup_nag": {
+      "title": "不再显示“让我们完成设备的设置”",
+      "description": "关闭不断推销 OneDrive、Microsoft 365 和 Microsoft 帐户的界面。"
+    },
+    "start.lockscreen_tips": {
+      "title": "锁屏界面不显示趣闻",
+      "description": "去掉锁屏界面上的提示和“趣闻”。"
+    },
+    "start.recommendations": {
+      "title": "在开始菜单中隐藏推荐和提示",
+      "description": "去掉开始菜单中的推广推荐（Iris）。"
+    },
+    "start.settings_suggestions": {
+      "title": "设置中不显示建议内容",
+      "description": "去掉“设置”应用中的建议和推广。"
+    },
+    "start.silent_installs": {
+      "title": "阻止静默安装推荐应用",
+      "description": "阻止 Windows 未经询问就安装推广的游戏和应用（如 Candy Crush 等）。"
+    },
+    "start.suggested_notifications": {
+      "title": "不显示“建议”通知",
+      "description": "屏蔽推荐功能和应用的系统通知。"
+    },
+    "start.suggestions": {
+      "title": "开始菜单中不显示建议",
+      "description": "关闭开始菜单中出现的推荐应用。"
+    },
+    "start.sync_provider_ads": {
+      "title": "资源管理器中不显示广告",
+      "description": "去掉资源管理器中同步服务提供商（OneDrive、Microsoft 365）的提示。"
+    },
+    "start.tips": {
+      "title": "不显示提示和技巧",
+      "description": "关闭“提示、技巧和建议”通知。"
+    },
+    "start.welcome_experience": {
+      "title": "更新后不显示“欢迎体验”",
+      "description": "更新后不再显示新功能介绍界面。"
+    },
+    "taskbar.align_left": {
+      "title": "图标靠左对齐",
+      "description": "开始按钮和图标靠左，就像 Windows 10。"
+    },
+    "taskbar.clock_seconds": {
+      "title": "时钟显示秒",
+      "description": "任务栏时钟显示秒数。会多耗一点电。"
+    },
+    "taskbar.disable_widgets": {
+      "title": "关闭小组件",
+      "description": "彻底关闭小组件面板（新闻、天气、MSN）的策略。"
+    },
+    "taskbar.end_task": {
+      "title": "右键“结束任务”",
+      "description": "在任务栏应用的右键菜单中添加“结束任务”。"
+    },
+    "taskbar.hide_task_view": {
+      "title": "隐藏“任务视图”按钮",
+      "description": "去掉“任务视图”按钮（Win+Tab 仍然可用）。"
+    },
+    "taskbar.no_animations": {
+      "title": "关闭任务栏动画",
+      "description": "关闭任务栏动画，感觉更流畅。"
+    },
+    "services.diagtrack": {
+      "title": "关闭遥测服务（DiagTrack）",
+      "description": "停止“Connected User Experiences and Telemetry”，即向 Microsoft 发送诊断数据的服务。"
+    },
+    "services.wap_push": {
+      "title": "关闭 WAP 推送消息路由服务",
+      "description": "设备推送消息服务，主要与遥测一起使用。普通电脑用不到。"
+    },
+    "services.maps": {
+      "title": "关闭已下载地图管理器",
+      "description": "只有“地图”应用（已停用）用它来提供离线地图。"
+    },
+    "services.retail_demo": {
+      "title": "关闭零售演示服务",
+      "description": "只用于商店里展示用电脑的演示模式。"
+    },
+    "services.fax": {
+      "title": "关闭传真服务",
+      "description": "用于收发传真的服务。许多 Windows 11 版本已经不再包含它。"
+    },
+    "services.error_reporting": {
+      "title": "关闭 Windows 错误报告",
+      "description": "程序崩溃时，Windows 不再收集和发送报告。不影响正常使用。"
+    },
+    "services.insider": {
+      "title": "关闭 Windows 预览体验服务",
+      "description": "只有接收 Windows 预览体验计划的测试版本时才需要。"
+    },
+    "services.xbox": {
+      "title": "关闭 Xbox 服务",
+      "description": "Xbox 登录、云存档、网络和配件。会导致 Microsoft Store / Game Pass 游戏、Xbox Game Bar 以及 Xbox 手柄设置无法使用。"
+    },
+    "services.print_spooler": {
+      "title": "关闭打印后台处理程序",
+      "description": "如果不用打印机：还能堵住一个已知的攻击途径（PrintNightmare）。关闭后无法打印，也无法用 Microsoft Print to PDF 另存为 PDF。"
+    },
+    "services.geolocation": {
+      "title": "关闭定位服务",
+      "description": "应用将无法知道电脑的位置。会影响本地天气、“查找我的设备”和自动设置时区。"
+    },
+    "services.sysmain": {
+      "title": "关闭 SysMain（Superfetch）",
+      "description": "不再把常用应用预加载到内存。使用固态硬盘几乎感觉不到；使用机械硬盘时应用打开会变慢。"
+    }
   },
   "bloat": {
-    "5319275A.WhatsAppDesktop": { "title": "WhatsApp" },
-    "AmazonVideo.PrimeVideo": { "title": "Prime Video" },
-    "BytedancePte.Ltd.TikTok": { "title": "TikTok" },
-    "Clipchamp.Clipchamp": { "title": "Clipchamp" },
-    "Disney.37853FC22B2CE": { "title": "Disney+" },
-    "Facebook.InstagramBeta": { "title": "Instagram" },
-    "MSTeams": { "title": "Microsoft Teams（个人版）" },
-    "Microsoft.549981C3F5F10": { "title": "Cortana（已停用）" },
-    "Microsoft.BingNews": { "title": "Microsoft 资讯" },
-    "Microsoft.BingSearch": { "title": "Bing Search" },
-    "Microsoft.BingWeather": { "title": "天气（MSN）" },
-    "Microsoft.Copilot": { "title": "Copilot" },
-    "Microsoft.GamingApp": { "title": "Xbox", "note": "安装 PC Game Pass 游戏需要它。" },
-    "Microsoft.GetHelp": { "title": "获取帮助", "note": "Windows 11 的部分疑难解答需要它。" },
-    "Microsoft.Getstarted": { "title": "提示" },
-    "Microsoft.MicrosoftOfficeHub": { "title": "Microsoft 365（Office Hub）" },
-    "Microsoft.MicrosoftSolitaireCollection": { "title": "Solitaire Collection" },
-    "Microsoft.MicrosoftStickyNotes": { "title": "便笺" },
-    "Microsoft.OutlookForWindows": { "title": "Outlook（新版）", "note": "取代“邮件”和“日历”。只有在使用其他邮件客户端时才删除它。" },
-    "Microsoft.People": { "title": "人脉" },
-    "Microsoft.PowerAutomateDesktop": { "title": "Power Automate" },
-    "Microsoft.Todos": { "title": "Microsoft To Do" },
-    "Microsoft.Windows.DevHome": { "title": "Dev Home（已停用）" },
-    "Microsoft.Windows.Photos": { "title": "照片", "note": "它是默认的图片查看器。删除前请先安装另一个。" },
-    "Microsoft.WindowsAlarms": { "title": "时钟" },
-    "Microsoft.WindowsCamera": { "title": "相机" },
-    "Microsoft.WindowsFeedbackHub": { "title": "反馈中心" },
-    "Microsoft.WindowsMaps": { "title": "地图（已停用）" },
-    "Microsoft.WindowsSoundRecorder": { "title": "录音机" },
-    "Microsoft.XboxGamingOverlay": { "title": "Xbox Game Bar", "note": "部分游戏用它截图和聊天。" },
-    "Microsoft.XboxIdentityProvider": { "title": "Xbox Identity Provider", "note": "Xbox 登录组件：没有它，Microsoft Store 的游戏无法登录。" },
-    "Microsoft.YourPhone": { "title": "手机连接" },
-    "Microsoft.ZuneMusic": { "title": "媒体播放器" },
-    "Microsoft.ZuneVideo": { "title": "电影和电视" },
-    "MicrosoftCorporationII.MicrosoftFamily": { "title": "Microsoft 家庭安全" },
-    "MicrosoftCorporationII.QuickAssist": { "title": "快速助手", "note": "这是诈骗者最常用的远程协助工具。删除它可以降低这种风险。" },
-    "MicrosoftTeams": { "title": "Microsoft Teams（经典个人版）" },
-    "MicrosoftWindows.Client.WebExperience": { "title": "小组件（Windows Web Experience Pack）", "note": "删除小组件面板（新闻、天气、MSN）。可以在 Microsoft Store 中以“Windows Web Experience Pack”重新安装。" },
-    "MicrosoftWindows.CrossDevice": { "title": "跨设备体验" },
-    "SpotifyAB.SpotifyMusic": { "title": "Spotify（应用商店版）" },
-    "king.com.": { "title": "King 游戏（Candy Crush 等）" }
+    "5319275A.WhatsAppDesktop": {
+      "title": "WhatsApp"
+    },
+    "AmazonVideo.PrimeVideo": {
+      "title": "Prime Video"
+    },
+    "BytedancePte.Ltd.TikTok": {
+      "title": "TikTok"
+    },
+    "Clipchamp.Clipchamp": {
+      "title": "Clipchamp"
+    },
+    "Disney.37853FC22B2CE": {
+      "title": "Disney+"
+    },
+    "Facebook.InstagramBeta": {
+      "title": "Instagram"
+    },
+    "MSTeams": {
+      "title": "Microsoft Teams（个人版）"
+    },
+    "Microsoft.549981C3F5F10": {
+      "title": "Cortana（已停用）"
+    },
+    "Microsoft.BingNews": {
+      "title": "Microsoft 资讯"
+    },
+    "Microsoft.BingSearch": {
+      "title": "Bing Search"
+    },
+    "Microsoft.BingWeather": {
+      "title": "天气（MSN）"
+    },
+    "Microsoft.Copilot": {
+      "title": "Copilot"
+    },
+    "Microsoft.GamingApp": {
+      "title": "Xbox",
+      "note": "安装 PC Game Pass 游戏需要它。"
+    },
+    "Microsoft.GetHelp": {
+      "title": "获取帮助",
+      "note": "Windows 11 的部分疑难解答需要它。"
+    },
+    "Microsoft.Getstarted": {
+      "title": "提示"
+    },
+    "Microsoft.MicrosoftOfficeHub": {
+      "title": "Microsoft 365（Office Hub）"
+    },
+    "Microsoft.MicrosoftSolitaireCollection": {
+      "title": "Solitaire Collection"
+    },
+    "Microsoft.MicrosoftStickyNotes": {
+      "title": "便笺"
+    },
+    "Microsoft.OutlookForWindows": {
+      "title": "Outlook（新版）",
+      "note": "取代“邮件”和“日历”。只有在使用其他邮件客户端时才删除它。"
+    },
+    "Microsoft.People": {
+      "title": "人脉"
+    },
+    "Microsoft.PowerAutomateDesktop": {
+      "title": "Power Automate"
+    },
+    "Microsoft.Todos": {
+      "title": "Microsoft To Do"
+    },
+    "Microsoft.Windows.DevHome": {
+      "title": "Dev Home（已停用）"
+    },
+    "Microsoft.Windows.Photos": {
+      "title": "照片",
+      "note": "它是默认的图片查看器。删除前请先安装另一个。"
+    },
+    "Microsoft.WindowsAlarms": {
+      "title": "时钟"
+    },
+    "Microsoft.WindowsCamera": {
+      "title": "相机"
+    },
+    "Microsoft.WindowsFeedbackHub": {
+      "title": "反馈中心"
+    },
+    "Microsoft.WindowsMaps": {
+      "title": "地图（已停用）"
+    },
+    "Microsoft.WindowsSoundRecorder": {
+      "title": "录音机"
+    },
+    "Microsoft.XboxGamingOverlay": {
+      "title": "Xbox Game Bar",
+      "note": "部分游戏用它截图和聊天。"
+    },
+    "Microsoft.XboxIdentityProvider": {
+      "title": "Xbox Identity Provider",
+      "note": "Xbox 登录组件：没有它，Microsoft Store 的游戏无法登录。"
+    },
+    "Microsoft.YourPhone": {
+      "title": "手机连接"
+    },
+    "Microsoft.ZuneMusic": {
+      "title": "媒体播放器"
+    },
+    "Microsoft.ZuneVideo": {
+      "title": "电影和电视"
+    },
+    "MicrosoftCorporationII.MicrosoftFamily": {
+      "title": "Microsoft 家庭安全"
+    },
+    "MicrosoftCorporationII.QuickAssist": {
+      "title": "快速助手",
+      "note": "这是诈骗者最常用的远程协助工具。删除它可以降低这种风险。"
+    },
+    "MicrosoftTeams": {
+      "title": "Microsoft Teams（经典个人版）"
+    },
+    "MicrosoftWindows.Client.WebExperience": {
+      "title": "小组件（Windows Web Experience Pack）",
+      "note": "删除小组件面板（新闻、天气、MSN）。可以在 Microsoft Store 中以“Windows Web Experience Pack”重新安装。"
+    },
+    "MicrosoftWindows.CrossDevice": {
+      "title": "跨设备体验"
+    },
+    "SpotifyAB.SpotifyMusic": {
+      "title": "Spotify（应用商店版）"
+    },
+    "king.com.": {
+      "title": "King 游戏（Candy Crush 等）"
+    }
   },
   "app_group": {
     "browsers": "浏览器",

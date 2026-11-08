@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AppWindow, Check, HardDrive, History, PackageX, ShieldCheck, ShieldOff, SlidersHorizontal } from "@lucide/svelte";
+  import { AppWindow, Check, HardDrive, History, LoaderCircle, PackageX, RefreshCw, ShieldCheck, ShieldOff, SlidersHorizontal, Tag } from "@lucide/svelte";
   import Logo from "./Logo.svelte";
   import { isTauri } from "#lib/api.ts";
   import { disk } from "#lib/disk.svelte.ts";
@@ -9,6 +9,8 @@
   import { theme, THEMES } from "#lib/theme.svelte.ts";
   import { initials } from "#lib/format.ts";
   import { i18n, LANGS, t } from "#lib/i18n.svelte.ts";
+  import { updates } from "#lib/updates.svelte.ts";
+  import UpdateNotice from "./UpdateNotice.svelte";
 
   const counts = $derived.by(() => {
     const c: Record<string, { on: number; total: number }> = {};
@@ -90,6 +92,10 @@
     <button class="nav {store.view === 'history' ? 'active' : ''}" onclick={() => (store.view = "history")}>
       <History size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">{t("nav.history")}</span>
     </button>
+    <button class="nav {store.view === 'versions' ? 'active' : ''}" onclick={() => (store.view = "versions")}>
+      <Tag size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">{t("nav.versions")}</span>
+      {#if updates.info}<span class="size-1.5 rounded-full bg-accent" title={t("update.available", { version: updates.info.version })}></span>{/if}
+    </button>
 
     <div class="mt-5 mb-1 px-2.5 text-[11.5px] text-faint">{t("side.profiles")}</div>
     {#each PROFILES as p (p.id)}
@@ -151,7 +157,18 @@
         <option value={l.code}>{l.name}</option>
       {/each}
     </select>
+
+    <button
+      class="mx-2.5 mt-3 inline-flex items-center gap-1.5 px-0.5 text-[11.5px] text-faint hover:text-ink disabled:opacity-60"
+      disabled={updates.checking || updates.installing}
+      onclick={() => updates.check(false)}
+    >
+      {#if updates.checking}<LoaderCircle size={11} class="animate-spin" />{:else}<RefreshCw size={11} />{/if}
+      {updates.checking ? t("update.checking") : t("update.check")}
+    </button>
   </nav>
+
+  <UpdateNotice />
 
   {#if store.user}
     {@const u = store.user}

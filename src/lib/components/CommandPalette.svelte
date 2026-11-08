@@ -4,6 +4,7 @@
   import { theme, THEMES } from "#lib/theme.svelte.ts";
   import { isTauri } from "#lib/api.ts";
   import { i18n, LANGS, t, tn } from "#lib/i18n.svelte.ts";
+  import { updates } from "#lib/updates.svelte.ts";
   import { fade, scale } from "svelte/transition";
   import { tick } from "svelte";
 
@@ -28,6 +29,7 @@
     { id: "v:apps", group: t("palette.group.goto"), label: t("palette.apps"), run: () => ((store.view = "apps"), (store.query = "")) },
     { id: "v:disk", group: t("palette.group.goto"), label: t("palette.disk"), run: () => ((store.view = "disk"), (store.query = "")) },
     { id: "v:bloat", group: t("palette.group.goto"), label: t("nav.bloat"), run: () => (store.view = "bloat") },
+    { id: "v:versions", group: t("palette.group.goto"), label: t("nav.versions"), run: () => (store.view = "versions") },
     { id: "v:history", group: t("palette.group.goto"), label: t("nav.history"), run: () => (store.view = "history") },
     ...(store.overview?.categories ?? []).map((c) => ({
       id: "c:" + c.id, group: t("palette.group.goto"), label: c.title, hint: t("palette.category"),
@@ -48,6 +50,10 @@
           hint: t("palette.glass_hint"),
           run: () => theme.setGlass(!theme.glass),
         }]
+      : []),
+    { id: "a:update", group: t("palette.group.actions"), label: t("update.check"), run: () => updates.check(false) },
+    ...(updates.info
+      ? [{ id: "a:install-update", group: t("palette.group.actions"), label: t("update.available", { version: updates.info.version }), hint: t("update.install"), run: () => updates.install() }]
       : []),
     ...PROFILES.map((p) => ({
       id: "p:" + p.id, group: t("palette.group.profiles"), label: t("palette.profile", { profile: t(p.title) }), hint: t(p.hint),

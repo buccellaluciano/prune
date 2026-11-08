@@ -3,6 +3,7 @@
   import { disk } from "#lib/disk.svelte.ts";
   import { bytes, count, seconds } from "#lib/format.ts";
   import { store } from "#lib/store.svelte.ts";
+  import CleanupPanel from "./CleanupPanel.svelte";
   import { t, tn } from "#lib/i18n.svelte.ts";
   import { onMount } from "svelte";
 
@@ -27,6 +28,8 @@
     <h1 class="font-display text-[20px] font-semibold">{t("nav.disk")}</h1>
     <p class="mt-1 max-w-2xl text-[13px] text-mute">{t("disk.subtitle")}</p>
   </header>
+
+  <CleanupPanel />
 
   <!-- Unidades -->
   <div class="mb-8 divide-y divide-line overflow-hidden rounded-lg border border-line bg-card">

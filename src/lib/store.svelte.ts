@@ -4,7 +4,7 @@ import { t, tn, type Key } from "./i18n.svelte";
 /** Pendiente: true/false para switches, id de opción para selectores. */
 export type Pending = boolean | string;
 
-export type View = "tweaks" | "apps" | "disk" | "bloat" | "history";
+export type View = "tweaks" | "apps" | "disk" | "bloat" | "history" | "versions";
 
 export interface Toast {
   id: number;
@@ -197,7 +197,7 @@ export const PROFILES: { id: string; title: Key; hint: Key; ids: string[] }[] = 
     ids: [
       "privacy.advertising_id", "privacy.tailored_experiences", "privacy.online_speech",
       "privacy.inking_typing", "privacy.typing_insights", "privacy.track_app_launches",
-      "privacy.feedback_frequency", "privacy.activity_history", "ai.recall",
+      "privacy.feedback_frequency", "privacy.activity_history", "ai.recall", "services.diagtrack",
       "start.suggestions", "start.silent_installs", "start.tips", "start.settings_suggestions",
       "start.lockscreen_tips", "start.sync_provider_ads", "start.recommendations",
     ],

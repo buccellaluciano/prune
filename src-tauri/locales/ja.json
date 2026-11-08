@@ -17,7 +17,6 @@
     "deletes_value": "（値を削除）",
     "value_missing": "（存在しない）",
     "value_other_type": "<型 {kind} · {bytes} バイト>",
-
     "power_title": "電源プラン",
     "power_description": "高パフォーマンスと究極のパフォーマンスでは、プロセッサーがクロックを下げたり省電力状態に入ったりしません。反応は速くなりますが、消費電力と発熱が増えます。ノート PC では電源に接続しているときだけ使いましょう。",
     "power_key": "電源プラン（powrprof）",
@@ -37,11 +36,9 @@
     "power_guid_invalid": "履歴の GUID が無効です",
     "power_previous_gone": "以前のプランはもう存在しません",
     "power_not_ours": "削除しようとしたプランは、アプリが作成した究極のパフォーマンスではありません",
-
     "label_power": "電源プラン：{plan}",
     "label_tweaks": "{n} 件の調整",
     "label_removed_apps": "{n} 個のアプリを削除",
-
     "journal_unreadable_backup": "履歴を読み取れませんでした（{error}）。コピーを {path} に保存し、新しい履歴を開始しました。",
     "journal_unreadable": "履歴を読み取れず（{error}）、バックアップもできませんでした（{backup_error}）。",
     "journal_save_failed": "履歴を保存できませんでした：{error}",
@@ -54,15 +51,12 @@
     "journal_bad_key": "削除するキーが無効です：「{key}」",
     "conflict_value": "{title}：{key} は {value}",
     "conflict_power": "電源プラン：現在は {plan}",
-
     "not_in_catalog": "カタログにありません",
-
     "drive_unavailable": "ドライブを使用できません：{letter}",
     "scan_running": "すでに分析を実行中です",
     "scan_missing": "完了した分析がまだありません",
     "folder_missing": "フォルダーが見つかりません",
     "explorer_failed": "エクスプローラーを開けませんでした",
-
     "winget_not_found": "winget が見つかりません。Microsoft Store から「アプリ インストーラー」をインストールまたは更新してください。",
     "winget_bad_signature": "winget の署名の検証に失敗しました：{error}",
     "winget_run_failed": "winget を実行できませんでした：{error}",
@@ -75,13 +69,10 @@
     "already_latest": "すでに最新バージョンです",
     "already_installed": "すでにインストールされています",
     "package_not_found": "winget がパッケージを見つけられませんでした（アンインストール済み？）",
-
     "signature_invalid": "署名が無効か、ありません（{code}）",
     "signer_unreadable": "署名者を読み取れませんでした",
     "signed_by_other": "署名者は Microsoft ではなく「{signer}」です",
-
     "hash_invalid": "無効なハッシュ",
-
     "http_only_https": "https のアドレスのみ使用できます：{url}",
     "http_bad_url": "無効なアドレス：{url}",
     "http_bad_port": "無効なポート：{url}",
@@ -91,7 +82,16 @@
     "http_send_failed": "{host} にアクセスできませんでした",
     "http_no_status": "ステータス コードのない応答",
     "http_cut": "ダウンロードが中断されました",
-    "http_too_large": "応答が大きすぎます（{kb} KB 超）"
+    "http_too_large": "応答が大きすぎます（{kb} KB 超）",
+    "key_missing": "このエディションの Windows にはこのサービスがありません",
+    "cleanup_foreign_user": "アプリは別の管理者アカウントで実行されています：そのアカウントのフォルダーがクリーンアップされます",
+    "update_failed": "更新できませんでした：{error}",
+    "update_none": "保留中の更新はありません",
+    "update_bad_format": "ダウンロードしたファイルは P-Rune のインストーラーではありません",
+    "cleanup_unsafe": "ユーザー権限でクリーンアップできなかったため、何も削除していません（{error}）",
+    "update_verify_message": "P-Rune {version} をインストールするには、ご本人であることを確認してください。",
+    "update_not_verified": "本人確認ができなかったため、何もインストールしていません。",
+    "update_verify_failed": "Windows に確認を求められなかったため、何もインストールしていません。"
   },
   "category": {
     "ai": "AI と Copilot",
@@ -102,100 +102,385 @@
     "privacy": "プライバシー",
     "search": "検索",
     "start": "スタートとおすすめ",
-    "taskbar": "タスクバー"
+    "taskbar": "タスクバー",
+    "services": "サービス"
   },
   "tweak": {
-    "ai.copilot_legacy": { "title": "組み込みの Copilot をオフにする（23H2）", "description": "23H2 の組み込み Copilot 用のポリシーです。24H2 以降の Copilot はアプリなので、不要なアプリから削除してください。" },
-    "ai.recall": { "title": "Recall（スナップショット）をオフにする", "description": "Recall が操作のスナップショットを保存しないようにするポリシーです。Copilot+ PC でのみ有効です。" },
-    "appearance.dark_mode": { "title": "ダーク モード", "description": "Windows とアプリをダーク モードにします。" },
-    "appearance.faster_menus": { "title": "メニューを速くする", "description": "サブメニューが開くまでの待ち時間を 400 ms から 100 ms に短縮します。" },
-    "appearance.no_transparency": { "title": "透明効果をオフにする", "description": "透明効果（Mica/Acrylic）をオフにします。GPU が非力な PC で役立ちます。" },
-    "appearance.performance_visuals": { "title": "視覚効果を最小限にする", "description": "「パフォーマンスを優先する」と同じように、ウィンドウやメニューのアニメーション、影、フェード、デスクトップのプレビュー、ドラッグ中のウィンドウの内容をオフにします。文字はなめらかなままです。" },
-    "explorer.checkboxes": { "title": "チェック ボックスで選択", "description": "ファイルを選択するためのチェック ボックスを表示します。" },
-    "explorer.classic_context_menu": { "title": "従来の右クリック メニュー", "description": "「その他のオプションを確認」を挟まずに、完全な右クリック メニューに戻します。" },
-    "explorer.compact_mode": { "title": "コンパクト ビュー", "description": "エクスプローラーの項目間の余白を詰めます。" },
-    "explorer.full_path_title": { "title": "名前を「整形」しない", "description": "ファイル名やフォルダー名を、大文字・小文字を変えずにそのまま表示します。" },
-    "explorer.icons_not_thumbnails": { "title": "縮小版ではなくアイコンを表示", "description": "エクスプローラーが画像や動画のプレビューを作りません。大きなフォルダーで速くなります。" },
-    "explorer.no_aero_shake": { "title": "「シェイクで最小化」をオフにする", "description": "ウィンドウを振っても、ほかのウィンドウが最小化されなくなります。" },
-    "explorer.open_this_pc": { "title": "「PC」で開く", "description": "エクスプローラーが「ホーム」ではなく「PC」で開きます。" },
-    "explorer.separate_process": { "title": "フォルダーを別のプロセスで開く", "description": "エクスプローラーのウィンドウが固まっても、タスクバーを巻き込みません。RAM を少し多く使います。" },
-    "explorer.show_extensions": { "title": "ファイル名拡張子を表示", "description": ".exe や .pdf などを表示します。安全のためにおすすめです：「請求書.pdf.exe」が偽装できなくなります。" },
-    "explorer.show_hidden": { "title": "隠しファイルを表示", "description": "隠しファイルと隠しフォルダーを表示します（保護されたシステム ファイルは除く）。" },
-    "gaming.game_dvr": { "title": "バックグラウンド録画をオフにする（Game DVR）", "description": "Xbox Game Bar のバックグラウンド録画をオフにします。控えめなスペックの PC で FPS が上がることがあります。" },
-    "gaming.mouse_acceleration": { "title": "マウスの加速をオフにする", "description": "「ポインターの精度を高める」をオフにして、動きを 1:1 にします。ゲームに最適です。" },
-    "gaming.sticky_keys_prompt": { "title": "固定キーの確認を出さない（Shift 5 回）", "description": "Shift を 5 回押しても、ゲーム中に固定キーの確認が出なくなります。" },
-    "privacy.activity_history": { "title": "アクティビティの履歴をオフにする", "description": "アクティビティの履歴（使ったアプリ、ファイル、Web サイト）を保存も送信もしません。" },
-    "privacy.advertising_id": { "title": "広告識別子をオフにする", "description": "アプリが広告識別子を使ってパーソナライズされた広告を表示しないようにします。" },
-    "privacy.feedback_frequency": { "title": "フィードバックを求めない", "description": "Windows がフィードバックのアンケートを表示しなくなります。" },
-    "privacy.inking_typing": { "title": "手書きと入力の個人用設定をオフにする", "description": "Windows が個人用辞書を作るために入力や手書きの内容を収集しなくなります。" },
-    "privacy.online_speech": { "title": "オンライン音声認識をオフにする", "description": "音声がクラウドに送信されなくなります。オンラインの音声入力は使えなくなります。" },
-    "privacy.tailored_experiences": { "title": "カスタマイズされたエクスペリエンスをオフにする", "description": "Microsoft が診断データを使って、あなた向けのヒントや広告を表示しなくなります。" },
-    "privacy.telemetry_policy": { "title": "テレメトリを最小限にする（ポリシー）", "description": "診断データを、お使いのエディションで許される最低レベルにします。Home と Pro では実際の最低レベルは「必須」です。" },
-    "privacy.track_app_launches": { "title": "アプリの起動を記録しない", "description": "スタートや検索の並び替えのために、どのアプリを開いたかを Windows が記録しなくなります。" },
-    "privacy.typing_insights": { "title": "入力の分析情報をオフにする", "description": "入力に関する統計（入力の分析情報）の収集をオフにします。" },
-    "search.highlights": { "title": "検索のハイライトを表示しない", "description": "検索ボックスから今日のイラストや話題を消します。" },
-    "search.taskbar_mode": { "title": "タスクバーの検索", "description": "検索の表示方法：非表示、アイコンのみ、アイコンとラベル、または検索ボックス全体。", "choices": { "box": "検索ボックス", "hidden": "非表示", "icon": "アイコン", "icon_label": "アイコンとラベル" } },
-    "search.web_results": { "title": "検索に Bing の Web 結果を出さない", "description": "スタートの検索で Web の候補をオフにするポリシーです。検索はローカルだけになります。" },
-    "start.account_notifications": { "title": "スタートのアカウント通知を隠す", "description": "スタート メニューから「Microsoft アカウントを完成させる」「バックアップする」といった通知を消します。" },
-    "start.finish_setup_nag": { "title": "「デバイスのセットアップを完了しましょう」を出さない", "description": "OneDrive、Microsoft 365、Microsoft アカウントをしつこく勧める画面をオフにします。" },
-    "start.lockscreen_tips": { "title": "ロック画面に豆知識を出さない", "description": "ロック画面からヒントや「豆知識」を消します。" },
-    "start.recommendations": { "title": "スタートのおすすめとヒントを隠す", "description": "スタート メニューから宣伝のおすすめ（Iris）を消します。" },
-    "start.settings_suggestions": { "title": "設定におすすめのコンテンツを出さない", "description": "設定アプリからおすすめや宣伝を消します。" },
-    "start.silent_installs": { "title": "おすすめアプリの自動インストールをブロック", "description": "Windows が宣伝されたゲームやアプリ（Candy Crush など）を確認なしにインストールしないようにします。" },
-    "start.suggested_notifications": { "title": "「おすすめ」の通知を出さない", "description": "機能やアプリを勧めるシステム通知を止めます。" },
-    "start.suggestions": { "title": "スタートにおすすめを出さない", "description": "スタート メニューに表示されるおすすめアプリをオフにします。" },
-    "start.sync_provider_ads": { "title": "エクスプローラーに広告を出さない", "description": "エクスプローラーから同期プロバイダー（OneDrive、Microsoft 365）の通知を消します。" },
-    "start.tips": { "title": "ヒントとコツを出さない", "description": "「ヒント、コツ、提案」の通知をオフにします。" },
-    "start.welcome_experience": { "title": "更新後の「ようこそ」画面を出さない", "description": "更新後の新機能紹介の画面をスキップします。" },
-    "taskbar.align_left": { "title": "アイコンを左揃えにする", "description": "Windows 10 のように、スタート ボタンとアイコンを左側に置きます。" },
-    "taskbar.clock_seconds": { "title": "時計に秒を表示", "description": "タスクバーの時計に秒を表示します。バッテリーを少し多く使います。" },
-    "taskbar.disable_widgets": { "title": "ウィジェットをオフにする", "description": "ウィジェット ボード（ニュース、天気、MSN）を完全にオフにするポリシーです。" },
-    "taskbar.end_task": { "title": "右クリックで「タスクの終了」", "description": "タスクバーのアプリの右クリック メニューに「タスクの終了」を追加します。" },
-    "taskbar.hide_task_view": { "title": "タスク ビュー ボタンを隠す", "description": "タスク ビュー ボタンを消します（Win+Tab は引き続き使えます）。" },
-    "taskbar.no_animations": { "title": "タスクバーのアニメーションをオフにする", "description": "タスクバーのアニメーションをオフにします。きびきび感じられます。" }
+    "ai.copilot_legacy": {
+      "title": "組み込みの Copilot をオフにする（23H2）",
+      "description": "23H2 の組み込み Copilot 用のポリシーです。24H2 以降の Copilot はアプリなので、不要なアプリから削除してください。"
+    },
+    "ai.recall": {
+      "title": "Recall（スナップショット）をオフにする",
+      "description": "Recall が操作のスナップショットを保存しないようにするポリシーです。Copilot+ PC でのみ有効です。"
+    },
+    "appearance.dark_mode": {
+      "title": "ダーク モード",
+      "description": "Windows とアプリをダーク モードにします。"
+    },
+    "appearance.faster_menus": {
+      "title": "メニューを速くする",
+      "description": "サブメニューが開くまでの待ち時間を 400 ms から 100 ms に短縮します。"
+    },
+    "appearance.no_transparency": {
+      "title": "透明効果をオフにする",
+      "description": "透明効果（Mica/Acrylic）をオフにします。GPU が非力な PC で役立ちます。"
+    },
+    "appearance.performance_visuals": {
+      "title": "視覚効果を最小限にする",
+      "description": "「パフォーマンスを優先する」と同じように、ウィンドウやメニューのアニメーション、影、フェード、デスクトップのプレビュー、ドラッグ中のウィンドウの内容をオフにします。文字はなめらかなままです。"
+    },
+    "explorer.checkboxes": {
+      "title": "チェック ボックスで選択",
+      "description": "ファイルを選択するためのチェック ボックスを表示します。"
+    },
+    "explorer.classic_context_menu": {
+      "title": "従来の右クリック メニュー",
+      "description": "「その他のオプションを確認」を挟まずに、完全な右クリック メニューに戻します。"
+    },
+    "explorer.compact_mode": {
+      "title": "コンパクト ビュー",
+      "description": "エクスプローラーの項目間の余白を詰めます。"
+    },
+    "explorer.full_path_title": {
+      "title": "名前を「整形」しない",
+      "description": "ファイル名やフォルダー名を、大文字・小文字を変えずにそのまま表示します。"
+    },
+    "explorer.icons_not_thumbnails": {
+      "title": "縮小版ではなくアイコンを表示",
+      "description": "エクスプローラーが画像や動画のプレビューを作りません。大きなフォルダーで速くなります。"
+    },
+    "explorer.no_aero_shake": {
+      "title": "「シェイクで最小化」をオフにする",
+      "description": "ウィンドウを振っても、ほかのウィンドウが最小化されなくなります。"
+    },
+    "explorer.open_this_pc": {
+      "title": "「PC」で開く",
+      "description": "エクスプローラーが「ホーム」ではなく「PC」で開きます。"
+    },
+    "explorer.separate_process": {
+      "title": "フォルダーを別のプロセスで開く",
+      "description": "エクスプローラーのウィンドウが固まっても、タスクバーを巻き込みません。RAM を少し多く使います。"
+    },
+    "explorer.show_extensions": {
+      "title": "ファイル名拡張子を表示",
+      "description": ".exe や .pdf などを表示します。安全のためにおすすめです：「請求書.pdf.exe」が偽装できなくなります。"
+    },
+    "explorer.show_hidden": {
+      "title": "隠しファイルを表示",
+      "description": "隠しファイルと隠しフォルダーを表示します（保護されたシステム ファイルは除く）。"
+    },
+    "gaming.game_dvr": {
+      "title": "バックグラウンド録画をオフにする（Game DVR）",
+      "description": "Xbox Game Bar のバックグラウンド録画をオフにします。控えめなスペックの PC で FPS が上がることがあります。"
+    },
+    "gaming.mouse_acceleration": {
+      "title": "マウスの加速をオフにする",
+      "description": "「ポインターの精度を高める」をオフにして、動きを 1:1 にします。ゲームに最適です。"
+    },
+    "gaming.sticky_keys_prompt": {
+      "title": "固定キーの確認を出さない（Shift 5 回）",
+      "description": "Shift を 5 回押しても、ゲーム中に固定キーの確認が出なくなります。"
+    },
+    "privacy.activity_history": {
+      "title": "アクティビティの履歴をオフにする",
+      "description": "アクティビティの履歴（使ったアプリ、ファイル、Web サイト）を保存も送信もしません。"
+    },
+    "privacy.advertising_id": {
+      "title": "広告識別子をオフにする",
+      "description": "アプリが広告識別子を使ってパーソナライズされた広告を表示しないようにします。"
+    },
+    "privacy.feedback_frequency": {
+      "title": "フィードバックを求めない",
+      "description": "Windows がフィードバックのアンケートを表示しなくなります。"
+    },
+    "privacy.inking_typing": {
+      "title": "手書きと入力の個人用設定をオフにする",
+      "description": "Windows が個人用辞書を作るために入力や手書きの内容を収集しなくなります。"
+    },
+    "privacy.online_speech": {
+      "title": "オンライン音声認識をオフにする",
+      "description": "音声がクラウドに送信されなくなります。オンラインの音声入力は使えなくなります。"
+    },
+    "privacy.tailored_experiences": {
+      "title": "カスタマイズされたエクスペリエンスをオフにする",
+      "description": "Microsoft が診断データを使って、あなた向けのヒントや広告を表示しなくなります。"
+    },
+    "privacy.telemetry_policy": {
+      "title": "テレメトリを最小限にする（ポリシー）",
+      "description": "診断データを、お使いのエディションで許される最低レベルにします。Home と Pro では実際の最低レベルは「必須」です。"
+    },
+    "privacy.track_app_launches": {
+      "title": "アプリの起動を記録しない",
+      "description": "スタートや検索の並び替えのために、どのアプリを開いたかを Windows が記録しなくなります。"
+    },
+    "privacy.typing_insights": {
+      "title": "入力の分析情報をオフにする",
+      "description": "入力に関する統計（入力の分析情報）の収集をオフにします。"
+    },
+    "search.highlights": {
+      "title": "検索のハイライトを表示しない",
+      "description": "検索ボックスから今日のイラストや話題を消します。"
+    },
+    "search.taskbar_mode": {
+      "title": "タスクバーの検索",
+      "description": "検索の表示方法：非表示、アイコンのみ、アイコンとラベル、または検索ボックス全体。",
+      "choices": {
+        "box": "検索ボックス",
+        "hidden": "非表示",
+        "icon": "アイコン",
+        "icon_label": "アイコンとラベル"
+      }
+    },
+    "search.web_results": {
+      "title": "検索に Bing の Web 結果を出さない",
+      "description": "スタートの検索で Web の候補をオフにするポリシーです。検索はローカルだけになります。"
+    },
+    "start.account_notifications": {
+      "title": "スタートのアカウント通知を隠す",
+      "description": "スタート メニューから「Microsoft アカウントを完成させる」「バックアップする」といった通知を消します。"
+    },
+    "start.finish_setup_nag": {
+      "title": "「デバイスのセットアップを完了しましょう」を出さない",
+      "description": "OneDrive、Microsoft 365、Microsoft アカウントをしつこく勧める画面をオフにします。"
+    },
+    "start.lockscreen_tips": {
+      "title": "ロック画面に豆知識を出さない",
+      "description": "ロック画面からヒントや「豆知識」を消します。"
+    },
+    "start.recommendations": {
+      "title": "スタートのおすすめとヒントを隠す",
+      "description": "スタート メニューから宣伝のおすすめ（Iris）を消します。"
+    },
+    "start.settings_suggestions": {
+      "title": "設定におすすめのコンテンツを出さない",
+      "description": "設定アプリからおすすめや宣伝を消します。"
+    },
+    "start.silent_installs": {
+      "title": "おすすめアプリの自動インストールをブロック",
+      "description": "Windows が宣伝されたゲームやアプリ（Candy Crush など）を確認なしにインストールしないようにします。"
+    },
+    "start.suggested_notifications": {
+      "title": "「おすすめ」の通知を出さない",
+      "description": "機能やアプリを勧めるシステム通知を止めます。"
+    },
+    "start.suggestions": {
+      "title": "スタートにおすすめを出さない",
+      "description": "スタート メニューに表示されるおすすめアプリをオフにします。"
+    },
+    "start.sync_provider_ads": {
+      "title": "エクスプローラーに広告を出さない",
+      "description": "エクスプローラーから同期プロバイダー（OneDrive、Microsoft 365）の通知を消します。"
+    },
+    "start.tips": {
+      "title": "ヒントとコツを出さない",
+      "description": "「ヒント、コツ、提案」の通知をオフにします。"
+    },
+    "start.welcome_experience": {
+      "title": "更新後の「ようこそ」画面を出さない",
+      "description": "更新後の新機能紹介の画面をスキップします。"
+    },
+    "taskbar.align_left": {
+      "title": "アイコンを左揃えにする",
+      "description": "Windows 10 のように、スタート ボタンとアイコンを左側に置きます。"
+    },
+    "taskbar.clock_seconds": {
+      "title": "時計に秒を表示",
+      "description": "タスクバーの時計に秒を表示します。バッテリーを少し多く使います。"
+    },
+    "taskbar.disable_widgets": {
+      "title": "ウィジェットをオフにする",
+      "description": "ウィジェット ボード（ニュース、天気、MSN）を完全にオフにするポリシーです。"
+    },
+    "taskbar.end_task": {
+      "title": "右クリックで「タスクの終了」",
+      "description": "タスクバーのアプリの右クリック メニューに「タスクの終了」を追加します。"
+    },
+    "taskbar.hide_task_view": {
+      "title": "タスク ビュー ボタンを隠す",
+      "description": "タスク ビュー ボタンを消します（Win+Tab は引き続き使えます）。"
+    },
+    "taskbar.no_animations": {
+      "title": "タスクバーのアニメーションをオフにする",
+      "description": "タスクバーのアニメーションをオフにします。きびきび感じられます。"
+    },
+    "services.diagtrack": {
+      "title": "テレメトリ サービスをオフにする（DiagTrack）",
+      "description": "診断データを Microsoft に送信するサービス「Connected User Experiences and Telemetry」を停止します。"
+    },
+    "services.wap_push": {
+      "title": "WAP プッシュ メッセージ ルーティング サービスをオフにする",
+      "description": "デバイスのプッシュ メッセージ サービスで、主にテレメトリと一緒に使われます。普通の PC では不要です。"
+    },
+    "services.maps": {
+      "title": "ダウンロードしたマップ マネージャーをオフにする",
+      "description": "オフライン マップのために「マップ」アプリ（提供終了）だけが使っていました。"
+    },
+    "services.retail_demo": {
+      "title": "小売デモ サービスをオフにする",
+      "description": "店頭展示用 PC のデモ モードにしか使われません。"
+    },
+    "services.fax": {
+      "title": "FAX サービスをオフにする",
+      "description": "FAX の送受信用のサービスです。多くの Windows 11 エディションにはもう含まれていません。"
+    },
+    "services.error_reporting": {
+      "title": "Windows エラー報告をオフにする",
+      "description": "プログラムがクラッシュしても、Windows がレポートを収集・送信しなくなります。普段の使用には影響しません。"
+    },
+    "services.insider": {
+      "title": "Windows Insider サービスをオフにする",
+      "description": "Insider プログラムのプレビュー版を受け取るときだけ必要です。"
+    },
+    "services.xbox": {
+      "title": "Xbox のサービスをオフにする",
+      "description": "Xbox のサインイン、クラウド セーブ、ネットワーク、アクセサリ。Microsoft Store / Game Pass のゲーム、Xbox Game Bar、Xbox コントローラーの設定が使えなくなります。"
+    },
+    "services.print_spooler": {
+      "title": "印刷スプーラーをオフにする",
+      "description": "プリンターを使わない場合に：よく知られた攻撃経路（PrintNightmare）もふさげます。オフにすると印刷も、Microsoft Print to PDF での PDF 保存もできません。"
+    },
+    "services.geolocation": {
+      "title": "位置情報サービスをオフにする",
+      "description": "アプリが PC の場所を知ることができなくなります。地域の天気、デバイスの検索、タイム ゾーンの自動設定が使えなくなります。"
+    },
+    "services.sysmain": {
+      "title": "SysMain（Superfetch）をオフにする",
+      "description": "よく使うアプリを RAM に事前に読み込まなくなります。SSD ならほとんど変わりませんが、HDD ではアプリの起動が遅くなります。"
+    }
   },
   "bloat": {
-    "5319275A.WhatsAppDesktop": { "title": "WhatsApp" },
-    "AmazonVideo.PrimeVideo": { "title": "Prime Video" },
-    "BytedancePte.Ltd.TikTok": { "title": "TikTok" },
-    "Clipchamp.Clipchamp": { "title": "Clipchamp" },
-    "Disney.37853FC22B2CE": { "title": "Disney+" },
-    "Facebook.InstagramBeta": { "title": "Instagram" },
-    "MSTeams": { "title": "Microsoft Teams（個人用）" },
-    "Microsoft.549981C3F5F10": { "title": "Cortana（提供終了）" },
-    "Microsoft.BingNews": { "title": "Microsoft ニュース" },
-    "Microsoft.BingSearch": { "title": "Bing Search" },
-    "Microsoft.BingWeather": { "title": "天気（MSN）" },
-    "Microsoft.Copilot": { "title": "Copilot" },
-    "Microsoft.GamingApp": { "title": "Xbox", "note": "PC Game Pass のゲームをインストールするのに必要です。" },
-    "Microsoft.GetHelp": { "title": "問い合わせ", "note": "Windows 11 の一部のトラブルシューティング ツールが使います。" },
-    "Microsoft.Getstarted": { "title": "ヒント" },
-    "Microsoft.MicrosoftOfficeHub": { "title": "Microsoft 365（Office Hub）" },
-    "Microsoft.MicrosoftSolitaireCollection": { "title": "Solitaire Collection" },
-    "Microsoft.MicrosoftStickyNotes": { "title": "付箋" },
-    "Microsoft.OutlookForWindows": { "title": "Outlook（新しい）", "note": "メールとカレンダーの後継です。ほかのメール アプリを使っている場合にだけ削除してください。" },
-    "Microsoft.People": { "title": "連絡先" },
-    "Microsoft.PowerAutomateDesktop": { "title": "Power Automate" },
-    "Microsoft.Todos": { "title": "Microsoft To Do" },
-    "Microsoft.Windows.DevHome": { "title": "Dev Home（提供終了）" },
-    "Microsoft.Windows.Photos": { "title": "フォト", "note": "既定の画像ビューアーです。削除する前に別のビューアーを入れてください。" },
-    "Microsoft.WindowsAlarms": { "title": "クロック" },
-    "Microsoft.WindowsCamera": { "title": "カメラ" },
-    "Microsoft.WindowsFeedbackHub": { "title": "フィードバック Hub" },
-    "Microsoft.WindowsMaps": { "title": "マップ（提供終了）" },
-    "Microsoft.WindowsSoundRecorder": { "title": "サウンド レコーダー" },
-    "Microsoft.XboxGamingOverlay": { "title": "Xbox Game Bar", "note": "一部のゲームがキャプチャやチャットに使います。" },
-    "Microsoft.XboxIdentityProvider": { "title": "Xbox Identity Provider", "note": "Xbox のサインイン用：ないと Microsoft Store のゲームにサインインできません。" },
-    "Microsoft.YourPhone": { "title": "スマートフォン連携" },
-    "Microsoft.ZuneMusic": { "title": "メディア プレーヤー" },
-    "Microsoft.ZuneVideo": { "title": "映画 & テレビ" },
-    "MicrosoftCorporationII.MicrosoftFamily": { "title": "Microsoft ファミリー セーフティ" },
-    "MicrosoftCorporationII.QuickAssist": { "title": "クイック アシスト", "note": "詐欺で最もよく使われるリモート サポート ツールです。削除するとそのリスクが下がります。" },
-    "MicrosoftTeams": { "title": "Microsoft Teams（従来の個人用）" },
-    "MicrosoftWindows.Client.WebExperience": { "title": "ウィジェット（Windows Web Experience Pack）", "note": "ウィジェット ボード（ニュース、天気、MSN）を削除します。Microsoft Store から「Windows Web Experience Pack」として再インストールできます。" },
-    "MicrosoftWindows.CrossDevice": { "title": "クロスデバイス エクスペリエンス" },
-    "SpotifyAB.SpotifyMusic": { "title": "Spotify（Store 版）" },
-    "king.com.": { "title": "King のゲーム（Candy Crush など）" }
+    "5319275A.WhatsAppDesktop": {
+      "title": "WhatsApp"
+    },
+    "AmazonVideo.PrimeVideo": {
+      "title": "Prime Video"
+    },
+    "BytedancePte.Ltd.TikTok": {
+      "title": "TikTok"
+    },
+    "Clipchamp.Clipchamp": {
+      "title": "Clipchamp"
+    },
+    "Disney.37853FC22B2CE": {
+      "title": "Disney+"
+    },
+    "Facebook.InstagramBeta": {
+      "title": "Instagram"
+    },
+    "MSTeams": {
+      "title": "Microsoft Teams（個人用）"
+    },
+    "Microsoft.549981C3F5F10": {
+      "title": "Cortana（提供終了）"
+    },
+    "Microsoft.BingNews": {
+      "title": "Microsoft ニュース"
+    },
+    "Microsoft.BingSearch": {
+      "title": "Bing Search"
+    },
+    "Microsoft.BingWeather": {
+      "title": "天気（MSN）"
+    },
+    "Microsoft.Copilot": {
+      "title": "Copilot"
+    },
+    "Microsoft.GamingApp": {
+      "title": "Xbox",
+      "note": "PC Game Pass のゲームをインストールするのに必要です。"
+    },
+    "Microsoft.GetHelp": {
+      "title": "問い合わせ",
+      "note": "Windows 11 の一部のトラブルシューティング ツールが使います。"
+    },
+    "Microsoft.Getstarted": {
+      "title": "ヒント"
+    },
+    "Microsoft.MicrosoftOfficeHub": {
+      "title": "Microsoft 365（Office Hub）"
+    },
+    "Microsoft.MicrosoftSolitaireCollection": {
+      "title": "Solitaire Collection"
+    },
+    "Microsoft.MicrosoftStickyNotes": {
+      "title": "付箋"
+    },
+    "Microsoft.OutlookForWindows": {
+      "title": "Outlook（新しい）",
+      "note": "メールとカレンダーの後継です。ほかのメール アプリを使っている場合にだけ削除してください。"
+    },
+    "Microsoft.People": {
+      "title": "連絡先"
+    },
+    "Microsoft.PowerAutomateDesktop": {
+      "title": "Power Automate"
+    },
+    "Microsoft.Todos": {
+      "title": "Microsoft To Do"
+    },
+    "Microsoft.Windows.DevHome": {
+      "title": "Dev Home（提供終了）"
+    },
+    "Microsoft.Windows.Photos": {
+      "title": "フォト",
+      "note": "既定の画像ビューアーです。削除する前に別のビューアーを入れてください。"
+    },
+    "Microsoft.WindowsAlarms": {
+      "title": "クロック"
+    },
+    "Microsoft.WindowsCamera": {
+      "title": "カメラ"
+    },
+    "Microsoft.WindowsFeedbackHub": {
+      "title": "フィードバック Hub"
+    },
+    "Microsoft.WindowsMaps": {
+      "title": "マップ（提供終了）"
+    },
+    "Microsoft.WindowsSoundRecorder": {
+      "title": "サウンド レコーダー"
+    },
+    "Microsoft.XboxGamingOverlay": {
+      "title": "Xbox Game Bar",
+      "note": "一部のゲームがキャプチャやチャットに使います。"
+    },
+    "Microsoft.XboxIdentityProvider": {
+      "title": "Xbox Identity Provider",
+      "note": "Xbox のサインイン用：ないと Microsoft Store のゲームにサインインできません。"
+    },
+    "Microsoft.YourPhone": {
+      "title": "スマートフォン連携"
+    },
+    "Microsoft.ZuneMusic": {
+      "title": "メディア プレーヤー"
+    },
+    "Microsoft.ZuneVideo": {
+      "title": "映画 & テレビ"
+    },
+    "MicrosoftCorporationII.MicrosoftFamily": {
+      "title": "Microsoft ファミリー セーフティ"
+    },
+    "MicrosoftCorporationII.QuickAssist": {
+      "title": "クイック アシスト",
+      "note": "詐欺で最もよく使われるリモート サポート ツールです。削除するとそのリスクが下がります。"
+    },
+    "MicrosoftTeams": {
+      "title": "Microsoft Teams（従来の個人用）"
+    },
+    "MicrosoftWindows.Client.WebExperience": {
+      "title": "ウィジェット（Windows Web Experience Pack）",
+      "note": "ウィジェット ボード（ニュース、天気、MSN）を削除します。Microsoft Store から「Windows Web Experience Pack」として再インストールできます。"
+    },
+    "MicrosoftWindows.CrossDevice": {
+      "title": "クロスデバイス エクスペリエンス"
+    },
+    "SpotifyAB.SpotifyMusic": {
+      "title": "Spotify（Store 版）"
+    },
+    "king.com.": {
+      "title": "King のゲーム（Candy Crush など）"
+    }
   },
   "app_group": {
     "browsers": "ブラウザー",

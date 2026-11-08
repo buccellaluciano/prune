@@ -6,6 +6,7 @@
     "tweak_unknown": "Tweak desconocido: {id}",
     "requires_admin": "Requiere ejecutar como administrador",
     "unsupported_build": "No aplica a esta versión de Windows",
+    "key_missing": "Este servicio no existe en esta edición de Windows",
     "foreign_user_apply": "La app corre con otra cuenta de administrador: se aplicaría a esa cuenta y no a {user}",
     "foreign_user_undo": "La app corre con otra cuenta de administrador: deshacer tocaría esa cuenta y no la de {user}",
     "foreign_user_remove": "La app corre con otra cuenta de administrador: se quitarían las apps de esa cuenta y no las de {user}",
@@ -17,7 +18,6 @@
     "deletes_value": "(borra el valor)",
     "value_missing": "(no existe)",
     "value_other_type": "<tipo {kind} · {bytes} bytes>",
-
     "power_title": "Plan de energía",
     "power_description": "Alto y Máximo rendimiento no dejan que el procesador baje la frecuencia ni que entre en ahorro: responde más rápido pero consume y calienta más. En notebooks, conviene usarlos solo enchufado.",
     "power_key": "Plan de energía (powrprof)",
@@ -37,11 +37,9 @@
     "power_guid_invalid": "GUID inválido en el historial",
     "power_previous_gone": "el plan anterior ya no existe",
     "power_not_ours": "el plan a borrar no es el Máximo rendimiento que creó la app",
-
     "label_power": "Plan de energía: {plan}",
     "label_tweaks": "{n} tweaks",
     "label_removed_apps": "Quitadas {n} apps",
-
     "journal_unreadable_backup": "El historial no se pudo leer ({error}). Se guardó una copia en {path} y se empezó uno nuevo.",
     "journal_unreadable": "El historial no se pudo leer ({error}) ni respaldar ({backup_error}).",
     "journal_save_failed": "No se pudo guardar el historial: {error}",
@@ -54,15 +52,13 @@
     "journal_bad_key": "clave a borrar no válida '{key}'",
     "conflict_value": "{title}: {key} vale {value}",
     "conflict_power": "Plan de energía: ahora está en {plan}",
-
     "not_in_catalog": "No está en el catálogo",
-
     "drive_unavailable": "Unidad no disponible: {letter}",
     "scan_running": "Ya hay un análisis en curso",
     "scan_missing": "Todavía no hay un análisis terminado",
     "folder_missing": "Carpeta inexistente",
     "explorer_failed": "No se pudo abrir el Explorador",
-
+    "cleanup_foreign_user": "La app corre con otra cuenta de administrador: se limpiarían las carpetas de esa cuenta",
     "winget_not_found": "No se encontró winget. Instalá o actualizá \"Instalador de aplicación\" desde Microsoft Store.",
     "winget_bad_signature": "winget no pasó la verificación de firma: {error}",
     "winget_run_failed": "No se pudo ejecutar winget: {error}",
@@ -75,13 +71,10 @@
     "already_latest": "Ya estaba en la última versión",
     "already_installed": "Ya estaba instalado",
     "package_not_found": "winget no encontró el paquete (¿ya se desinstaló?)",
-
     "signature_invalid": "firma inválida o ausente ({code})",
     "signer_unreadable": "no se pudo leer el firmante",
     "signed_by_other": "firmado por \"{signer}\", no por Microsoft",
-
     "hash_invalid": "Hash inválido",
-
     "http_only_https": "Solo se permiten direcciones https: {url}",
     "http_bad_url": "Dirección inválida: {url}",
     "http_bad_port": "Puerto inválido: {url}",
@@ -91,6 +84,13 @@
     "http_send_failed": "No se pudo contactar a {host}",
     "http_no_status": "Respuesta sin código de estado",
     "http_cut": "Se cortó la descarga",
-    "http_too_large": "Respuesta demasiado grande (más de {kb} KB)"
+    "http_too_large": "Respuesta demasiado grande (más de {kb} KB)",
+    "update_failed": "No se pudo actualizar: {error}",
+    "update_none": "No hay ninguna actualización pendiente",
+    "update_bad_format": "El archivo descargado no es un instalador de P-Rune",
+    "cleanup_unsafe": "No se pudo limpiar con permisos de usuario, así que no se borró nada ({error})",
+    "update_verify_message": "Confirmá que sos vos para instalar P-Rune {version}.",
+    "update_not_verified": "No se confirmó tu identidad: no se instaló nada.",
+    "update_verify_failed": "No se pudo pedir la confirmación de Windows: no se instaló nada."
   }
 }

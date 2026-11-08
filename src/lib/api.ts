@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { mock, mockProgress } from "./mock";
+import { mock, mockProgress, mockUpdateProgress } from "./mock";
 
 export type Risk = "safe" | "moderate" | "advanced";
 export type Restart = "none" | "explorer" | "logoff" | "reboot";
@@ -205,6 +205,35 @@ export const wingetApi = {
   },
 };
 
+// ───────── Actualizaciones de P-Rune ─────────
+
+export interface UpdateInfo {
+  version: string;
+  current: string;
+  notes: string | null;
+}
+
+export interface UpdateProgress {
+  downloaded: number;
+  total: number | null;
+}
+
+export const appApi = {
+  version: () => call<string>("app_version"),
+};
+
+export const updateApi = {
+  /** Consulta GitHub Releases. null si ya está en la última versión. */
+  check: () => call<UpdateInfo | null>("update_check"),
+  /** Descarga, verifica la firma y lanza el instalador; la app se cierra. */
+  install: () => call<void>("update_install"),
+  async onProgress(cb: (p: UpdateProgress) => void): Promise<() => void> {
+    if (!isTauri) return mockUpdateProgress(cb);
+    const { listen } = await import("@tauri-apps/api/event");
+    return listen<UpdateProgress>("update-progress", (e) => cb(e.payload));
+  },
+};
+
 export const vtApi = {
   /** Abre en el navegador el informe de VirusTotal de ese hash. */
   open: (sha256: string) => call<void>("vt_open", { sha256 }),
@@ -296,4 +325,41 @@ export const diskApi = {
   summary: () => call<DiskSummary>("disk_summary"),
   dir: (id: number) => call<DirView>("disk_dir", { id }),
   open: (id: number) => call<void>("disk_open", { id }),
+};
+
+// ───────── Limpieza de archivos descartables ─────────
+
+export type CleanupId =
+  | "temp_user"
+  | "temp_system"
+  | "crash"
+  | "shaders"
+  | "thumbnails"
+  | "update_cache"
+  | "spotify"
+  | "prefetch"
+  | "recycle_bin";
+
+export interface CleanView {
+  id: CleanupId;
+  bytes: number;
+  files: number;
+  admin: boolean;
+  per_user: boolean;
+  warn: "slower_start" | "permanent" | "close_app" | null;
+  /** Se puede limpiar ahora (permisos y cuenta correctos). */
+  available: boolean;
+}
+
+export interface CleanResult {
+  id: CleanupId;
+  freed: number;
+  deleted: number;
+  skipped: number;
+  error: string | null;
+}
+
+export const cleanupApi = {
+  scan: () => call<CleanView[]>("cleanup_scan"),
+  run: (ids: CleanupId[]) => call<CleanResult[]>("cleanup_run", { ids }),
 };

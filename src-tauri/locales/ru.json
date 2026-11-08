@@ -17,7 +17,6 @@
     "deletes_value": "(удаляет значение)",
     "value_missing": "(не задано)",
     "value_other_type": "<тип {kind} · {bytes} байт>",
-
     "power_title": "Схема электропитания",
     "power_description": "Высокая и Максимальная производительность не дают процессору снижать частоту и переходить в экономию: он отвечает быстрее, но потребляет больше энергии и сильнее греется. На ноутбуках лучше включать их только от сети.",
     "power_key": "Схема электропитания (powrprof)",
@@ -37,11 +36,9 @@
     "power_guid_invalid": "Недопустимый GUID в журнале",
     "power_previous_gone": "прежней схемы больше нет",
     "power_not_ours": "удаляемая схема — не та «Максимальная производительность», которую создало приложение",
-
     "label_power": "Электропитание: {plan}",
     "label_tweaks": "Настроек: {n}",
     "label_removed_apps": "Удалено приложений: {n}",
-
     "journal_unreadable_backup": "Не удалось прочитать журнал ({error}). Копия сохранена в {path}, начат новый журнал.",
     "journal_unreadable": "Не удалось ни прочитать журнал ({error}), ни сделать его копию ({backup_error}).",
     "journal_save_failed": "Не удалось сохранить журнал: {error}",
@@ -54,15 +51,12 @@
     "journal_bad_key": "недопустимый раздел для удаления «{key}»",
     "conflict_value": "{title}: {key} = {value}",
     "conflict_power": "Электропитание: сейчас выбрана схема «{plan}»",
-
     "not_in_catalog": "Нет в каталоге",
-
     "drive_unavailable": "Диск недоступен: {letter}",
     "scan_running": "Анализ уже выполняется",
     "scan_missing": "Пока нет завершённого анализа",
     "folder_missing": "Папка не найдена",
     "explorer_failed": "Не удалось открыть Проводник",
-
     "winget_not_found": "winget не найден. Установите или обновите «Установщик приложений» из Microsoft Store.",
     "winget_bad_signature": "winget не прошёл проверку подписи: {error}",
     "winget_run_failed": "Не удалось запустить winget: {error}",
@@ -75,13 +69,10 @@
     "already_latest": "Уже последняя версия",
     "already_installed": "Уже установлено",
     "package_not_found": "winget не нашёл пакет (уже удалён?)",
-
     "signature_invalid": "подпись недействительна или отсутствует ({code})",
     "signer_unreadable": "не удалось прочитать подписавшего",
     "signed_by_other": "подписано «{signer}», а не Microsoft",
-
     "hash_invalid": "Недопустимый хэш",
-
     "http_only_https": "Разрешены только адреса https: {url}",
     "http_bad_url": "Недопустимый адрес: {url}",
     "http_bad_port": "Недопустимый порт: {url}",
@@ -91,7 +82,16 @@
     "http_send_failed": "Не удалось связаться с {host}",
     "http_no_status": "Ответ без кода состояния",
     "http_cut": "Загрузка прервалась",
-    "http_too_large": "Слишком большой ответ (больше {kb} КБ)"
+    "http_too_large": "Слишком большой ответ (больше {kb} КБ)",
+    "key_missing": "Этой службы нет в данном выпуске Windows",
+    "cleanup_foreign_user": "Приложение запущено под другой учётной записью администратора: будут очищены папки этой учётной записи",
+    "update_failed": "Не удалось обновить: {error}",
+    "update_none": "Нет ожидающих обновлений",
+    "update_bad_format": "Скачанный файл не является установщиком P-Rune",
+    "cleanup_unsafe": "Не удалось выполнить очистку с правами пользователя, поэтому ничего не удалено ({error})",
+    "update_verify_message": "Подтвердите, что это вы, чтобы установить P-Rune {version}.",
+    "update_not_verified": "Личность не подтверждена: ничего не установлено.",
+    "update_verify_failed": "Не удалось запросить подтверждение Windows: ничего не установлено."
   },
   "category": {
     "ai": "ИИ и Copilot",
@@ -102,100 +102,385 @@
     "privacy": "Конфиденциальность",
     "search": "Поиск",
     "start": "«Пуск» и рекомендации",
-    "taskbar": "Панель задач"
+    "taskbar": "Панель задач",
+    "services": "Службы"
   },
   "tweak": {
-    "ai.copilot_legacy": { "title": "Отключить встроенный Copilot (23H2)", "description": "Политика для встроенного Copilot в 23H2. Начиная с 24H2 Copilot — это приложение: удалите его в разделе «Лишние приложения»." },
-    "ai.recall": { "title": "Отключить Recall (снимки)", "description": "Политика, запрещающая Recall сохранять снимки ваших действий. Работает только на ПК Copilot+." },
-    "appearance.dark_mode": { "title": "Тёмный режим", "description": "Тёмный режим для Windows и приложений." },
-    "appearance.faster_menus": { "title": "Быстрые меню", "description": "Сокращает задержку открытия подменю с 400 до 100 мс." },
-    "appearance.no_transparency": { "title": "Без эффектов прозрачности", "description": "Отключает прозрачность (Mica/Acrylic). Помогает на ПК со слабой видеокартой." },
-    "appearance.performance_visuals": { "title": "Минимум визуальных эффектов", "description": "Как «Обеспечить наилучшее быстродействие»: без анимации окон и меню, теней, затухания, предпросмотра рабочего стола и содержимого окна при перетаскивании. Сглаживание текста остаётся." },
-    "explorer.checkboxes": { "title": "Флажки для выбора", "description": "Показывает флажки для выбора файлов." },
-    "explorer.classic_context_menu": { "title": "Классическое контекстное меню", "description": "Возвращает полное меню правой кнопки без пункта «Показать дополнительные параметры»." },
-    "explorer.compact_mode": { "title": "Компактный вид", "description": "Уменьшает расстояние между элементами в Проводнике." },
-    "explorer.full_path_title": { "title": "Не «украшать» имена", "description": "Показывает имена файлов и папок так, как они написаны, не меняя регистр." },
-    "explorer.icons_not_thumbnails": { "title": "Значки вместо эскизов", "description": "Проводник не создаёт превью изображений и видео. Быстрее в больших папках." },
-    "explorer.no_aero_shake": { "title": "Отключить «встряхивание для сворачивания»", "description": "Если встряхнуть окно, остальные больше не сворачиваются." },
-    "explorer.open_this_pc": { "title": "Открывать «Этот компьютер»", "description": "Проводник открывается на «Этот компьютер», а не на «Главная»." },
-    "explorer.separate_process": { "title": "Папки в отдельном процессе", "description": "Если окно Проводника зависнет, оно не потянет за собой панель задач. Требует чуть больше ОЗУ." },
-    "explorer.show_extensions": { "title": "Показывать расширения файлов", "description": "Показывает .exe, .pdf и т. д. Рекомендуется для безопасности: так «счёт.pdf.exe» не сможет замаскироваться." },
-    "explorer.show_hidden": { "title": "Показывать скрытые файлы", "description": "Показывает скрытые файлы и папки (но не защищённые системные)." },
-    "gaming.game_dvr": { "title": "Отключить фоновую запись (Game DVR)", "description": "Отключает фоновую запись Xbox Game Bar. Может поднять FPS на скромных ПК." },
-    "gaming.mouse_acceleration": { "title": "Отключить ускорение мыши", "description": "Отключает «Включить повышенную точность установки указателя»: движение становится 1:1. Идеально для игр." },
-    "gaming.sticky_keys_prompt": { "title": "Без запроса залипания клавиш (Shift ×5)", "description": "Пятикратное нажатие Shift больше не открывает запрос залипания клавиш посреди игры." },
-    "privacy.activity_history": { "title": "Отключить журнал действий", "description": "Журнал действий (приложения, файлы и сайты, которыми вы пользовались) не хранится и не отправляется." },
-    "privacy.advertising_id": { "title": "Отключить рекламный идентификатор", "description": "Не даёт приложениям использовать ваш рекламный идентификатор для персонализированной рекламы." },
-    "privacy.feedback_frequency": { "title": "Не запрашивать отзывы", "description": "Windows перестаёт показывать опросы об отзывах." },
-    "privacy.inking_typing": { "title": "Отключить персонализацию рукописного ввода и ввода с клавиатуры", "description": "Windows перестаёт собирать то, что вы печатаете и рисуете, для личного словаря." },
-    "privacy.online_speech": { "title": "Отключить распознавание речи в сети", "description": "Голос не отправляется в облако. Онлайн-диктовка перестаёт работать." },
-    "privacy.tailored_experiences": { "title": "Отключить персонализированные возможности", "description": "Microsoft перестаёт использовать ваши диагностические данные для персональных советов и рекламы." },
-    "privacy.telemetry_policy": { "title": "Телеметрия на минимум (политика)", "description": "Ставит диагностические данные на самый низкий уровень, который позволяет ваш выпуск. В Домашней и Pro фактический минимум — «Обязательные»." },
-    "privacy.track_app_launches": { "title": "Не отслеживать запуск приложений", "description": "Windows перестаёт запоминать, какие приложения вы открываете, для сортировки «Пуска» и поиска." },
-    "privacy.typing_insights": { "title": "Отключить статистику ввода", "description": "Отключает сбор статистики набора текста (Аналитика ввода)." },
-    "search.highlights": { "title": "Без интересного в поиске", "description": "Убирает иллюстрации и темы дня из поля поиска." },
-    "search.taskbar_mode": { "title": "Поиск на панели задач", "description": "Как показывать поиск: скрыть, только значок, значок с подписью или всё поле поиска.", "choices": { "box": "Поле", "hidden": "Скрыт", "icon": "Значок", "icon_label": "Значок и подпись" } },
-    "search.web_results": { "title": "Без веб-результатов Bing в поиске", "description": "Политика, отключающая веб-предложения в поиске «Пуска». Поиск остаётся только локальным." },
-    "start.account_notifications": { "title": "Скрыть уведомления учётной записи в «Пуске»", "description": "Убирает из меню «Пуск» напоминания вроде «Завершите настройку учётной записи Microsoft» / «Создайте резервную копию»." },
-    "start.finish_setup_nag": { "title": "Без «Давайте завершим настройку устройства»", "description": "Отключает экран, который навязывает OneDrive, Microsoft 365 и учётную запись Microsoft." },
-    "start.lockscreen_tips": { "title": "Без интересных фактов на экране блокировки", "description": "Убирает советы и «интересные факты» с экрана блокировки." },
-    "start.recommendations": { "title": "Скрыть рекомендации и советы в «Пуске»", "description": "Убирает рекламные рекомендации (Iris) из меню «Пуск»." },
-    "start.settings_suggestions": { "title": "Без рекомендуемого содержимого в «Параметрах»", "description": "Убирает предложения и рекламу из приложения «Параметры»." },
-    "start.silent_installs": { "title": "Запретить тихую установку рекомендуемых приложений", "description": "Не даёт Windows без спроса устанавливать рекламируемые игры и приложения (Candy Crush и т. п.)." },
-    "start.suggested_notifications": { "title": "Без «рекомендуемых» уведомлений", "description": "Отключает системные уведомления, предлагающие функции и приложения." },
-    "start.suggestions": { "title": "Без предложений в «Пуске»", "description": "Отключает рекомендуемые приложения в меню «Пуск»." },
-    "start.sync_provider_ads": { "title": "Без рекламы в Проводнике", "description": "Убирает уведомления поставщиков синхронизации (OneDrive, Microsoft 365) из Проводника." },
-    "start.tips": { "title": "Без советов и подсказок", "description": "Отключает уведомления «Советы, подсказки и рекомендации»." },
-    "start.welcome_experience": { "title": "Без «экрана приветствия» после обновлений", "description": "Пропускает экран новинок после обновлений." },
-    "taskbar.align_left": { "title": "Выровнять значки по левому краю", "description": "Кнопка «Пуск» и значки слева, как в Windows 10." },
-    "taskbar.clock_seconds": { "title": "Показывать секунды в часах", "description": "Часы на панели задач показывают секунды. Немного больше расход батареи." },
-    "taskbar.disable_widgets": { "title": "Отключить мини-приложения", "description": "Политика, полностью отключающая панель мини-приложений (новости, погода, MSN)." },
-    "taskbar.end_task": { "title": "«Завершить задачу» по правой кнопке", "description": "Добавляет «Завершить задачу» в контекстное меню приложений на панели задач." },
-    "taskbar.hide_task_view": { "title": "Скрыть кнопку «Представление задач»", "description": "Убирает кнопку «Представление задач» (Win+Tab продолжает работать)." },
-    "taskbar.no_animations": { "title": "Без анимации панели задач", "description": "Отключает анимацию панели задач. Ощущается отзывчивее." }
+    "ai.copilot_legacy": {
+      "title": "Отключить встроенный Copilot (23H2)",
+      "description": "Политика для встроенного Copilot в 23H2. Начиная с 24H2 Copilot — это приложение: удалите его в разделе «Лишние приложения»."
+    },
+    "ai.recall": {
+      "title": "Отключить Recall (снимки)",
+      "description": "Политика, запрещающая Recall сохранять снимки ваших действий. Работает только на ПК Copilot+."
+    },
+    "appearance.dark_mode": {
+      "title": "Тёмный режим",
+      "description": "Тёмный режим для Windows и приложений."
+    },
+    "appearance.faster_menus": {
+      "title": "Быстрые меню",
+      "description": "Сокращает задержку открытия подменю с 400 до 100 мс."
+    },
+    "appearance.no_transparency": {
+      "title": "Без эффектов прозрачности",
+      "description": "Отключает прозрачность (Mica/Acrylic). Помогает на ПК со слабой видеокартой."
+    },
+    "appearance.performance_visuals": {
+      "title": "Минимум визуальных эффектов",
+      "description": "Как «Обеспечить наилучшее быстродействие»: без анимации окон и меню, теней, затухания, предпросмотра рабочего стола и содержимого окна при перетаскивании. Сглаживание текста остаётся."
+    },
+    "explorer.checkboxes": {
+      "title": "Флажки для выбора",
+      "description": "Показывает флажки для выбора файлов."
+    },
+    "explorer.classic_context_menu": {
+      "title": "Классическое контекстное меню",
+      "description": "Возвращает полное меню правой кнопки без пункта «Показать дополнительные параметры»."
+    },
+    "explorer.compact_mode": {
+      "title": "Компактный вид",
+      "description": "Уменьшает расстояние между элементами в Проводнике."
+    },
+    "explorer.full_path_title": {
+      "title": "Не «украшать» имена",
+      "description": "Показывает имена файлов и папок так, как они написаны, не меняя регистр."
+    },
+    "explorer.icons_not_thumbnails": {
+      "title": "Значки вместо эскизов",
+      "description": "Проводник не создаёт превью изображений и видео. Быстрее в больших папках."
+    },
+    "explorer.no_aero_shake": {
+      "title": "Отключить «встряхивание для сворачивания»",
+      "description": "Если встряхнуть окно, остальные больше не сворачиваются."
+    },
+    "explorer.open_this_pc": {
+      "title": "Открывать «Этот компьютер»",
+      "description": "Проводник открывается на «Этот компьютер», а не на «Главная»."
+    },
+    "explorer.separate_process": {
+      "title": "Папки в отдельном процессе",
+      "description": "Если окно Проводника зависнет, оно не потянет за собой панель задач. Требует чуть больше ОЗУ."
+    },
+    "explorer.show_extensions": {
+      "title": "Показывать расширения файлов",
+      "description": "Показывает .exe, .pdf и т. д. Рекомендуется для безопасности: так «счёт.pdf.exe» не сможет замаскироваться."
+    },
+    "explorer.show_hidden": {
+      "title": "Показывать скрытые файлы",
+      "description": "Показывает скрытые файлы и папки (но не защищённые системные)."
+    },
+    "gaming.game_dvr": {
+      "title": "Отключить фоновую запись (Game DVR)",
+      "description": "Отключает фоновую запись Xbox Game Bar. Может поднять FPS на скромных ПК."
+    },
+    "gaming.mouse_acceleration": {
+      "title": "Отключить ускорение мыши",
+      "description": "Отключает «Включить повышенную точность установки указателя»: движение становится 1:1. Идеально для игр."
+    },
+    "gaming.sticky_keys_prompt": {
+      "title": "Без запроса залипания клавиш (Shift ×5)",
+      "description": "Пятикратное нажатие Shift больше не открывает запрос залипания клавиш посреди игры."
+    },
+    "privacy.activity_history": {
+      "title": "Отключить журнал действий",
+      "description": "Журнал действий (приложения, файлы и сайты, которыми вы пользовались) не хранится и не отправляется."
+    },
+    "privacy.advertising_id": {
+      "title": "Отключить рекламный идентификатор",
+      "description": "Не даёт приложениям использовать ваш рекламный идентификатор для персонализированной рекламы."
+    },
+    "privacy.feedback_frequency": {
+      "title": "Не запрашивать отзывы",
+      "description": "Windows перестаёт показывать опросы об отзывах."
+    },
+    "privacy.inking_typing": {
+      "title": "Отключить персонализацию рукописного ввода и ввода с клавиатуры",
+      "description": "Windows перестаёт собирать то, что вы печатаете и рисуете, для личного словаря."
+    },
+    "privacy.online_speech": {
+      "title": "Отключить распознавание речи в сети",
+      "description": "Голос не отправляется в облако. Онлайн-диктовка перестаёт работать."
+    },
+    "privacy.tailored_experiences": {
+      "title": "Отключить персонализированные возможности",
+      "description": "Microsoft перестаёт использовать ваши диагностические данные для персональных советов и рекламы."
+    },
+    "privacy.telemetry_policy": {
+      "title": "Телеметрия на минимум (политика)",
+      "description": "Ставит диагностические данные на самый низкий уровень, который позволяет ваш выпуск. В Домашней и Pro фактический минимум — «Обязательные»."
+    },
+    "privacy.track_app_launches": {
+      "title": "Не отслеживать запуск приложений",
+      "description": "Windows перестаёт запоминать, какие приложения вы открываете, для сортировки «Пуска» и поиска."
+    },
+    "privacy.typing_insights": {
+      "title": "Отключить статистику ввода",
+      "description": "Отключает сбор статистики набора текста (Аналитика ввода)."
+    },
+    "search.highlights": {
+      "title": "Без интересного в поиске",
+      "description": "Убирает иллюстрации и темы дня из поля поиска."
+    },
+    "search.taskbar_mode": {
+      "title": "Поиск на панели задач",
+      "description": "Как показывать поиск: скрыть, только значок, значок с подписью или всё поле поиска.",
+      "choices": {
+        "box": "Поле",
+        "hidden": "Скрыт",
+        "icon": "Значок",
+        "icon_label": "Значок и подпись"
+      }
+    },
+    "search.web_results": {
+      "title": "Без веб-результатов Bing в поиске",
+      "description": "Политика, отключающая веб-предложения в поиске «Пуска». Поиск остаётся только локальным."
+    },
+    "start.account_notifications": {
+      "title": "Скрыть уведомления учётной записи в «Пуске»",
+      "description": "Убирает из меню «Пуск» напоминания вроде «Завершите настройку учётной записи Microsoft» / «Создайте резервную копию»."
+    },
+    "start.finish_setup_nag": {
+      "title": "Без «Давайте завершим настройку устройства»",
+      "description": "Отключает экран, который навязывает OneDrive, Microsoft 365 и учётную запись Microsoft."
+    },
+    "start.lockscreen_tips": {
+      "title": "Без интересных фактов на экране блокировки",
+      "description": "Убирает советы и «интересные факты» с экрана блокировки."
+    },
+    "start.recommendations": {
+      "title": "Скрыть рекомендации и советы в «Пуске»",
+      "description": "Убирает рекламные рекомендации (Iris) из меню «Пуск»."
+    },
+    "start.settings_suggestions": {
+      "title": "Без рекомендуемого содержимого в «Параметрах»",
+      "description": "Убирает предложения и рекламу из приложения «Параметры»."
+    },
+    "start.silent_installs": {
+      "title": "Запретить тихую установку рекомендуемых приложений",
+      "description": "Не даёт Windows без спроса устанавливать рекламируемые игры и приложения (Candy Crush и т. п.)."
+    },
+    "start.suggested_notifications": {
+      "title": "Без «рекомендуемых» уведомлений",
+      "description": "Отключает системные уведомления, предлагающие функции и приложения."
+    },
+    "start.suggestions": {
+      "title": "Без предложений в «Пуске»",
+      "description": "Отключает рекомендуемые приложения в меню «Пуск»."
+    },
+    "start.sync_provider_ads": {
+      "title": "Без рекламы в Проводнике",
+      "description": "Убирает уведомления поставщиков синхронизации (OneDrive, Microsoft 365) из Проводника."
+    },
+    "start.tips": {
+      "title": "Без советов и подсказок",
+      "description": "Отключает уведомления «Советы, подсказки и рекомендации»."
+    },
+    "start.welcome_experience": {
+      "title": "Без «экрана приветствия» после обновлений",
+      "description": "Пропускает экран новинок после обновлений."
+    },
+    "taskbar.align_left": {
+      "title": "Выровнять значки по левому краю",
+      "description": "Кнопка «Пуск» и значки слева, как в Windows 10."
+    },
+    "taskbar.clock_seconds": {
+      "title": "Показывать секунды в часах",
+      "description": "Часы на панели задач показывают секунды. Немного больше расход батареи."
+    },
+    "taskbar.disable_widgets": {
+      "title": "Отключить мини-приложения",
+      "description": "Политика, полностью отключающая панель мини-приложений (новости, погода, MSN)."
+    },
+    "taskbar.end_task": {
+      "title": "«Завершить задачу» по правой кнопке",
+      "description": "Добавляет «Завершить задачу» в контекстное меню приложений на панели задач."
+    },
+    "taskbar.hide_task_view": {
+      "title": "Скрыть кнопку «Представление задач»",
+      "description": "Убирает кнопку «Представление задач» (Win+Tab продолжает работать)."
+    },
+    "taskbar.no_animations": {
+      "title": "Без анимации панели задач",
+      "description": "Отключает анимацию панели задач. Ощущается отзывчивее."
+    },
+    "services.diagtrack": {
+      "title": "Отключить службу телеметрии (DiagTrack)",
+      "description": "Останавливает «Функциональные возможности для подключенных пользователей и телеметрия» — службу, которая отправляет диагностические данные в Microsoft."
+    },
+    "services.wap_push": {
+      "title": "Отключить маршрутизацию push-сообщений WAP",
+      "description": "Служба push-сообщений устройств, используется в основном вместе с телеметрией. Обычному ПК не нужна."
+    },
+    "services.maps": {
+      "title": "Отключить диспетчер скачанных карт",
+      "description": "Её использовало только приложение «Карты» (больше не поддерживается) для офлайн-карт."
+    },
+    "services.retail_demo": {
+      "title": "Отключить службу демонстрации магазина",
+      "description": "Нужна только для демонстрационного режима ПК на витрине магазина."
+    },
+    "services.fax": {
+      "title": "Отключить службу факсов",
+      "description": "Служба для отправки и приёма факсов. Во многих выпусках Windows 11 её уже нет."
+    },
+    "services.error_reporting": {
+      "title": "Отключить отчёты об ошибках Windows",
+      "description": "Windows перестаёт собирать и отправлять отчёты при сбоях программ. На обычную работу не влияет."
+    },
+    "services.insider": {
+      "title": "Отключить службу Windows Insider",
+      "description": "Нужна только для получения предварительных сборок программы Insider."
+    },
+    "services.xbox": {
+      "title": "Отключить службы Xbox",
+      "description": "Вход в Xbox, облачные сохранения, сеть и аксессуары. Ломает игры из Microsoft Store / Game Pass, Xbox Game Bar и настройку контроллеров Xbox."
+    },
+    "services.print_spooler": {
+      "title": "Отключить диспетчер печати",
+      "description": "Если у вас нет принтера: заодно закрывает известную уязвимость (PrintNightmare). Без него нельзя печатать и сохранять в PDF через Microsoft Print to PDF."
+    },
+    "services.geolocation": {
+      "title": "Отключить службу геолокации",
+      "description": "Приложения перестают знать, где находится ПК. Ломает местную погоду, «Поиск устройства» и автоматический часовой пояс."
+    },
+    "services.sysmain": {
+      "title": "Отключить SysMain (Superfetch)",
+      "description": "Перестаёт заранее загружать в ОЗУ часто используемые приложения. С SSD почти незаметно; с жёстким диском приложения будут открываться дольше."
+    }
   },
   "bloat": {
-    "5319275A.WhatsAppDesktop": { "title": "WhatsApp" },
-    "AmazonVideo.PrimeVideo": { "title": "Prime Video" },
-    "BytedancePte.Ltd.TikTok": { "title": "TikTok" },
-    "Clipchamp.Clipchamp": { "title": "Clipchamp" },
-    "Disney.37853FC22B2CE": { "title": "Disney+" },
-    "Facebook.InstagramBeta": { "title": "Instagram" },
-    "MSTeams": { "title": "Microsoft Teams (личный)" },
-    "Microsoft.549981C3F5F10": { "title": "Cortana (больше не поддерживается)" },
-    "Microsoft.BingNews": { "title": "Microsoft Новости" },
-    "Microsoft.BingSearch": { "title": "Bing Search" },
-    "Microsoft.BingWeather": { "title": "Погода (MSN)" },
-    "Microsoft.Copilot": { "title": "Copilot" },
-    "Microsoft.GamingApp": { "title": "Xbox", "note": "Нужно для установки игр PC Game Pass." },
-    "Microsoft.GetHelp": { "title": "Техническая поддержка", "note": "Некоторым средствам устранения неполадок Windows 11 оно нужно." },
-    "Microsoft.Getstarted": { "title": "Советы" },
-    "Microsoft.MicrosoftOfficeHub": { "title": "Microsoft 365 (Office Hub)" },
-    "Microsoft.MicrosoftSolitaireCollection": { "title": "Solitaire Collection" },
-    "Microsoft.MicrosoftStickyNotes": { "title": "Записки" },
-    "Microsoft.OutlookForWindows": { "title": "Outlook (новый)", "note": "Заменяет «Почту» и «Календарь». Удаляйте, только если пользуетесь другим почтовым клиентом." },
-    "Microsoft.People": { "title": "Люди" },
-    "Microsoft.PowerAutomateDesktop": { "title": "Power Automate" },
-    "Microsoft.Todos": { "title": "Microsoft To Do" },
-    "Microsoft.Windows.DevHome": { "title": "Dev Home (больше не поддерживается)" },
-    "Microsoft.Windows.Photos": { "title": "Фотографии", "note": "Это стандартный просмотрщик изображений. Установите другой, прежде чем удалять." },
-    "Microsoft.WindowsAlarms": { "title": "Часы" },
-    "Microsoft.WindowsCamera": { "title": "Камера" },
-    "Microsoft.WindowsFeedbackHub": { "title": "Центр отзывов" },
-    "Microsoft.WindowsMaps": { "title": "Карты (больше не поддерживаются)" },
-    "Microsoft.WindowsSoundRecorder": { "title": "Звукозапись" },
-    "Microsoft.XboxGamingOverlay": { "title": "Xbox Game Bar", "note": "Некоторые игры используют его для снимков и чата." },
-    "Microsoft.XboxIdentityProvider": { "title": "Xbox Identity Provider", "note": "Вход в Xbox: без него игры из Microsoft Store не смогут войти в учётную запись." },
-    "Microsoft.YourPhone": { "title": "Связь с телефоном" },
-    "Microsoft.ZuneMusic": { "title": "Медиаплеер" },
-    "Microsoft.ZuneVideo": { "title": "Кино и ТВ" },
-    "MicrosoftCorporationII.MicrosoftFamily": { "title": "Microsoft Family Safety" },
-    "MicrosoftCorporationII.QuickAssist": { "title": "Быстрая помощь", "note": "Это средство удалённой поддержки, которым чаще всего пользуются мошенники. Удаление снижает этот риск." },
-    "MicrosoftTeams": { "title": "Microsoft Teams (классический личный)" },
-    "MicrosoftWindows.Client.WebExperience": { "title": "Мини-приложения (Windows Web Experience Pack)", "note": "Удаляет панель мини-приложений (новости, погода, MSN). Переустанавливается из Microsoft Store как «Windows Web Experience Pack»." },
-    "MicrosoftWindows.CrossDevice": { "title": "Взаимодействие между устройствами" },
-    "SpotifyAB.SpotifyMusic": { "title": "Spotify (Store)" },
-    "king.com.": { "title": "Игры King (Candy Crush и др.)" }
+    "5319275A.WhatsAppDesktop": {
+      "title": "WhatsApp"
+    },
+    "AmazonVideo.PrimeVideo": {
+      "title": "Prime Video"
+    },
+    "BytedancePte.Ltd.TikTok": {
+      "title": "TikTok"
+    },
+    "Clipchamp.Clipchamp": {
+      "title": "Clipchamp"
+    },
+    "Disney.37853FC22B2CE": {
+      "title": "Disney+"
+    },
+    "Facebook.InstagramBeta": {
+      "title": "Instagram"
+    },
+    "MSTeams": {
+      "title": "Microsoft Teams (личный)"
+    },
+    "Microsoft.549981C3F5F10": {
+      "title": "Cortana (больше не поддерживается)"
+    },
+    "Microsoft.BingNews": {
+      "title": "Microsoft Новости"
+    },
+    "Microsoft.BingSearch": {
+      "title": "Bing Search"
+    },
+    "Microsoft.BingWeather": {
+      "title": "Погода (MSN)"
+    },
+    "Microsoft.Copilot": {
+      "title": "Copilot"
+    },
+    "Microsoft.GamingApp": {
+      "title": "Xbox",
+      "note": "Нужно для установки игр PC Game Pass."
+    },
+    "Microsoft.GetHelp": {
+      "title": "Техническая поддержка",
+      "note": "Некоторым средствам устранения неполадок Windows 11 оно нужно."
+    },
+    "Microsoft.Getstarted": {
+      "title": "Советы"
+    },
+    "Microsoft.MicrosoftOfficeHub": {
+      "title": "Microsoft 365 (Office Hub)"
+    },
+    "Microsoft.MicrosoftSolitaireCollection": {
+      "title": "Solitaire Collection"
+    },
+    "Microsoft.MicrosoftStickyNotes": {
+      "title": "Записки"
+    },
+    "Microsoft.OutlookForWindows": {
+      "title": "Outlook (новый)",
+      "note": "Заменяет «Почту» и «Календарь». Удаляйте, только если пользуетесь другим почтовым клиентом."
+    },
+    "Microsoft.People": {
+      "title": "Люди"
+    },
+    "Microsoft.PowerAutomateDesktop": {
+      "title": "Power Automate"
+    },
+    "Microsoft.Todos": {
+      "title": "Microsoft To Do"
+    },
+    "Microsoft.Windows.DevHome": {
+      "title": "Dev Home (больше не поддерживается)"
+    },
+    "Microsoft.Windows.Photos": {
+      "title": "Фотографии",
+      "note": "Это стандартный просмотрщик изображений. Установите другой, прежде чем удалять."
+    },
+    "Microsoft.WindowsAlarms": {
+      "title": "Часы"
+    },
+    "Microsoft.WindowsCamera": {
+      "title": "Камера"
+    },
+    "Microsoft.WindowsFeedbackHub": {
+      "title": "Центр отзывов"
+    },
+    "Microsoft.WindowsMaps": {
+      "title": "Карты (больше не поддерживаются)"
+    },
+    "Microsoft.WindowsSoundRecorder": {
+      "title": "Звукозапись"
+    },
+    "Microsoft.XboxGamingOverlay": {
+      "title": "Xbox Game Bar",
+      "note": "Некоторые игры используют его для снимков и чата."
+    },
+    "Microsoft.XboxIdentityProvider": {
+      "title": "Xbox Identity Provider",
+      "note": "Вход в Xbox: без него игры из Microsoft Store не смогут войти в учётную запись."
+    },
+    "Microsoft.YourPhone": {
+      "title": "Связь с телефоном"
+    },
+    "Microsoft.ZuneMusic": {
+      "title": "Медиаплеер"
+    },
+    "Microsoft.ZuneVideo": {
+      "title": "Кино и ТВ"
+    },
+    "MicrosoftCorporationII.MicrosoftFamily": {
+      "title": "Microsoft Family Safety"
+    },
+    "MicrosoftCorporationII.QuickAssist": {
+      "title": "Быстрая помощь",
+      "note": "Это средство удалённой поддержки, которым чаще всего пользуются мошенники. Удаление снижает этот риск."
+    },
+    "MicrosoftTeams": {
+      "title": "Microsoft Teams (классический личный)"
+    },
+    "MicrosoftWindows.Client.WebExperience": {
+      "title": "Мини-приложения (Windows Web Experience Pack)",
+      "note": "Удаляет панель мини-приложений (новости, погода, MSN). Переустанавливается из Microsoft Store как «Windows Web Experience Pack»."
+    },
+    "MicrosoftWindows.CrossDevice": {
+      "title": "Взаимодействие между устройствами"
+    },
+    "SpotifyAB.SpotifyMusic": {
+      "title": "Spotify (Store)"
+    },
+    "king.com.": {
+      "title": "Игры King (Candy Crush и др.)"
+    }
   },
   "app_group": {
     "browsers": "Браузеры",

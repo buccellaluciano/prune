@@ -17,7 +17,6 @@
     "deletes_value": "(deletes the value)",
     "value_missing": "(not set)",
     "value_other_type": "<type {kind} · {bytes} bytes>",
-
     "power_title": "Power plan",
     "power_description": "High and Ultimate Performance keep the processor from lowering its clock or entering power saving: it responds faster but uses more power and runs hotter. On laptops, use them only when plugged in.",
     "power_key": "Power plan (powrprof)",
@@ -37,11 +36,9 @@
     "power_guid_invalid": "Invalid GUID in the history",
     "power_previous_gone": "the previous plan no longer exists",
     "power_not_ours": "the plan to delete isn't the Ultimate Performance plan the app created",
-
     "label_power": "Power plan: {plan}",
     "label_tweaks": "{n} tweaks",
     "label_removed_apps": "Removed {n} apps",
-
     "journal_unreadable_backup": "The history couldn't be read ({error}). A copy was saved to {path} and a new one was started.",
     "journal_unreadable": "The history couldn't be read ({error}) or backed up ({backup_error}).",
     "journal_save_failed": "Couldn't save the history: {error}",
@@ -54,15 +51,12 @@
     "journal_bad_key": "invalid key to delete '{key}'",
     "conflict_value": "{title}: {key} is {value}",
     "conflict_power": "Power plan: it's now on {plan}",
-
     "not_in_catalog": "Not in the catalog",
-
     "drive_unavailable": "Drive not available: {letter}",
     "scan_running": "A scan is already running",
     "scan_missing": "There's no finished scan yet",
     "folder_missing": "Folder not found",
     "explorer_failed": "Couldn't open File Explorer",
-
     "winget_not_found": "winget wasn't found. Install or update \"App Installer\" from the Microsoft Store.",
     "winget_bad_signature": "winget failed the signature check: {error}",
     "winget_run_failed": "Couldn't run winget: {error}",
@@ -75,13 +69,10 @@
     "already_latest": "Already on the latest version",
     "already_installed": "Already installed",
     "package_not_found": "winget couldn't find the package (already uninstalled?)",
-
     "signature_invalid": "invalid or missing signature ({code})",
     "signer_unreadable": "couldn't read the signer",
     "signed_by_other": "signed by \"{signer}\", not by Microsoft",
-
     "hash_invalid": "Invalid hash",
-
     "http_only_https": "Only https addresses are allowed: {url}",
     "http_bad_url": "Invalid address: {url}",
     "http_bad_port": "Invalid port: {url}",
@@ -91,7 +82,16 @@
     "http_send_failed": "Couldn't reach {host}",
     "http_no_status": "Response without a status code",
     "http_cut": "The download was cut off",
-    "http_too_large": "Response too large (over {kb} KB)"
+    "http_too_large": "Response too large (over {kb} KB)",
+    "key_missing": "This service doesn't exist in this edition of Windows",
+    "cleanup_foreign_user": "The app is running under a different administrator account: it would clean that account's folders",
+    "update_failed": "Couldn't update: {error}",
+    "update_none": "There's no pending update",
+    "update_bad_format": "The downloaded file isn't a P-Rune installer",
+    "cleanup_unsafe": "Couldn't clean up with user permissions, so nothing was deleted ({error})",
+    "update_verify_message": "Confirm it's you to install P-Rune {version}.",
+    "update_not_verified": "Your identity wasn't confirmed: nothing was installed.",
+    "update_verify_failed": "Couldn't ask Windows for confirmation: nothing was installed."
   },
   "category": {
     "ai": "AI and Copilot",
@@ -102,100 +102,385 @@
     "privacy": "Privacy",
     "search": "Search",
     "start": "Start and suggestions",
-    "taskbar": "Taskbar"
+    "taskbar": "Taskbar",
+    "services": "Services"
   },
   "tweak": {
-    "ai.copilot_legacy": { "title": "Turn off built-in Copilot (23H2)", "description": "Policy for the built-in Copilot in 23H2. From 24H2 on, Copilot is an app: remove it from Bloatware." },
-    "ai.recall": { "title": "Turn off Recall (snapshots)", "description": "Policy that stops Recall from saving snapshots of your activity. Only has an effect on Copilot+ PCs." },
-    "appearance.dark_mode": { "title": "Dark mode", "description": "Dark mode for Windows and for apps." },
-    "appearance.faster_menus": { "title": "Faster menus", "description": "Lowers the delay before submenus open from 400 ms to 100 ms." },
-    "appearance.no_transparency": { "title": "No transparency effects", "description": "Turns off transparency (Mica/Acrylic). Helps on PCs with a weak GPU." },
-    "appearance.performance_visuals": { "title": "Minimal visual effects", "description": "Like \"Adjust for best performance\": no window and menu animations, shadows, fades, desktop peek or window contents while dragging. Text stays smoothed." },
-    "explorer.checkboxes": { "title": "Checkboxes to select", "description": "Shows checkboxes for selecting files." },
-    "explorer.classic_context_menu": { "title": "Classic context menu", "description": "Brings back the full right-click menu, without 'Show more options'." },
-    "explorer.compact_mode": { "title": "Compact view", "description": "Reduces the spacing between items in File Explorer." },
-    "explorer.full_path_title": { "title": "Don't 'prettify' names", "description": "Shows file and folder names exactly as written, without changing their case." },
-    "explorer.icons_not_thumbnails": { "title": "Icons instead of thumbnails", "description": "File Explorer doesn't generate previews of images and videos. Faster in large folders." },
-    "explorer.no_aero_shake": { "title": "Turn off 'shake to minimize'", "description": "Shaking a window no longer minimizes all the others." },
-    "explorer.open_this_pc": { "title": "Open to 'This PC'", "description": "File Explorer opens to 'This PC' instead of 'Home'." },
-    "explorer.separate_process": { "title": "Folders in a separate process", "description": "If a File Explorer window hangs, it doesn't take the taskbar down with it. Uses a bit more RAM." },
-    "explorer.show_extensions": { "title": "Show file extensions", "description": "Shows .exe, .pdf, etc. Recommended for security: that way 'invoice.pdf.exe' can't hide what it is." },
-    "explorer.show_hidden": { "title": "Show hidden files", "description": "Shows hidden files and folders (not protected system files)." },
-    "gaming.game_dvr": { "title": "Turn off background recording (Game DVR)", "description": "Turns off Xbox Game Bar background capture. Can raise FPS on modest PCs." },
-    "gaming.mouse_acceleration": { "title": "Turn off mouse acceleration", "description": "Turns off 'Enhance pointer precision': movement becomes 1:1. Ideal for games." },
-    "gaming.sticky_keys_prompt": { "title": "No Sticky Keys prompt (Shift x5)", "description": "Pressing Shift five times no longer opens the Sticky Keys prompt in the middle of a game." },
-    "privacy.activity_history": { "title": "Turn off activity history", "description": "Your activity history (apps, files and websites you used) isn't stored or uploaded." },
-    "privacy.advertising_id": { "title": "Turn off advertising ID", "description": "Stops apps from using your advertising ID for personalized ads." },
-    "privacy.feedback_frequency": { "title": "Don't ask for feedback", "description": "Windows stops showing feedback surveys." },
-    "privacy.inking_typing": { "title": "Turn off inking and typing personalization", "description": "Windows stops collecting what you type and draw to build a personal dictionary." },
-    "privacy.online_speech": { "title": "Turn off online speech recognition", "description": "Your voice isn't sent to the cloud. Online dictation stops working." },
-    "privacy.tailored_experiences": { "title": "Turn off tailored experiences", "description": "Microsoft stops using your diagnostic data for tailored tips and ads." },
-    "privacy.telemetry_policy": { "title": "Minimal telemetry (policy)", "description": "Sets diagnostic data to the lowest level your edition allows. On Home and Pro the effective minimum is 'Required'." },
-    "privacy.track_app_launches": { "title": "Don't track app launches", "description": "Windows stops recording which apps you open to rank Start and search." },
-    "privacy.typing_insights": { "title": "Turn off typing insights", "description": "Turns off the collection of typing statistics (Typing insights)." },
-    "search.highlights": { "title": "No search highlights", "description": "Removes the daily illustrations and topics from the search box." },
-    "search.taskbar_mode": { "title": "Search on the taskbar", "description": "How search is shown: hidden, icon only, icon with label, or the full search box.", "choices": { "box": "Box", "hidden": "Hidden", "icon": "Icon", "icon_label": "Icon and label" } },
-    "search.web_results": { "title": "No Bing web results in search", "description": "Policy that turns off web suggestions in Start search. Searches stay local only." },
-    "start.account_notifications": { "title": "Hide account notifications in Start", "description": "Removes 'Complete your Microsoft account' / 'Back up' style notices from the Start menu." },
-    "start.finish_setup_nag": { "title": "No 'Let's finish setting up your device'", "description": "Turns off the screen that keeps pushing OneDrive, Microsoft 365 and a Microsoft account." },
-    "start.lockscreen_tips": { "title": "No fun facts on the lock screen", "description": "Removes tips and 'fun facts' from the lock screen." },
-    "start.recommendations": { "title": "Hide recommendations and tips in Start", "description": "Removes promotional recommendations (Iris) from the Start menu." },
-    "start.settings_suggestions": { "title": "No suggested content in Settings", "description": "Removes suggestions and promotions from the Settings app." },
-    "start.silent_installs": { "title": "Block silent installs of suggested apps", "description": "Stops Windows from installing promoted games and apps (Candy Crush & co.) without asking." },
-    "start.suggested_notifications": { "title": "No 'suggested' notifications", "description": "Silences system notifications that suggest features and apps." },
-    "start.suggestions": { "title": "No suggestions in Start", "description": "Turns off the suggested apps that show up in the Start menu." },
-    "start.sync_provider_ads": { "title": "No ads in File Explorer", "description": "Removes sync provider notices (OneDrive, Microsoft 365) from File Explorer." },
-    "start.tips": { "title": "No tips and tricks", "description": "Turns off 'tips, tricks and suggestions' notifications." },
-    "start.welcome_experience": { "title": "No 'welcome experience' after updates", "description": "Skips the what's-new screen after updates." },
-    "taskbar.align_left": { "title": "Align icons to the left", "description": "Start button and icons on the left, like in Windows 10." },
-    "taskbar.clock_seconds": { "title": "Show seconds on the clock", "description": "The taskbar clock shows seconds. Uses a little more battery." },
-    "taskbar.disable_widgets": { "title": "Turn off Widgets", "description": "Policy that fully turns off the Widgets board (news, weather, MSN)." },
-    "taskbar.end_task": { "title": "'End task' on right-click", "description": "Adds 'End task' to the context menu of apps on the taskbar." },
-    "taskbar.hide_task_view": { "title": "Hide the Task View button", "description": "Removes the Task View button (Win+Tab still works)." },
-    "taskbar.no_animations": { "title": "No taskbar animations", "description": "Turns off taskbar animations. It feels snappier." }
+    "ai.copilot_legacy": {
+      "title": "Turn off built-in Copilot (23H2)",
+      "description": "Policy for the built-in Copilot in 23H2. From 24H2 on, Copilot is an app: remove it from Bloatware."
+    },
+    "ai.recall": {
+      "title": "Turn off Recall (snapshots)",
+      "description": "Policy that stops Recall from saving snapshots of your activity. Only has an effect on Copilot+ PCs."
+    },
+    "appearance.dark_mode": {
+      "title": "Dark mode",
+      "description": "Dark mode for Windows and for apps."
+    },
+    "appearance.faster_menus": {
+      "title": "Faster menus",
+      "description": "Lowers the delay before submenus open from 400 ms to 100 ms."
+    },
+    "appearance.no_transparency": {
+      "title": "No transparency effects",
+      "description": "Turns off transparency (Mica/Acrylic). Helps on PCs with a weak GPU."
+    },
+    "appearance.performance_visuals": {
+      "title": "Minimal visual effects",
+      "description": "Like \"Adjust for best performance\": no window and menu animations, shadows, fades, desktop peek or window contents while dragging. Text stays smoothed."
+    },
+    "explorer.checkboxes": {
+      "title": "Checkboxes to select",
+      "description": "Shows checkboxes for selecting files."
+    },
+    "explorer.classic_context_menu": {
+      "title": "Classic context menu",
+      "description": "Brings back the full right-click menu, without 'Show more options'."
+    },
+    "explorer.compact_mode": {
+      "title": "Compact view",
+      "description": "Reduces the spacing between items in File Explorer."
+    },
+    "explorer.full_path_title": {
+      "title": "Don't 'prettify' names",
+      "description": "Shows file and folder names exactly as written, without changing their case."
+    },
+    "explorer.icons_not_thumbnails": {
+      "title": "Icons instead of thumbnails",
+      "description": "File Explorer doesn't generate previews of images and videos. Faster in large folders."
+    },
+    "explorer.no_aero_shake": {
+      "title": "Turn off 'shake to minimize'",
+      "description": "Shaking a window no longer minimizes all the others."
+    },
+    "explorer.open_this_pc": {
+      "title": "Open to 'This PC'",
+      "description": "File Explorer opens to 'This PC' instead of 'Home'."
+    },
+    "explorer.separate_process": {
+      "title": "Folders in a separate process",
+      "description": "If a File Explorer window hangs, it doesn't take the taskbar down with it. Uses a bit more RAM."
+    },
+    "explorer.show_extensions": {
+      "title": "Show file extensions",
+      "description": "Shows .exe, .pdf, etc. Recommended for security: that way 'invoice.pdf.exe' can't hide what it is."
+    },
+    "explorer.show_hidden": {
+      "title": "Show hidden files",
+      "description": "Shows hidden files and folders (not protected system files)."
+    },
+    "gaming.game_dvr": {
+      "title": "Turn off background recording (Game DVR)",
+      "description": "Turns off Xbox Game Bar background capture. Can raise FPS on modest PCs."
+    },
+    "gaming.mouse_acceleration": {
+      "title": "Turn off mouse acceleration",
+      "description": "Turns off 'Enhance pointer precision': movement becomes 1:1. Ideal for games."
+    },
+    "gaming.sticky_keys_prompt": {
+      "title": "No Sticky Keys prompt (Shift x5)",
+      "description": "Pressing Shift five times no longer opens the Sticky Keys prompt in the middle of a game."
+    },
+    "privacy.activity_history": {
+      "title": "Turn off activity history",
+      "description": "Your activity history (apps, files and websites you used) isn't stored or uploaded."
+    },
+    "privacy.advertising_id": {
+      "title": "Turn off advertising ID",
+      "description": "Stops apps from using your advertising ID for personalized ads."
+    },
+    "privacy.feedback_frequency": {
+      "title": "Don't ask for feedback",
+      "description": "Windows stops showing feedback surveys."
+    },
+    "privacy.inking_typing": {
+      "title": "Turn off inking and typing personalization",
+      "description": "Windows stops collecting what you type and draw to build a personal dictionary."
+    },
+    "privacy.online_speech": {
+      "title": "Turn off online speech recognition",
+      "description": "Your voice isn't sent to the cloud. Online dictation stops working."
+    },
+    "privacy.tailored_experiences": {
+      "title": "Turn off tailored experiences",
+      "description": "Microsoft stops using your diagnostic data for tailored tips and ads."
+    },
+    "privacy.telemetry_policy": {
+      "title": "Minimal telemetry (policy)",
+      "description": "Sets diagnostic data to the lowest level your edition allows. On Home and Pro the effective minimum is 'Required'."
+    },
+    "privacy.track_app_launches": {
+      "title": "Don't track app launches",
+      "description": "Windows stops recording which apps you open to rank Start and search."
+    },
+    "privacy.typing_insights": {
+      "title": "Turn off typing insights",
+      "description": "Turns off the collection of typing statistics (Typing insights)."
+    },
+    "search.highlights": {
+      "title": "No search highlights",
+      "description": "Removes the daily illustrations and topics from the search box."
+    },
+    "search.taskbar_mode": {
+      "title": "Search on the taskbar",
+      "description": "How search is shown: hidden, icon only, icon with label, or the full search box.",
+      "choices": {
+        "box": "Box",
+        "hidden": "Hidden",
+        "icon": "Icon",
+        "icon_label": "Icon and label"
+      }
+    },
+    "search.web_results": {
+      "title": "No Bing web results in search",
+      "description": "Policy that turns off web suggestions in Start search. Searches stay local only."
+    },
+    "start.account_notifications": {
+      "title": "Hide account notifications in Start",
+      "description": "Removes 'Complete your Microsoft account' / 'Back up' style notices from the Start menu."
+    },
+    "start.finish_setup_nag": {
+      "title": "No 'Let's finish setting up your device'",
+      "description": "Turns off the screen that keeps pushing OneDrive, Microsoft 365 and a Microsoft account."
+    },
+    "start.lockscreen_tips": {
+      "title": "No fun facts on the lock screen",
+      "description": "Removes tips and 'fun facts' from the lock screen."
+    },
+    "start.recommendations": {
+      "title": "Hide recommendations and tips in Start",
+      "description": "Removes promotional recommendations (Iris) from the Start menu."
+    },
+    "start.settings_suggestions": {
+      "title": "No suggested content in Settings",
+      "description": "Removes suggestions and promotions from the Settings app."
+    },
+    "start.silent_installs": {
+      "title": "Block silent installs of suggested apps",
+      "description": "Stops Windows from installing promoted games and apps (Candy Crush & co.) without asking."
+    },
+    "start.suggested_notifications": {
+      "title": "No 'suggested' notifications",
+      "description": "Silences system notifications that suggest features and apps."
+    },
+    "start.suggestions": {
+      "title": "No suggestions in Start",
+      "description": "Turns off the suggested apps that show up in the Start menu."
+    },
+    "start.sync_provider_ads": {
+      "title": "No ads in File Explorer",
+      "description": "Removes sync provider notices (OneDrive, Microsoft 365) from File Explorer."
+    },
+    "start.tips": {
+      "title": "No tips and tricks",
+      "description": "Turns off 'tips, tricks and suggestions' notifications."
+    },
+    "start.welcome_experience": {
+      "title": "No 'welcome experience' after updates",
+      "description": "Skips the what's-new screen after updates."
+    },
+    "taskbar.align_left": {
+      "title": "Align icons to the left",
+      "description": "Start button and icons on the left, like in Windows 10."
+    },
+    "taskbar.clock_seconds": {
+      "title": "Show seconds on the clock",
+      "description": "The taskbar clock shows seconds. Uses a little more battery."
+    },
+    "taskbar.disable_widgets": {
+      "title": "Turn off Widgets",
+      "description": "Policy that fully turns off the Widgets board (news, weather, MSN)."
+    },
+    "taskbar.end_task": {
+      "title": "'End task' on right-click",
+      "description": "Adds 'End task' to the context menu of apps on the taskbar."
+    },
+    "taskbar.hide_task_view": {
+      "title": "Hide the Task View button",
+      "description": "Removes the Task View button (Win+Tab still works)."
+    },
+    "taskbar.no_animations": {
+      "title": "No taskbar animations",
+      "description": "Turns off taskbar animations. It feels snappier."
+    },
+    "services.diagtrack": {
+      "title": "Turn off the telemetry service (DiagTrack)",
+      "description": "Stops \"Connected User Experiences and Telemetry\", the service that sends diagnostic data to Microsoft."
+    },
+    "services.wap_push": {
+      "title": "Turn off the WAP Push message routing service",
+      "description": "Device push message service, used mostly alongside telemetry. A regular PC won't miss it."
+    },
+    "services.maps": {
+      "title": "Turn off Downloaded Maps Manager",
+      "description": "Only the Maps app (discontinued) used it for offline maps."
+    },
+    "services.retail_demo": {
+      "title": "Turn off the Retail Demo service",
+      "description": "Only used for the showroom mode of PCs on display in stores."
+    },
+    "services.fax": {
+      "title": "Turn off the Fax service",
+      "description": "Service to send and receive faxes. Many editions of Windows 11 no longer include it."
+    },
+    "services.error_reporting": {
+      "title": "Turn off Windows Error Reporting",
+      "description": "Windows stops collecting and sending reports when a program crashes. Doesn't affect normal use."
+    },
+    "services.insider": {
+      "title": "Turn off the Windows Insider service",
+      "description": "Only needed to get preview builds from the Insider program."
+    },
+    "services.xbox": {
+      "title": "Turn off the Xbox services",
+      "description": "Xbox sign-in, cloud saves, networking and accessories. Breaks Microsoft Store / Game Pass games, the Xbox Game Bar and Xbox controller configuration."
+    },
+    "services.print_spooler": {
+      "title": "Turn off the Print Spooler",
+      "description": "If you don't use a printer: it also closes a well-known attack path (PrintNightmare). With it off you can't print or save as PDF with Microsoft Print to PDF."
+    },
+    "services.geolocation": {
+      "title": "Turn off the location service",
+      "description": "Apps no longer know where the PC is. Breaks local weather, Find my device and automatic time zone."
+    },
+    "services.sysmain": {
+      "title": "Turn off SysMain (Superfetch)",
+      "description": "Stops preloading your most-used apps into RAM. Barely noticeable with an SSD; with a hard drive, apps take longer to open."
+    }
   },
   "bloat": {
-    "5319275A.WhatsAppDesktop": { "title": "WhatsApp" },
-    "AmazonVideo.PrimeVideo": { "title": "Prime Video" },
-    "BytedancePte.Ltd.TikTok": { "title": "TikTok" },
-    "Clipchamp.Clipchamp": { "title": "Clipchamp" },
-    "Disney.37853FC22B2CE": { "title": "Disney+" },
-    "Facebook.InstagramBeta": { "title": "Instagram" },
-    "MSTeams": { "title": "Microsoft Teams (personal)" },
-    "Microsoft.549981C3F5F10": { "title": "Cortana (discontinued)" },
-    "Microsoft.BingNews": { "title": "Microsoft News" },
-    "Microsoft.BingSearch": { "title": "Bing Search" },
-    "Microsoft.BingWeather": { "title": "Weather (MSN)" },
-    "Microsoft.Copilot": { "title": "Copilot" },
-    "Microsoft.GamingApp": { "title": "Xbox", "note": "Needed to install PC Game Pass games." },
-    "Microsoft.GetHelp": { "title": "Get Help", "note": "Some Windows 11 troubleshooters need it." },
-    "Microsoft.Getstarted": { "title": "Tips" },
-    "Microsoft.MicrosoftOfficeHub": { "title": "Microsoft 365 (Office Hub)" },
-    "Microsoft.MicrosoftSolitaireCollection": { "title": "Solitaire Collection" },
-    "Microsoft.MicrosoftStickyNotes": { "title": "Sticky Notes" },
-    "Microsoft.OutlookForWindows": { "title": "Outlook (new)", "note": "Replaces Mail and Calendar. Only remove it if you use another email client." },
-    "Microsoft.People": { "title": "People" },
-    "Microsoft.PowerAutomateDesktop": { "title": "Power Automate" },
-    "Microsoft.Todos": { "title": "Microsoft To Do" },
-    "Microsoft.Windows.DevHome": { "title": "Dev Home (discontinued)" },
-    "Microsoft.Windows.Photos": { "title": "Photos", "note": "It's the default image viewer. Install another one before removing it." },
-    "Microsoft.WindowsAlarms": { "title": "Clock" },
-    "Microsoft.WindowsCamera": { "title": "Camera" },
-    "Microsoft.WindowsFeedbackHub": { "title": "Feedback Hub" },
-    "Microsoft.WindowsMaps": { "title": "Maps (discontinued)" },
-    "Microsoft.WindowsSoundRecorder": { "title": "Sound Recorder" },
-    "Microsoft.XboxGamingOverlay": { "title": "Xbox Game Bar", "note": "Some games use it for captures and chat." },
-    "Microsoft.XboxIdentityProvider": { "title": "Xbox Identity Provider", "note": "Xbox sign-in: without it, Microsoft Store games can't sign in." },
-    "Microsoft.YourPhone": { "title": "Phone Link" },
-    "Microsoft.ZuneMusic": { "title": "Media Player" },
-    "Microsoft.ZuneVideo": { "title": "Movies & TV" },
-    "MicrosoftCorporationII.MicrosoftFamily": { "title": "Microsoft Family Safety" },
-    "MicrosoftCorporationII.QuickAssist": { "title": "Quick Assist", "note": "It's the remote support tool scammers use the most. Removing it lowers that risk." },
-    "MicrosoftTeams": { "title": "Microsoft Teams (classic personal)" },
-    "MicrosoftWindows.Client.WebExperience": { "title": "Widgets (Windows Web Experience Pack)", "note": "Removes the Widgets board (news, weather, MSN). It can be reinstalled from the Microsoft Store as \"Windows Web Experience Pack\"." },
-    "MicrosoftWindows.CrossDevice": { "title": "Cross Device Experience Host" },
-    "SpotifyAB.SpotifyMusic": { "title": "Spotify (Store)" },
-    "king.com.": { "title": "King games (Candy Crush, etc.)" }
+    "5319275A.WhatsAppDesktop": {
+      "title": "WhatsApp"
+    },
+    "AmazonVideo.PrimeVideo": {
+      "title": "Prime Video"
+    },
+    "BytedancePte.Ltd.TikTok": {
+      "title": "TikTok"
+    },
+    "Clipchamp.Clipchamp": {
+      "title": "Clipchamp"
+    },
+    "Disney.37853FC22B2CE": {
+      "title": "Disney+"
+    },
+    "Facebook.InstagramBeta": {
+      "title": "Instagram"
+    },
+    "MSTeams": {
+      "title": "Microsoft Teams (personal)"
+    },
+    "Microsoft.549981C3F5F10": {
+      "title": "Cortana (discontinued)"
+    },
+    "Microsoft.BingNews": {
+      "title": "Microsoft News"
+    },
+    "Microsoft.BingSearch": {
+      "title": "Bing Search"
+    },
+    "Microsoft.BingWeather": {
+      "title": "Weather (MSN)"
+    },
+    "Microsoft.Copilot": {
+      "title": "Copilot"
+    },
+    "Microsoft.GamingApp": {
+      "title": "Xbox",
+      "note": "Needed to install PC Game Pass games."
+    },
+    "Microsoft.GetHelp": {
+      "title": "Get Help",
+      "note": "Some Windows 11 troubleshooters need it."
+    },
+    "Microsoft.Getstarted": {
+      "title": "Tips"
+    },
+    "Microsoft.MicrosoftOfficeHub": {
+      "title": "Microsoft 365 (Office Hub)"
+    },
+    "Microsoft.MicrosoftSolitaireCollection": {
+      "title": "Solitaire Collection"
+    },
+    "Microsoft.MicrosoftStickyNotes": {
+      "title": "Sticky Notes"
+    },
+    "Microsoft.OutlookForWindows": {
+      "title": "Outlook (new)",
+      "note": "Replaces Mail and Calendar. Only remove it if you use another email client."
+    },
+    "Microsoft.People": {
+      "title": "People"
+    },
+    "Microsoft.PowerAutomateDesktop": {
+      "title": "Power Automate"
+    },
+    "Microsoft.Todos": {
+      "title": "Microsoft To Do"
+    },
+    "Microsoft.Windows.DevHome": {
+      "title": "Dev Home (discontinued)"
+    },
+    "Microsoft.Windows.Photos": {
+      "title": "Photos",
+      "note": "It's the default image viewer. Install another one before removing it."
+    },
+    "Microsoft.WindowsAlarms": {
+      "title": "Clock"
+    },
+    "Microsoft.WindowsCamera": {
+      "title": "Camera"
+    },
+    "Microsoft.WindowsFeedbackHub": {
+      "title": "Feedback Hub"
+    },
+    "Microsoft.WindowsMaps": {
+      "title": "Maps (discontinued)"
+    },
+    "Microsoft.WindowsSoundRecorder": {
+      "title": "Sound Recorder"
+    },
+    "Microsoft.XboxGamingOverlay": {
+      "title": "Xbox Game Bar",
+      "note": "Some games use it for captures and chat."
+    },
+    "Microsoft.XboxIdentityProvider": {
+      "title": "Xbox Identity Provider",
+      "note": "Xbox sign-in: without it, Microsoft Store games can't sign in."
+    },
+    "Microsoft.YourPhone": {
+      "title": "Phone Link"
+    },
+    "Microsoft.ZuneMusic": {
+      "title": "Media Player"
+    },
+    "Microsoft.ZuneVideo": {
+      "title": "Movies & TV"
+    },
+    "MicrosoftCorporationII.MicrosoftFamily": {
+      "title": "Microsoft Family Safety"
+    },
+    "MicrosoftCorporationII.QuickAssist": {
+      "title": "Quick Assist",
+      "note": "It's the remote support tool scammers use the most. Removing it lowers that risk."
+    },
+    "MicrosoftTeams": {
+      "title": "Microsoft Teams (classic personal)"
+    },
+    "MicrosoftWindows.Client.WebExperience": {
+      "title": "Widgets (Windows Web Experience Pack)",
+      "note": "Removes the Widgets board (news, weather, MSN). It can be reinstalled from the Microsoft Store as \"Windows Web Experience Pack\"."
+    },
+    "MicrosoftWindows.CrossDevice": {
+      "title": "Cross Device Experience Host"
+    },
+    "SpotifyAB.SpotifyMusic": {
+      "title": "Spotify (Store)"
+    },
+    "king.com.": {
+      "title": "King games (Candy Crush, etc.)"
+    }
   },
   "app_group": {
     "browsers": "Browsers",

@@ -65,6 +65,11 @@ pub struct Op {
     pub off: Option<Value>,
     #[serde(default)]
     pub delete_key_on_revert: Option<String>,
+    /// La clave tiene que existir: si no está, el tweak no aplica y nunca se crea.
+    /// Para servicios (`SYSTEM\CurrentControlSet\Services\<nombre>`): crear la clave de un
+    /// servicio que esa edición de Windows no trae dejaría un servicio fantasma.
+    #[serde(default)]
+    pub must_exist: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -310,6 +315,9 @@ pub fn validate_tweaks(c: &TweakCatalog) -> Result<(), String> {
             check_value(op.kind, on).map_err(ctx)?;
             if let Some(off) = &op.off {
                 check_value(op.kind, off).map_err(ctx)?;
+            }
+            if op.must_exist && op.delete_key_on_revert.is_some() {
+                return Err(ctx("must_exist no se combina con delete_key_on_revert".into()));
             }
             if let Some(k) = &op.delete_key_on_revert {
                 // Solo se permite borrar una clave que contiene a la de la operación,

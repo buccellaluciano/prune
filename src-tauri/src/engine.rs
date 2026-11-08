@@ -305,6 +305,11 @@ pub struct Detected {
     pub choice: Option<String>,
 }
 
+/// Alguna operación pide que su clave exista (p. ej. un servicio) y no está.
+fn missing_required_key(t: &Tweak) -> bool {
+    t.ops.iter().any(|o| o.must_exist && !reg::key_exists(o.hive, &o.path).unwrap_or(false))
+}
+
 pub fn tweak_state(t: &Tweak, build: u32) -> Detected {
     let mut views = Vec::with_capacity(t.ops.len());
     let mut current_values = Vec::with_capacity(t.ops.len());
@@ -334,7 +339,7 @@ pub fn tweak_state(t: &Tweak, build: u32) -> Detected {
     }
 
     let mut choice = None;
-    let state = if !t.supported_on(build) {
+    let state = if !t.supported_on(build) || missing_required_key(t) {
         TweakState::Unsupported
     } else if error {
         TweakState::Error
@@ -466,6 +471,9 @@ fn apply_op(t: &Tweak, op: &Op, target: &Target) -> Result<Change, String> {
         }
         Target::Set(v) => {
             change.created_keys = reg::missing_keys(op.hive, &op.path).map_err(|e| e.to_string())?;
+            if op.must_exist && !change.created_keys.is_empty() {
+                return Err(t!("key_missing"));
+            }
             let raw = reg::encode(op.kind, v);
             if let Err(e) = reg::write_raw(op.hive, &op.path, &op.name, &raw) {
                 // La clave pudo crearse aunque el valor no: no dejar claves vacías colgadas.
@@ -509,6 +517,10 @@ fn validate_change(c: &Change) -> Result<(), String> {
         .iter()
         .find(|o| o.hive == c.hive && o.path.eq_ignore_ascii_case(&c.path) && o.name.eq_ignore_ascii_case(&c.name))
         .ok_or_else(|| t!("journal_not_in_tweak", key = format!("{}\\{}\\{}", reg::hive_label(c.hive), c.path, c.name), id = t.id))?;
+    // Deshacer tampoco puede recrear la clave de un servicio que ya no está.
+    if op.must_exist && !reg::key_exists(op.hive, &op.path).unwrap_or(false) {
+        return Err(t!("key_missing"));
+    }
     // Solo se pueden borrar claves que contienen a la de la operación, y nunca de 1-2 niveles.
     let path = op.path.to_ascii_lowercase();
     for k in &c.created_keys {
@@ -672,6 +684,11 @@ impl Engine {
             }
             if (d.applied || t.is_choice()) && !t.supported_on(build) {
                 results.push(ItemResult { id: t.id.clone(), ok: false, error: Some(t!("unsupported_build")) });
+                continue;
+            }
+            // Aplicar o revertir: nunca se crea la clave de algo que no existe (un servicio).
+            if missing_required_key(t) {
+                results.push(ItemResult { id: t.id.clone(), ok: false, error: Some(t!("key_missing")) });
                 continue;
             }
             let targets = match targets(t, d, build) {
@@ -1029,9 +1046,56 @@ mod tests {
                     after: None,
                     tracked: true,
                 };
+                if op.must_exist && !reg::key_exists(op.hive, &op.path).unwrap() {
+                    // Un servicio que esta edición no trae: deshacer no lo recrea.
+                    assert_eq!(validate_change(&c).unwrap_err(), t!("key_missing"), "{}", t.id);
+                    continue;
+                }
                 validate_change(&c).unwrap_or_else(|e| panic!("{}: {e}", t.id));
             }
         }
+    }
+
+    /// `must_exist`: si la clave no está, el tweak no aplica y aplicar nunca la crea.
+    #[test]
+    fn must_exist_never_creates_the_key() {
+        let key = TestKey::new("must-exist");
+        let path = format!(r"{}\NoExiste", key.0);
+        let op = Op {
+            hive: Hive::HKCU,
+            path: path.clone(),
+            name: "Start".into(),
+            kind: catalog::ValueKind::Dword,
+            on: Some(Value::Int(4)),
+            off: Some(Value::Int(3)),
+            delete_key_on_revert: None,
+            must_exist: true,
+        };
+        let t = Tweak {
+            id: "test.tweak".into(),
+            category: "services".into(),
+            title: "t".into(),
+            description: "d".into(),
+            risk: Risk::Safe,
+            restart: Restart::None,
+            min_build: None,
+            max_build: None,
+            tags: vec![],
+            ops: vec![op.clone()],
+            ucpd: false,
+            choices: vec![],
+        };
+        assert!(missing_required_key(&t));
+        assert_eq!(tweak_state(&t, 26100).state, TweakState::Unsupported);
+        assert_eq!(apply_op(&t, &op, &Target::Set(Value::Int(4))).unwrap_err(), t!("key_missing"));
+        assert!(!reg::key_exists(Hive::HKCU, &path).unwrap(), "se creó la clave");
+        assert!(!reg::key_exists(Hive::HKCU, &key.0).unwrap(), "se creó la clave padre");
+
+        // Con la clave presente se aplica normal.
+        reg::write_raw(Hive::HKCU, &path, "Start", &reg::encode(catalog::ValueKind::Dword, &Value::Int(3))).unwrap();
+        assert!(!missing_required_key(&t));
+        apply_op(&t, &op, &Target::Set(Value::Int(4))).unwrap();
+        assert!(reg::matches(reg::read(Hive::HKCU, &path, "Start").unwrap().as_ref(), catalog::ValueKind::Dword, &Value::Int(4)));
     }
 
     /// Claves que `missing_keys` podría devolver en la práctica (con al menos 2 niveles).

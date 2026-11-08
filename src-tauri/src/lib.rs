@@ -10,6 +10,7 @@ macro_rules! t {
 
 mod appx;
 mod catalog;
+mod cleanup;
 mod disk;
 mod engine;
 mod http;
@@ -19,6 +20,8 @@ mod power;
 mod registry;
 mod sign;
 mod system;
+mod updater;
+mod verify;
 mod user;
 mod vt;
 mod winget;
@@ -33,6 +36,12 @@ struct Overview {
     system: system::SystemInfo,
     categories: Vec<Category>,
     tweaks: Vec<TweakView>,
+}
+
+/// Versión instalada (la de Cargo.toml, que es la de tauri.conf.json).
+#[tauri::command]
+fn app_version() -> &'static str {
+    env!("CARGO_PKG_VERSION")
 }
 
 /// Idioma de los mensajes y del catálogo (uno de `i18n::LANGS`).
@@ -137,6 +146,25 @@ async fn get_user() -> user::UserInfo {
         username: String::new(),
         picture: None,
     })
+}
+
+// ───────── Limpieza de archivos descartables ─────────
+
+#[tauri::command]
+async fn cleanup_scan() -> Vec<cleanup::CleanView> {
+    let info = system::info();
+    let foreign = info.foreign_user.is_some();
+    tauri::async_runtime::spawn_blocking(move || cleanup::scan(info.elevated, foreign)).await.unwrap_or_default()
+}
+
+/// Borra las categorías elegidas. Los IDs se validan contra la lista fija del backend.
+#[tauri::command]
+async fn cleanup_run(ids: Vec<String>) -> Result<Vec<cleanup::CleanResult>, String> {
+    let info = system::info();
+    let foreign = info.foreign_user.is_some();
+    tauri::async_runtime::spawn_blocking(move || cleanup::run(&ids, info.elevated, foreign))
+        .await
+        .map_err(|e| e.to_string())
 }
 
 // ───────── Disco (solo lectura) ─────────
@@ -272,6 +300,8 @@ fn journal_dir(user_dir: &std::path::Path) -> std::path::PathBuf {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .manage(updater::Pending::default())
         .setup(|app| {
             let dir = app.path().app_data_dir()?;
             app.manage(Engine::new(journal_dir(&dir)));
@@ -279,6 +309,9 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             set_language,
+            app_version,
+            updater::update_check,
+            updater::update_install,
             get_overview,
             plan_changes,
             apply_changes,
@@ -296,6 +329,8 @@ pub fn run() {
             disk_summary,
             disk_dir,
             disk_open,
+            cleanup_scan,
+            cleanup_run,
             winget_icons,
             winget_check,
             vt_open,

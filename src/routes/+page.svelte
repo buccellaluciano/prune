@@ -11,8 +11,11 @@
   import HistoryView from "#lib/components/HistoryView.svelte";
   import AppsView from "#lib/components/AppsView.svelte";
   import DiskView from "#lib/components/DiskView.svelte";
+  import VersionsView from "#lib/components/VersionsView.svelte";
   import InstallSheet from "#lib/components/InstallSheet.svelte";
   import Welcome from "#lib/components/Welcome.svelte";
+  import UpdateSheet from "#lib/components/UpdateSheet.svelte";
+  import { updates } from "#lib/updates.svelte.ts";
   import { fly } from "svelte/transition";
   import { flip } from "svelte/animate";
   import { onMount } from "svelte";
@@ -26,7 +29,8 @@
     theme.apply();
     store.loadUser();
     // El idioma va primero: el backend arma el catálogo y los mensajes en ese idioma.
-    i18n.init().finally(() => store.load());
+    // Después, en silencio, si hay una versión nueva (un pedido a GitHub; si falla, nada).
+    i18n.init().finally(() => store.load().then(() => updates.check(true)));
     // Al cambiarlo, se vuelve a pedir lo que trae textos del catálogo.
     i18n.onChange(() => {
       store.load();
@@ -116,6 +120,8 @@
         <DiskView />
       {:else if store.view === "history"}
         {#key i18n.lang}<HistoryView />{/key}
+      {:else if store.view === "versions"}
+        <VersionsView />
       {:else}
         <div class="mx-auto max-w-4xl">
           <h1 class="font-display text-[20px] font-semibold">{categoryTitle}</h1>
@@ -152,6 +158,7 @@
 <PlanSheet />
 <CommandPalette />
 <InstallSheet />
+<UpdateSheet />
 <Welcome />
 
 <!-- Toasts -->

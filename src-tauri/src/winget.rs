@@ -227,7 +227,7 @@ fn version() -> Result<String, String> {
 /// que vamos a usar y hacer que winget (como admin) escriba en otro lado. Por eso se crea
 /// una carpeta nueva (falla si ya existe algo con ese nombre) y, si la app corre como
 /// admin, nace con permisos solo para Administradores y SYSTEM.
-fn private_dir() -> Result<PathBuf, String> {
+pub(crate) fn private_dir() -> Result<PathBuf, String> {
     private_dir_with(crate::system::is_elevated())
 }
 
@@ -317,6 +317,114 @@ fn parse_upgrades(lines: &[String]) -> HashMap<String, String> {
     map
 }
 
+// ───────── Programas instalados por fuera de winget ─────────
+//
+// `winget export` (y `winget list` completo) solo identifican un programa si la
+// correspondencia con el repositorio no es ambigua. Brave instalado desde su web, por
+// ejemplo, coincide con `Brave.Brave` de winget y con el de Microsoft Store, así que en el
+// listado general queda como "ARP\Machine\X86\BraveSoftware Brave-Browser" y no aparece.
+// Preguntando por el ID exacto (`winget list --id Brave.Brave --exact`) winget sí lo
+// confirma. Para no hacer 39 consultas, solo se pregunta por los programas del catálogo
+// cuyo nombre aparece en "Aplicaciones instaladas" del registro.
+
+/// Nombres visibles de lo instalado ("Agregar o quitar programas"), 64 y 32 bits y del usuario.
+fn arp_names() -> Vec<String> {
+    use winreg::enums::*;
+    use winreg::RegKey;
+    const PATH: &str = r"Software\Microsoft\Windows\CurrentVersion\Uninstall";
+    let roots = [
+        (HKEY_LOCAL_MACHINE, KEY_READ | KEY_WOW64_64KEY),
+        (HKEY_LOCAL_MACHINE, KEY_READ | KEY_WOW64_32KEY),
+        (HKEY_CURRENT_USER, KEY_READ),
+    ];
+    let mut out = Vec::new();
+    for (hive, flags) in roots {
+        let Ok(k) = RegKey::predef(hive).open_subkey_with_flags(PATH, flags) else { continue };
+        for name in k.enum_keys().flatten() {
+            let Ok(sub) = k.open_subkey_with_flags(&name, flags) else { continue };
+            if sub.get_value::<u32, _>("SystemComponent").unwrap_or(0) == 1 {
+                continue;
+            }
+            if let Ok(d) = sub.get_value::<String, _>("DisplayName") {
+                out.push(d);
+            }
+        }
+    }
+    out
+}
+
+fn name_tokens(s: &str) -> Vec<String> {
+    s.to_lowercase()
+        .split(|c: char| c.is_whitespace() || "()[],:;/-_".contains(c))
+        .filter(|t| !t.is_empty())
+        .map(String::from)
+        .collect()
+}
+
+/// ¿El nombre registrado puede ser este programa? Es generoso a propósito ("VLC" con
+/// "VLC media player", "Node.js LTS" con "Node.js"): la confirmación la da winget.
+fn title_matches(title: &str, display: &str) -> bool {
+    let (t, d) = (name_tokens(title), name_tokens(display));
+    if t.is_empty() || d.is_empty() {
+        return false;
+    }
+    d.windows(t.len()).any(|w| w == t.as_slice()) || (t[0].len() >= 3 && d[0] == t[0])
+}
+
+/// Versión instalada y disponible (si hay actualización) de la fila de `id` en la tabla de
+/// `winget list --id <id> --exact --source winget`. Independiente del idioma.
+fn parse_list_row(lines: &[String], id: &str) -> Option<(String, Option<String>)> {
+    for line in lines {
+        let toks: Vec<&str> = line.split_whitespace().collect();
+        let Some(pos) = toks.iter().position(|t| t.eq_ignore_ascii_case(id)) else { continue };
+        let mut rest = toks[pos + 1..].iter().copied();
+        let mut version = rest.next()?.to_string();
+        // Versiones aproximadas: "< 1.2" / "> 3.0".
+        if version == "<" || version == ">" {
+            version = format!("{version} {}", rest.next()?);
+        }
+        let available = rest.next().filter(|t| !t.eq_ignore_ascii_case("winget")).map(String::from);
+        return Some((version, available));
+    }
+    None
+}
+
+/// Le pregunta a winget por un ID exacto: si lo reconoce como instalado, devuelve versión y
+/// actualización disponible.
+fn confirm_installed(id: &str) -> Option<(String, Option<String>)> {
+    let mut args = vec!["list", "--id", id, "--exact", "--source", "winget"];
+    args.extend(COMMON);
+    let (code, lines) = run(&args, QUERY_TIMEOUT, |_| {}).ok()?;
+    if code != 0 {
+        return None;
+    }
+    parse_list_row(&lines, id)
+}
+
+/// Completa `inst`/`upg` con los programas del catálogo que `export` no identificó.
+fn add_unmatched(inst: &mut HashMap<String, String>, upg: &mut HashMap<String, String>) {
+    let missing: Vec<&catalog::WingetApp> =
+        catalog::apps().app.iter().filter(|a| !inst.contains_key(&a.id.to_ascii_lowercase())).collect();
+    if missing.is_empty() {
+        return;
+    }
+    let names = arp_names();
+    let candidates: Vec<&catalog::WingetApp> =
+        missing.into_iter().filter(|a| names.iter().any(|n| title_matches(&a.title, n))).collect();
+    let found: Vec<(String, Option<(String, Option<String>)>)> = std::thread::scope(|s| {
+        let handles: Vec<_> = candidates.iter().map(|a| (a.id.to_ascii_lowercase(), s.spawn(|| confirm_installed(&a.id)))).collect();
+        handles.into_iter().map(|(k, h)| (k, h.join().ok().flatten())).collect()
+    });
+    for (k, r) in found {
+        if let Some((version, available)) = r {
+            if let Some(v) = available {
+                upg.insert(k.clone(), v);
+            }
+            inst.insert(k, version);
+        }
+    }
+}
+
 pub fn status() -> AppsOverview {
     let c = catalog::apps();
     let groups = c
@@ -338,11 +446,14 @@ pub fn status() -> AppsOverview {
         let b = s.spawn(upgrades);
         (a.join().unwrap_or_else(|_| Err("pánico".into())), b.join().unwrap_or_else(|_| Err("pánico".into())))
     });
-    let inst = inst.unwrap_or_else(|e| {
+    let mut inst = inst.unwrap_or_else(|e| {
         ov.error = Some(e);
         HashMap::new()
     });
-    let upg = upg.unwrap_or_default();
+    let mut upg = upg.unwrap_or_default();
+    if ov.error.is_none() {
+        add_unmatched(&mut inst, &mut upg);
+    }
     ov.apps = c
         .app
         .iter()
@@ -654,6 +765,46 @@ mod tests {
     fn real_installed_list() {
         let m = installed().unwrap();
         assert!(!m.is_empty());
+    }
+
+    #[test]
+    fn nombres_registrados() {
+        assert!(title_matches("Brave", "Brave"));
+        assert!(title_matches("VLC", "VLC media player"));
+        assert!(title_matches("7-Zip", "7-Zip 24.08 (x64)"));
+        assert!(title_matches("Notepad++", "Notepad++ (64-bit x64)"));
+        assert!(title_matches("Node.js LTS", "Node.js"));
+        assert!(title_matches("PowerShell 7", "PowerShell 7-x64"));
+        assert!(title_matches("Visual Studio Code", "Microsoft Visual Studio Code (User)"));
+        assert!(!title_matches("Git", "GitHub Desktop"));
+        assert!(!title_matches("Zoom", "Zoomit"));
+        assert!(!title_matches("Brave", ""));
+    }
+
+    #[test]
+    fn fila_de_winget_list() {
+        let lines = |s: &str| s.lines().map(String::from).collect::<Vec<_>>();
+        let plain = lines("Name  Id          Version\n-----------------------------\nBrave Brave.Brave 157.1.99.55");
+        assert_eq!(parse_list_row(&plain, "Brave.Brave"), Some(("157.1.99.55".into(), None)));
+        let upd = lines("Nombre Id Versión Disponible\n----\nBrave Brave.Brave 157.1.99.55 157.1.100.2");
+        assert_eq!(parse_list_row(&upd, "brave.brave"), Some(("157.1.99.55".into(), Some("157.1.100.2".into()))));
+        let src = lines("Brave Brave.Brave 1.0 winget");
+        assert_eq!(parse_list_row(&src, "Brave.Brave"), Some(("1.0".into(), None)));
+        let approx = lines("Foo Foo.Bar < 3.1 3.2");
+        assert_eq!(parse_list_row(&approx, "Foo.Bar"), Some(("< 3.1".into(), Some("3.2".into()))));
+        assert_eq!(parse_list_row(&lines("No se encontró ningún paquete instalado"), "Brave.Brave"), None);
+    }
+
+    /// En una PC con Brave instalado desde su web: `export` no lo trae y el complemento sí.
+    #[test]
+    #[ignore]
+    fn real_brave_fuera_de_export() {
+        let mut inst = installed().unwrap();
+        let mut upg = HashMap::new();
+        println!("export trae brave: {}", inst.contains_key("brave.brave"));
+        add_unmatched(&mut inst, &mut upg);
+        println!("después: {:?} / actualización: {:?}", inst.get("brave.brave"), upg.get("brave.brave"));
+        assert!(inst.contains_key("brave.brave"));
     }
 
     /// winget se busca en el paquete protegido, nunca en la carpeta del usuario.

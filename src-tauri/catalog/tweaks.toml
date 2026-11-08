@@ -53,6 +53,11 @@ icon = "gamepad"
 
 # El plan de energía no vive en este archivo: lo arma el motor con la API de energía.
 [[category]]
+id = "services"
+title = "Servicios"
+icon = "cog"
+
+[[category]]
 id = "power"
 title = "Energía"
 icon = "zap"
@@ -944,3 +949,219 @@ name = "Flags"
 kind = "sz"
 on = "506"
 off = "510"
+
+# ───────────────────────────── Servicios ─────────────────────────────
+# Cada tweak pone el servicio en Deshabilitado (Start = 4). Revertir vuelve al inicio
+# que trae Windows 11 (2 = automático, 3 = manual). must_exist: si el servicio no existe en
+# esa edición, el tweak no aplica y nunca se crea su clave.
+
+[[tweak]]
+id = "services.diagtrack"
+category = "services"
+title = "Desactivar el servicio de telemetría (DiagTrack)"
+description = "Detiene \"Experiencias del usuario y telemetría asociadas\", el servicio que envía los datos de diagnóstico a Microsoft."
+risk = "safe"
+restart = "reboot"
+tags = ["servicios", "telemetria", "diagtrack"]
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SYSTEM\CurrentControlSet\Services\DiagTrack'
+name = "Start"
+kind = "dword"
+on = 4
+off = 2
+must_exist = true
+
+[[tweak]]
+id = "services.wap_push"
+category = "services"
+title = "Desactivar el enrutador de mensajes WAP Push"
+description = "Servicio de mensajes push de dispositivos, usado sobre todo junto a la telemetría. En una PC común no se extraña."
+risk = "safe"
+restart = "reboot"
+tags = ["servicios", "telemetria", "dmwappushservice"]
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SYSTEM\CurrentControlSet\Services\dmwappushservice'
+name = "Start"
+kind = "dword"
+on = 4
+off = 3
+must_exist = true
+
+[[tweak]]
+id = "services.maps"
+category = "services"
+title = "Desactivar el administrador de mapas descargados"
+description = "Solo lo usaba la app Mapas (discontinuada) para los mapas sin conexión."
+risk = "safe"
+restart = "reboot"
+tags = ["servicios", "mapas", "mapsbroker"]
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SYSTEM\CurrentControlSet\Services\MapsBroker'
+name = "Start"
+kind = "dword"
+on = 4
+off = 2
+must_exist = true
+
+[[tweak]]
+id = "services.retail_demo"
+category = "services"
+title = "Desactivar el servicio de demostración comercial"
+description = "Solo sirve para el modo de exhibición de las PC en los negocios."
+risk = "safe"
+restart = "reboot"
+tags = ["servicios", "retaildemo"]
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SYSTEM\CurrentControlSet\Services\RetailDemo'
+name = "Start"
+kind = "dword"
+on = 4
+off = 3
+must_exist = true
+
+[[tweak]]
+id = "services.fax"
+category = "services"
+title = "Desactivar el servicio de fax"
+description = "Servicio para enviar y recibir faxes. Muchas ediciones de Windows 11 ya no lo traen."
+risk = "safe"
+restart = "reboot"
+tags = ["servicios", "fax"]
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SYSTEM\CurrentControlSet\Services\Fax'
+name = "Start"
+kind = "dword"
+on = 4
+off = 3
+must_exist = true
+
+[[tweak]]
+id = "services.error_reporting"
+category = "services"
+title = "Desactivar el informe de errores de Windows"
+description = "Windows deja de juntar y enviar los informes cuando un programa se cuelga. No afecta al uso normal."
+risk = "safe"
+restart = "reboot"
+tags = ["servicios", "errores", "wer", "wersvc"]
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SYSTEM\CurrentControlSet\Services\WerSvc'
+name = "Start"
+kind = "dword"
+on = 4
+off = 3
+must_exist = true
+
+[[tweak]]
+id = "services.insider"
+category = "services"
+title = "Desactivar el servicio de Windows Insider"
+description = "Solo hace falta para recibir las versiones de prueba del programa Insider."
+risk = "safe"
+restart = "reboot"
+tags = ["servicios", "insider", "wisvc"]
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SYSTEM\CurrentControlSet\Services\wisvc'
+name = "Start"
+kind = "dword"
+on = 4
+off = 3
+must_exist = true
+
+[[tweak]]
+id = "services.xbox"
+category = "services"
+title = "Desactivar los servicios de Xbox"
+description = "Login, partidas guardadas en la nube, red y accesorios de Xbox. Rompe los juegos de Microsoft Store / Game Pass, la Xbox Game Bar y la configuración de controles Xbox."
+risk = "moderate"
+restart = "reboot"
+tags = ["servicios", "xbox", "gaming"]
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SYSTEM\CurrentControlSet\Services\XblAuthManager'
+name = "Start"
+kind = "dword"
+on = 4
+off = 3
+must_exist = true
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SYSTEM\CurrentControlSet\Services\XblGameSave'
+name = "Start"
+kind = "dword"
+on = 4
+off = 3
+must_exist = true
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SYSTEM\CurrentControlSet\Services\XboxNetApiSvc'
+name = "Start"
+kind = "dword"
+on = 4
+off = 3
+must_exist = true
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SYSTEM\CurrentControlSet\Services\XboxGipSvc'
+name = "Start"
+kind = "dword"
+on = 4
+off = 3
+must_exist = true
+
+[[tweak]]
+id = "services.print_spooler"
+category = "services"
+title = "Desactivar la cola de impresión"
+description = "Si no usás impresora: además cierra una vía de ataque conocida (PrintNightmare). Con esto apagado no se puede imprimir ni guardar como PDF con Microsoft Print to PDF."
+risk = "moderate"
+restart = "reboot"
+tags = ["servicios", "impresora", "spooler"]
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SYSTEM\CurrentControlSet\Services\Spooler'
+name = "Start"
+kind = "dword"
+on = 4
+off = 2
+must_exist = true
+
+[[tweak]]
+id = "services.geolocation"
+category = "services"
+title = "Desactivar el servicio de ubicación"
+description = "Las apps dejan de saber dónde está el equipo. Rompe el clima local, Encontrar mi dispositivo y el ajuste automático de zona horaria."
+risk = "moderate"
+restart = "reboot"
+tags = ["servicios", "ubicacion", "privacidad", "lfsvc"]
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SYSTEM\CurrentControlSet\Services\lfsvc'
+name = "Start"
+kind = "dword"
+on = 4
+off = 3
+must_exist = true
+
+[[tweak]]
+id = "services.sysmain"
+category = "services"
+title = "Desactivar SysMain (Superfetch)"
+description = "Deja de precargar en RAM las apps que más usás. Con SSD casi no se nota; con disco rígido, las apps tardan más en abrir."
+risk = "moderate"
+restart = "reboot"
+tags = ["servicios", "rendimiento", "superfetch", "sysmain"]
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SYSTEM\CurrentControlSet\Services\SysMain'
+name = "Start"
+kind = "dword"
+on = 4
+off = 2
+must_exist = true

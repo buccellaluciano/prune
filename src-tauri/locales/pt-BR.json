@@ -17,7 +17,6 @@
     "deletes_value": "(apaga o valor)",
     "value_missing": "(não existe)",
     "value_other_type": "<tipo {kind} · {bytes} bytes>",
-
     "power_title": "Plano de energia",
     "power_description": "Alto desempenho e Desempenho máximo não deixam o processador baixar a frequência nem entrar em economia: responde mais rápido, mas consome e esquenta mais. Em notebooks, use só na tomada.",
     "power_key": "Plano de energia (powrprof)",
@@ -37,11 +36,9 @@
     "power_guid_invalid": "GUID inválido no histórico",
     "power_previous_gone": "o plano anterior não existe mais",
     "power_not_ours": "o plano a apagar não é o Desempenho máximo que o app criou",
-
     "label_power": "Plano de energia: {plan}",
     "label_tweaks": "{n} ajustes",
     "label_removed_apps": "{n} apps removidos",
-
     "journal_unreadable_backup": "Não foi possível ler o histórico ({error}). Uma cópia foi salva em {path} e um novo foi iniciado.",
     "journal_unreadable": "Não foi possível ler o histórico ({error}) nem fazer backup ({backup_error}).",
     "journal_save_failed": "Não foi possível salvar o histórico: {error}",
@@ -54,15 +51,12 @@
     "journal_bad_key": "chave a apagar inválida '{key}'",
     "conflict_value": "{title}: {key} vale {value}",
     "conflict_power": "Plano de energia: agora está em {plan}",
-
     "not_in_catalog": "Não está no catálogo",
-
     "drive_unavailable": "Unidade indisponível: {letter}",
     "scan_running": "Já há uma análise em andamento",
     "scan_missing": "Ainda não há uma análise concluída",
     "folder_missing": "Pasta inexistente",
     "explorer_failed": "Não foi possível abrir o Explorador",
-
     "winget_not_found": "O winget não foi encontrado. Instale ou atualize o \"Instalador de Aplicativo\" pela Microsoft Store.",
     "winget_bad_signature": "O winget não passou na verificação de assinatura: {error}",
     "winget_run_failed": "Não foi possível executar o winget: {error}",
@@ -75,13 +69,10 @@
     "already_latest": "Já estava na versão mais recente",
     "already_installed": "Já estava instalado",
     "package_not_found": "O winget não encontrou o pacote (já foi desinstalado?)",
-
     "signature_invalid": "assinatura inválida ou ausente ({code})",
     "signer_unreadable": "não foi possível ler o signatário",
     "signed_by_other": "assinado por \"{signer}\", não pela Microsoft",
-
     "hash_invalid": "Hash inválido",
-
     "http_only_https": "Só são permitidos endereços https: {url}",
     "http_bad_url": "Endereço inválido: {url}",
     "http_bad_port": "Porta inválida: {url}",
@@ -91,7 +82,16 @@
     "http_send_failed": "Não foi possível contatar {host}",
     "http_no_status": "Resposta sem código de status",
     "http_cut": "O download foi interrompido",
-    "http_too_large": "Resposta grande demais (mais de {kb} KB)"
+    "http_too_large": "Resposta grande demais (mais de {kb} KB)",
+    "key_missing": "Este serviço não existe nesta edição do Windows",
+    "cleanup_foreign_user": "O app está rodando com outra conta de administrador: limparia as pastas dessa conta",
+    "update_failed": "Não foi possível atualizar: {error}",
+    "update_none": "Não há nenhuma atualização pendente",
+    "update_bad_format": "O arquivo baixado não é um instalador do P-Rune",
+    "cleanup_unsafe": "Não foi possível limpar com permissões de usuário, então nada foi apagado ({error})",
+    "update_verify_message": "Confirme que é você para instalar o P-Rune {version}.",
+    "update_not_verified": "Sua identidade não foi confirmada: nada foi instalado.",
+    "update_verify_failed": "Não foi possível pedir a confirmação do Windows: nada foi instalado."
   },
   "category": {
     "ai": "IA e Copilot",
@@ -102,100 +102,385 @@
     "privacy": "Privacidade",
     "search": "Pesquisa",
     "start": "Iniciar e sugestões",
-    "taskbar": "Barra de tarefas"
+    "taskbar": "Barra de tarefas",
+    "services": "Serviços"
   },
   "tweak": {
-    "ai.copilot_legacy": { "title": "Desativar o Copilot integrado (23H2)", "description": "Política para o Copilot integrado do 23H2. A partir do 24H2 o Copilot é um app: remova-o em Bloatware." },
-    "ai.recall": { "title": "Desativar o Recall (instantâneos)", "description": "Política que impede o Recall de salvar capturas da sua atividade. Só tem efeito em PCs Copilot+." },
-    "appearance.dark_mode": { "title": "Modo escuro", "description": "Modo escuro para o Windows e para os apps." },
-    "appearance.faster_menus": { "title": "Menus mais rápidos", "description": "Reduz a espera para abrir submenus de 400 ms para 100 ms." },
-    "appearance.no_transparency": { "title": "Sem efeitos de transparência", "description": "Desativa a transparência (Mica/Acrylic). Ajuda em PCs com GPU fraca." },
-    "appearance.performance_visuals": { "title": "Efeitos visuais no mínimo", "description": "Como \"Ajustar para obter um melhor desempenho\": sem animações de janelas e menus, sombras, esmaecimentos, espiada na área de trabalho nem conteúdo ao arrastar. O texto continua suavizado." },
-    "explorer.checkboxes": { "title": "Caixas de seleção", "description": "Mostra caixas de seleção para selecionar arquivos." },
-    "explorer.classic_context_menu": { "title": "Menu de contexto clássico", "description": "Volta o menu completo do clique direito, sem o 'Mostrar mais opções'." },
-    "explorer.compact_mode": { "title": "Modo compacto", "description": "Reduz o espaço entre os itens do Explorador." },
-    "explorer.full_path_title": { "title": "Não 'embelezar' nomes", "description": "Mostra os nomes de arquivos e pastas exatamente como foram escritos, sem mudar maiúsculas." },
-    "explorer.icons_not_thumbnails": { "title": "Ícones em vez de miniaturas", "description": "O Explorador não gera prévias de imagens e vídeos. Mais rápido em pastas grandes." },
-    "explorer.no_aero_shake": { "title": "Desativar 'sacudir para minimizar'", "description": "Sacudir uma janela não minimiza mais as outras." },
-    "explorer.open_this_pc": { "title": "Abrir em 'Este Computador'", "description": "O Explorador abre em 'Este Computador' em vez de 'Início'." },
-    "explorer.separate_process": { "title": "Pastas em um processo separado", "description": "Se uma janela do Explorador travar, não leva a barra de tarefas junto. Usa um pouco mais de RAM." },
-    "explorer.show_extensions": { "title": "Mostrar extensões de arquivo", "description": "Mostra .exe, .pdf etc. Recomendado por segurança: assim 'fatura.pdf.exe' não se disfarça." },
-    "explorer.show_hidden": { "title": "Mostrar arquivos ocultos", "description": "Mostra os arquivos e pastas ocultos (não os protegidos do sistema)." },
-    "gaming.game_dvr": { "title": "Desativar gravação em segundo plano (Game DVR)", "description": "Desativa a captura em segundo plano da Xbox Game Bar. Pode aumentar o FPS em PCs modestos." },
-    "gaming.mouse_acceleration": { "title": "Desativar aceleração do mouse", "description": "Desativa 'Aumentar a precisão do ponteiro': o movimento fica 1:1. Ideal para jogos." },
-    "gaming.sticky_keys_prompt": { "title": "Sem aviso de Teclas de Aderência (Shift x5)", "description": "Apertar Shift cinco vezes não abre mais o aviso de Teclas de Aderência no meio do jogo." },
-    "privacy.activity_history": { "title": "Desativar histórico de atividades", "description": "O histórico de atividades (apps, arquivos e sites que você usou) não é guardado nem enviado." },
-    "privacy.advertising_id": { "title": "Desativar ID de publicidade", "description": "Impede que os apps usem seu ID de publicidade para anúncios personalizados." },
-    "privacy.feedback_frequency": { "title": "Não pedir comentários", "description": "O Windows deixa de mostrar pesquisas de feedback." },
-    "privacy.inking_typing": { "title": "Desativar personalização de escrita e tinta", "description": "O Windows deixa de coletar o que você digita e desenha para montar um dicionário pessoal." },
-    "privacy.online_speech": { "title": "Desativar reconhecimento de fala online", "description": "Sua voz não é enviada para a nuvem. O ditado online deixa de funcionar." },
-    "privacy.tailored_experiences": { "title": "Desativar experiências personalizadas", "description": "A Microsoft deixa de usar seus dados de diagnóstico para dicas e anúncios personalizados." },
-    "privacy.telemetry_policy": { "title": "Telemetria no mínimo (política)", "description": "Coloca os dados de diagnóstico no nível mais baixo que sua edição permite. No Home e no Pro, o mínimo efetivo é 'Obrigatórios'." },
-    "privacy.track_app_launches": { "title": "Não registrar apps abertos", "description": "O Windows deixa de registrar quais apps você abre para ordenar o Iniciar e a pesquisa." },
-    "privacy.typing_insights": { "title": "Desativar estatísticas de digitação", "description": "Desativa a coleta de estatísticas de digitação (Insights de digitação)." },
-    "search.highlights": { "title": "Sem destaques da pesquisa", "description": "Tira as ilustrações e temas do dia da caixa de pesquisa." },
-    "search.taskbar_mode": { "title": "Pesquisa na barra de tarefas", "description": "Como a pesquisa aparece: oculta, só a lupa, lupa com rótulo ou a caixa completa.", "choices": { "box": "Caixa", "hidden": "Oculta", "icon": "Ícone", "icon_label": "Ícone e rótulo" } },
-    "search.web_results": { "title": "Sem resultados da web do Bing na pesquisa", "description": "Política que desativa as sugestões da web na pesquisa do Iniciar. As pesquisas ficam só locais." },
-    "start.account_notifications": { "title": "Ocultar avisos de conta no Iniciar", "description": "Tira avisos como 'Conclua sua conta Microsoft' / 'Faça backup' do menu Iniciar." },
-    "start.finish_setup_nag": { "title": "Sem 'Vamos terminar de configurar seu dispositivo'", "description": "Desativa a tela que insiste com OneDrive, Microsoft 365 e conta Microsoft." },
-    "start.lockscreen_tips": { "title": "Sem curiosidades na tela de bloqueio", "description": "Tira as dicas e 'curiosidades' da tela de bloqueio." },
-    "start.recommendations": { "title": "Ocultar recomendações e dicas no Iniciar", "description": "Tira as recomendações promocionais (Iris) do menu Iniciar." },
-    "start.settings_suggestions": { "title": "Sem conteúdo sugerido nas Configurações", "description": "Tira as sugestões e promoções do app Configurações." },
-    "start.silent_installs": { "title": "Bloquear instalação silenciosa de apps sugeridos", "description": "Impede o Windows de instalar jogos e apps promovidos (Candy Crush e cia.) sem perguntar." },
-    "start.suggested_notifications": { "title": "Sem notificações 'sugeridas'", "description": "Silencia as notificações do sistema que sugerem recursos e apps." },
-    "start.suggestions": { "title": "Sem sugestões no Iniciar", "description": "Desativa os apps sugeridos que aparecem no menu Iniciar." },
-    "start.sync_provider_ads": { "title": "Sem anúncios no Explorador", "description": "Tira os avisos de provedores de sincronização (OneDrive, Microsoft 365) do Explorador." },
-    "start.tips": { "title": "Sem dicas e truques", "description": "Desativa as notificações de 'dicas, truques e sugestões'." },
-    "start.welcome_experience": { "title": "Sem 'experiência de boas-vindas' após atualizar", "description": "Evita a tela de novidades depois das atualizações." },
-    "taskbar.align_left": { "title": "Alinhar ícones à esquerda", "description": "Botão Iniciar e ícones à esquerda, como no Windows 10." },
-    "taskbar.clock_seconds": { "title": "Mostrar segundos no relógio", "description": "O relógio da barra mostra os segundos. Gasta um pouco mais de bateria." },
-    "taskbar.disable_widgets": { "title": "Desativar Widgets", "description": "Política que desativa por completo o painel de Widgets (notícias, clima, MSN)." },
-    "taskbar.end_task": { "title": "'Finalizar tarefa' com clique direito", "description": "Adiciona 'Finalizar tarefa' ao menu de contexto dos apps na barra." },
-    "taskbar.hide_task_view": { "title": "Ocultar botão Visão de Tarefas", "description": "Tira o botão Visão de Tarefas (Win+Tab continua funcionando)." },
-    "taskbar.no_animations": { "title": "Sem animações da barra", "description": "Desativa as animações da barra de tarefas. Parece mais rápida." }
+    "ai.copilot_legacy": {
+      "title": "Desativar o Copilot integrado (23H2)",
+      "description": "Política para o Copilot integrado do 23H2. A partir do 24H2 o Copilot é um app: remova-o em Bloatware."
+    },
+    "ai.recall": {
+      "title": "Desativar o Recall (instantâneos)",
+      "description": "Política que impede o Recall de salvar capturas da sua atividade. Só tem efeito em PCs Copilot+."
+    },
+    "appearance.dark_mode": {
+      "title": "Modo escuro",
+      "description": "Modo escuro para o Windows e para os apps."
+    },
+    "appearance.faster_menus": {
+      "title": "Menus mais rápidos",
+      "description": "Reduz a espera para abrir submenus de 400 ms para 100 ms."
+    },
+    "appearance.no_transparency": {
+      "title": "Sem efeitos de transparência",
+      "description": "Desativa a transparência (Mica/Acrylic). Ajuda em PCs com GPU fraca."
+    },
+    "appearance.performance_visuals": {
+      "title": "Efeitos visuais no mínimo",
+      "description": "Como \"Ajustar para obter um melhor desempenho\": sem animações de janelas e menus, sombras, esmaecimentos, espiada na área de trabalho nem conteúdo ao arrastar. O texto continua suavizado."
+    },
+    "explorer.checkboxes": {
+      "title": "Caixas de seleção",
+      "description": "Mostra caixas de seleção para selecionar arquivos."
+    },
+    "explorer.classic_context_menu": {
+      "title": "Menu de contexto clássico",
+      "description": "Volta o menu completo do clique direito, sem o 'Mostrar mais opções'."
+    },
+    "explorer.compact_mode": {
+      "title": "Modo compacto",
+      "description": "Reduz o espaço entre os itens do Explorador."
+    },
+    "explorer.full_path_title": {
+      "title": "Não 'embelezar' nomes",
+      "description": "Mostra os nomes de arquivos e pastas exatamente como foram escritos, sem mudar maiúsculas."
+    },
+    "explorer.icons_not_thumbnails": {
+      "title": "Ícones em vez de miniaturas",
+      "description": "O Explorador não gera prévias de imagens e vídeos. Mais rápido em pastas grandes."
+    },
+    "explorer.no_aero_shake": {
+      "title": "Desativar 'sacudir para minimizar'",
+      "description": "Sacudir uma janela não minimiza mais as outras."
+    },
+    "explorer.open_this_pc": {
+      "title": "Abrir em 'Este Computador'",
+      "description": "O Explorador abre em 'Este Computador' em vez de 'Início'."
+    },
+    "explorer.separate_process": {
+      "title": "Pastas em um processo separado",
+      "description": "Se uma janela do Explorador travar, não leva a barra de tarefas junto. Usa um pouco mais de RAM."
+    },
+    "explorer.show_extensions": {
+      "title": "Mostrar extensões de arquivo",
+      "description": "Mostra .exe, .pdf etc. Recomendado por segurança: assim 'fatura.pdf.exe' não se disfarça."
+    },
+    "explorer.show_hidden": {
+      "title": "Mostrar arquivos ocultos",
+      "description": "Mostra os arquivos e pastas ocultos (não os protegidos do sistema)."
+    },
+    "gaming.game_dvr": {
+      "title": "Desativar gravação em segundo plano (Game DVR)",
+      "description": "Desativa a captura em segundo plano da Xbox Game Bar. Pode aumentar o FPS em PCs modestos."
+    },
+    "gaming.mouse_acceleration": {
+      "title": "Desativar aceleração do mouse",
+      "description": "Desativa 'Aumentar a precisão do ponteiro': o movimento fica 1:1. Ideal para jogos."
+    },
+    "gaming.sticky_keys_prompt": {
+      "title": "Sem aviso de Teclas de Aderência (Shift x5)",
+      "description": "Apertar Shift cinco vezes não abre mais o aviso de Teclas de Aderência no meio do jogo."
+    },
+    "privacy.activity_history": {
+      "title": "Desativar histórico de atividades",
+      "description": "O histórico de atividades (apps, arquivos e sites que você usou) não é guardado nem enviado."
+    },
+    "privacy.advertising_id": {
+      "title": "Desativar ID de publicidade",
+      "description": "Impede que os apps usem seu ID de publicidade para anúncios personalizados."
+    },
+    "privacy.feedback_frequency": {
+      "title": "Não pedir comentários",
+      "description": "O Windows deixa de mostrar pesquisas de feedback."
+    },
+    "privacy.inking_typing": {
+      "title": "Desativar personalização de escrita e tinta",
+      "description": "O Windows deixa de coletar o que você digita e desenha para montar um dicionário pessoal."
+    },
+    "privacy.online_speech": {
+      "title": "Desativar reconhecimento de fala online",
+      "description": "Sua voz não é enviada para a nuvem. O ditado online deixa de funcionar."
+    },
+    "privacy.tailored_experiences": {
+      "title": "Desativar experiências personalizadas",
+      "description": "A Microsoft deixa de usar seus dados de diagnóstico para dicas e anúncios personalizados."
+    },
+    "privacy.telemetry_policy": {
+      "title": "Telemetria no mínimo (política)",
+      "description": "Coloca os dados de diagnóstico no nível mais baixo que sua edição permite. No Home e no Pro, o mínimo efetivo é 'Obrigatórios'."
+    },
+    "privacy.track_app_launches": {
+      "title": "Não registrar apps abertos",
+      "description": "O Windows deixa de registrar quais apps você abre para ordenar o Iniciar e a pesquisa."
+    },
+    "privacy.typing_insights": {
+      "title": "Desativar estatísticas de digitação",
+      "description": "Desativa a coleta de estatísticas de digitação (Insights de digitação)."
+    },
+    "search.highlights": {
+      "title": "Sem destaques da pesquisa",
+      "description": "Tira as ilustrações e temas do dia da caixa de pesquisa."
+    },
+    "search.taskbar_mode": {
+      "title": "Pesquisa na barra de tarefas",
+      "description": "Como a pesquisa aparece: oculta, só a lupa, lupa com rótulo ou a caixa completa.",
+      "choices": {
+        "box": "Caixa",
+        "hidden": "Oculta",
+        "icon": "Ícone",
+        "icon_label": "Ícone e rótulo"
+      }
+    },
+    "search.web_results": {
+      "title": "Sem resultados da web do Bing na pesquisa",
+      "description": "Política que desativa as sugestões da web na pesquisa do Iniciar. As pesquisas ficam só locais."
+    },
+    "start.account_notifications": {
+      "title": "Ocultar avisos de conta no Iniciar",
+      "description": "Tira avisos como 'Conclua sua conta Microsoft' / 'Faça backup' do menu Iniciar."
+    },
+    "start.finish_setup_nag": {
+      "title": "Sem 'Vamos terminar de configurar seu dispositivo'",
+      "description": "Desativa a tela que insiste com OneDrive, Microsoft 365 e conta Microsoft."
+    },
+    "start.lockscreen_tips": {
+      "title": "Sem curiosidades na tela de bloqueio",
+      "description": "Tira as dicas e 'curiosidades' da tela de bloqueio."
+    },
+    "start.recommendations": {
+      "title": "Ocultar recomendações e dicas no Iniciar",
+      "description": "Tira as recomendações promocionais (Iris) do menu Iniciar."
+    },
+    "start.settings_suggestions": {
+      "title": "Sem conteúdo sugerido nas Configurações",
+      "description": "Tira as sugestões e promoções do app Configurações."
+    },
+    "start.silent_installs": {
+      "title": "Bloquear instalação silenciosa de apps sugeridos",
+      "description": "Impede o Windows de instalar jogos e apps promovidos (Candy Crush e cia.) sem perguntar."
+    },
+    "start.suggested_notifications": {
+      "title": "Sem notificações 'sugeridas'",
+      "description": "Silencia as notificações do sistema que sugerem recursos e apps."
+    },
+    "start.suggestions": {
+      "title": "Sem sugestões no Iniciar",
+      "description": "Desativa os apps sugeridos que aparecem no menu Iniciar."
+    },
+    "start.sync_provider_ads": {
+      "title": "Sem anúncios no Explorador",
+      "description": "Tira os avisos de provedores de sincronização (OneDrive, Microsoft 365) do Explorador."
+    },
+    "start.tips": {
+      "title": "Sem dicas e truques",
+      "description": "Desativa as notificações de 'dicas, truques e sugestões'."
+    },
+    "start.welcome_experience": {
+      "title": "Sem 'experiência de boas-vindas' após atualizar",
+      "description": "Evita a tela de novidades depois das atualizações."
+    },
+    "taskbar.align_left": {
+      "title": "Alinhar ícones à esquerda",
+      "description": "Botão Iniciar e ícones à esquerda, como no Windows 10."
+    },
+    "taskbar.clock_seconds": {
+      "title": "Mostrar segundos no relógio",
+      "description": "O relógio da barra mostra os segundos. Gasta um pouco mais de bateria."
+    },
+    "taskbar.disable_widgets": {
+      "title": "Desativar Widgets",
+      "description": "Política que desativa por completo o painel de Widgets (notícias, clima, MSN)."
+    },
+    "taskbar.end_task": {
+      "title": "'Finalizar tarefa' com clique direito",
+      "description": "Adiciona 'Finalizar tarefa' ao menu de contexto dos apps na barra."
+    },
+    "taskbar.hide_task_view": {
+      "title": "Ocultar botão Visão de Tarefas",
+      "description": "Tira o botão Visão de Tarefas (Win+Tab continua funcionando)."
+    },
+    "taskbar.no_animations": {
+      "title": "Sem animações da barra",
+      "description": "Desativa as animações da barra de tarefas. Parece mais rápida."
+    },
+    "services.diagtrack": {
+      "title": "Desativar o serviço de telemetria (DiagTrack)",
+      "description": "Interrompe \"Experiências do Usuário Conectado e Telemetria\", o serviço que envia os dados de diagnóstico para a Microsoft."
+    },
+    "services.wap_push": {
+      "title": "Desativar o roteamento de mensagens WAP Push",
+      "description": "Serviço de mensagens push de dispositivos, usado principalmente junto com a telemetria. Num PC comum não faz falta."
+    },
+    "services.maps": {
+      "title": "Desativar o Gerenciador de mapas baixados",
+      "description": "Só era usado pelo app Mapas (descontinuado) para os mapas offline."
+    },
+    "services.retail_demo": {
+      "title": "Desativar o serviço de demonstração de varejo",
+      "description": "Só serve para o modo de exposição dos PCs nas lojas."
+    },
+    "services.fax": {
+      "title": "Desativar o serviço de fax",
+      "description": "Serviço para enviar e receber faxes. Muitas edições do Windows 11 já não o incluem."
+    },
+    "services.error_reporting": {
+      "title": "Desativar o Relatório de Erros do Windows",
+      "description": "O Windows deixa de coletar e enviar relatórios quando um programa trava. Não afeta o uso normal."
+    },
+    "services.insider": {
+      "title": "Desativar o serviço do Windows Insider",
+      "description": "Só é necessário para receber as versões de teste do programa Insider."
+    },
+    "services.xbox": {
+      "title": "Desativar os serviços do Xbox",
+      "description": "Login, salvamento na nuvem, rede e acessórios do Xbox. Quebra os jogos da Microsoft Store / Game Pass, a Xbox Game Bar e a configuração de controles Xbox."
+    },
+    "services.print_spooler": {
+      "title": "Desativar o Spooler de Impressão",
+      "description": "Se você não usa impressora: também fecha uma via de ataque conhecida (PrintNightmare). Com ele desligado não dá para imprimir nem salvar como PDF com o Microsoft Print to PDF."
+    },
+    "services.geolocation": {
+      "title": "Desativar o serviço de localização",
+      "description": "Os apps deixam de saber onde o PC está. Quebra o clima local, o Localizar meu dispositivo e o fuso horário automático."
+    },
+    "services.sysmain": {
+      "title": "Desativar o SysMain (Superfetch)",
+      "description": "Deixa de pré-carregar na RAM os apps que você mais usa. Com SSD quase não se nota; com HD, os apps demoram mais para abrir."
+    }
   },
   "bloat": {
-    "5319275A.WhatsAppDesktop": { "title": "WhatsApp" },
-    "AmazonVideo.PrimeVideo": { "title": "Prime Video" },
-    "BytedancePte.Ltd.TikTok": { "title": "TikTok" },
-    "Clipchamp.Clipchamp": { "title": "Clipchamp" },
-    "Disney.37853FC22B2CE": { "title": "Disney+" },
-    "Facebook.InstagramBeta": { "title": "Instagram" },
-    "MSTeams": { "title": "Microsoft Teams (pessoal)" },
-    "Microsoft.549981C3F5F10": { "title": "Cortana (descontinuada)" },
-    "Microsoft.BingNews": { "title": "Microsoft Notícias" },
-    "Microsoft.BingSearch": { "title": "Bing Search" },
-    "Microsoft.BingWeather": { "title": "Clima (MSN)" },
-    "Microsoft.Copilot": { "title": "Copilot" },
-    "Microsoft.GamingApp": { "title": "Xbox", "note": "Necessário para instalar jogos do PC Game Pass." },
-    "Microsoft.GetHelp": { "title": "Obter Ajuda", "note": "Alguns solucionadores de problemas do Windows 11 precisam dele." },
-    "Microsoft.Getstarted": { "title": "Dicas" },
-    "Microsoft.MicrosoftOfficeHub": { "title": "Microsoft 365 (Office Hub)" },
-    "Microsoft.MicrosoftSolitaireCollection": { "title": "Solitaire Collection" },
-    "Microsoft.MicrosoftStickyNotes": { "title": "Notas Autoadesivas" },
-    "Microsoft.OutlookForWindows": { "title": "Outlook (novo)", "note": "Substitui o Email e Calendário. Só remova se você usa outro cliente de email." },
-    "Microsoft.People": { "title": "Pessoas" },
-    "Microsoft.PowerAutomateDesktop": { "title": "Power Automate" },
-    "Microsoft.Todos": { "title": "Microsoft To Do" },
-    "Microsoft.Windows.DevHome": { "title": "Dev Home (descontinuado)" },
-    "Microsoft.Windows.Photos": { "title": "Fotos", "note": "É o visualizador de imagens padrão. Instale outro antes de removê-lo." },
-    "Microsoft.WindowsAlarms": { "title": "Relógio" },
-    "Microsoft.WindowsCamera": { "title": "Câmera" },
-    "Microsoft.WindowsFeedbackHub": { "title": "Hub de Feedback" },
-    "Microsoft.WindowsMaps": { "title": "Mapas (descontinuado)" },
-    "Microsoft.WindowsSoundRecorder": { "title": "Gravador de Som" },
-    "Microsoft.XboxGamingOverlay": { "title": "Xbox Game Bar", "note": "Alguns jogos a usam para capturas e chat." },
-    "Microsoft.XboxIdentityProvider": { "title": "Xbox Identity Provider", "note": "Login do Xbox: sem ele, os jogos da Microsoft Store não fazem login." },
-    "Microsoft.YourPhone": { "title": "Vincular ao Celular" },
-    "Microsoft.ZuneMusic": { "title": "Media Player" },
-    "Microsoft.ZuneVideo": { "title": "Filmes e TV" },
-    "MicrosoftCorporationII.MicrosoftFamily": { "title": "Microsoft Family Safety" },
-    "MicrosoftCorporationII.QuickAssist": { "title": "Assistência Rápida", "note": "É a ferramenta de suporte remoto mais usada por golpistas. Removê-la reduz esse risco." },
-    "MicrosoftTeams": { "title": "Microsoft Teams (pessoal clássico)" },
-    "MicrosoftWindows.Client.WebExperience": { "title": "Widgets (Windows Web Experience Pack)", "note": "Remove o painel de Widgets (notícias, clima, MSN). Pode ser reinstalado pela Microsoft Store como \"Windows Web Experience Pack\"." },
-    "MicrosoftWindows.CrossDevice": { "title": "Experiência entre dispositivos" },
-    "SpotifyAB.SpotifyMusic": { "title": "Spotify (Store)" },
-    "king.com.": { "title": "Jogos da King (Candy Crush etc.)" }
+    "5319275A.WhatsAppDesktop": {
+      "title": "WhatsApp"
+    },
+    "AmazonVideo.PrimeVideo": {
+      "title": "Prime Video"
+    },
+    "BytedancePte.Ltd.TikTok": {
+      "title": "TikTok"
+    },
+    "Clipchamp.Clipchamp": {
+      "title": "Clipchamp"
+    },
+    "Disney.37853FC22B2CE": {
+      "title": "Disney+"
+    },
+    "Facebook.InstagramBeta": {
+      "title": "Instagram"
+    },
+    "MSTeams": {
+      "title": "Microsoft Teams (pessoal)"
+    },
+    "Microsoft.549981C3F5F10": {
+      "title": "Cortana (descontinuada)"
+    },
+    "Microsoft.BingNews": {
+      "title": "Microsoft Notícias"
+    },
+    "Microsoft.BingSearch": {
+      "title": "Bing Search"
+    },
+    "Microsoft.BingWeather": {
+      "title": "Clima (MSN)"
+    },
+    "Microsoft.Copilot": {
+      "title": "Copilot"
+    },
+    "Microsoft.GamingApp": {
+      "title": "Xbox",
+      "note": "Necessário para instalar jogos do PC Game Pass."
+    },
+    "Microsoft.GetHelp": {
+      "title": "Obter Ajuda",
+      "note": "Alguns solucionadores de problemas do Windows 11 precisam dele."
+    },
+    "Microsoft.Getstarted": {
+      "title": "Dicas"
+    },
+    "Microsoft.MicrosoftOfficeHub": {
+      "title": "Microsoft 365 (Office Hub)"
+    },
+    "Microsoft.MicrosoftSolitaireCollection": {
+      "title": "Solitaire Collection"
+    },
+    "Microsoft.MicrosoftStickyNotes": {
+      "title": "Notas Autoadesivas"
+    },
+    "Microsoft.OutlookForWindows": {
+      "title": "Outlook (novo)",
+      "note": "Substitui o Email e Calendário. Só remova se você usa outro cliente de email."
+    },
+    "Microsoft.People": {
+      "title": "Pessoas"
+    },
+    "Microsoft.PowerAutomateDesktop": {
+      "title": "Power Automate"
+    },
+    "Microsoft.Todos": {
+      "title": "Microsoft To Do"
+    },
+    "Microsoft.Windows.DevHome": {
+      "title": "Dev Home (descontinuado)"
+    },
+    "Microsoft.Windows.Photos": {
+      "title": "Fotos",
+      "note": "É o visualizador de imagens padrão. Instale outro antes de removê-lo."
+    },
+    "Microsoft.WindowsAlarms": {
+      "title": "Relógio"
+    },
+    "Microsoft.WindowsCamera": {
+      "title": "Câmera"
+    },
+    "Microsoft.WindowsFeedbackHub": {
+      "title": "Hub de Feedback"
+    },
+    "Microsoft.WindowsMaps": {
+      "title": "Mapas (descontinuado)"
+    },
+    "Microsoft.WindowsSoundRecorder": {
+      "title": "Gravador de Som"
+    },
+    "Microsoft.XboxGamingOverlay": {
+      "title": "Xbox Game Bar",
+      "note": "Alguns jogos a usam para capturas e chat."
+    },
+    "Microsoft.XboxIdentityProvider": {
+      "title": "Xbox Identity Provider",
+      "note": "Login do Xbox: sem ele, os jogos da Microsoft Store não fazem login."
+    },
+    "Microsoft.YourPhone": {
+      "title": "Vincular ao Celular"
+    },
+    "Microsoft.ZuneMusic": {
+      "title": "Media Player"
+    },
+    "Microsoft.ZuneVideo": {
+      "title": "Filmes e TV"
+    },
+    "MicrosoftCorporationII.MicrosoftFamily": {
+      "title": "Microsoft Family Safety"
+    },
+    "MicrosoftCorporationII.QuickAssist": {
+      "title": "Assistência Rápida",
+      "note": "É a ferramenta de suporte remoto mais usada por golpistas. Removê-la reduz esse risco."
+    },
+    "MicrosoftTeams": {
+      "title": "Microsoft Teams (pessoal clássico)"
+    },
+    "MicrosoftWindows.Client.WebExperience": {
+      "title": "Widgets (Windows Web Experience Pack)",
+      "note": "Remove o painel de Widgets (notícias, clima, MSN). Pode ser reinstalado pela Microsoft Store como \"Windows Web Experience Pack\"."
+    },
+    "MicrosoftWindows.CrossDevice": {
+      "title": "Experiência entre dispositivos"
+    },
+    "SpotifyAB.SpotifyMusic": {
+      "title": "Spotify (Store)"
+    },
+    "king.com.": {
+      "title": "Jogos da King (Candy Crush etc.)"
+    }
   },
   "app_group": {
     "browsers": "Navegadores",

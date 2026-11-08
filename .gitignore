@@ -8,3 +8,7 @@ node_modules
 !.env.example
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Claves de firma de actualizaciones: nunca al repo
+*.key
+.tauri/

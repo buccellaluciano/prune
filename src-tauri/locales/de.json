@@ -17,7 +17,6 @@
     "deletes_value": "(löscht den Wert)",
     "value_missing": "(nicht vorhanden)",
     "value_other_type": "<Typ {kind} · {bytes} Bytes>",
-
     "power_title": "Energiesparplan",
     "power_description": "Höchstleistung und Ultimative Leistung verhindern, dass der Prozessor den Takt senkt oder in den Energiesparmodus wechselt: Er reagiert schneller, verbraucht aber mehr Strom und wird wärmer. Auf Laptops nur am Netzteil verwenden.",
     "power_key": "Energiesparplan (powrprof)",
@@ -37,11 +36,9 @@
     "power_guid_invalid": "Ungültige GUID im Verlauf",
     "power_previous_gone": "der vorherige Plan existiert nicht mehr",
     "power_not_ours": "der zu löschende Plan ist nicht der von der App erstellte Plan Ultimative Leistung",
-
     "label_power": "Energiesparplan: {plan}",
     "label_tweaks": "{n} Optimierungen",
     "label_removed_apps": "{n} Apps entfernt",
-
     "journal_unreadable_backup": "Der Verlauf konnte nicht gelesen werden ({error}). Eine Kopie wurde unter {path} gespeichert und ein neuer begonnen.",
     "journal_unreadable": "Der Verlauf konnte weder gelesen ({error}) noch gesichert werden ({backup_error}).",
     "journal_save_failed": "Der Verlauf konnte nicht gespeichert werden: {error}",
@@ -54,15 +51,12 @@
     "journal_bad_key": "ungültiger zu löschender Schlüssel „{key}“",
     "conflict_value": "{title}: {key} ist {value}",
     "conflict_power": "Energiesparplan: jetzt auf {plan}",
-
     "not_in_catalog": "Nicht im Katalog",
-
     "drive_unavailable": "Laufwerk nicht verfügbar: {letter}",
     "scan_running": "Es läuft bereits eine Analyse",
     "scan_missing": "Es gibt noch keine abgeschlossene Analyse",
     "folder_missing": "Ordner nicht gefunden",
     "explorer_failed": "Der Explorer konnte nicht geöffnet werden",
-
     "winget_not_found": "winget wurde nicht gefunden. Installiere oder aktualisiere „App-Installer“ aus dem Microsoft Store.",
     "winget_bad_signature": "winget hat die Signaturprüfung nicht bestanden: {error}",
     "winget_run_failed": "winget konnte nicht ausgeführt werden: {error}",
@@ -75,13 +69,10 @@
     "already_latest": "Bereits auf der neuesten Version",
     "already_installed": "Bereits installiert",
     "package_not_found": "winget hat das Paket nicht gefunden (bereits deinstalliert?)",
-
     "signature_invalid": "ungültige oder fehlende Signatur ({code})",
     "signer_unreadable": "der Signierer konnte nicht gelesen werden",
     "signed_by_other": "signiert von „{signer}“, nicht von Microsoft",
-
     "hash_invalid": "Ungültiger Hash",
-
     "http_only_https": "Nur https-Adressen sind erlaubt: {url}",
     "http_bad_url": "Ungültige Adresse: {url}",
     "http_bad_port": "Ungültiger Port: {url}",
@@ -91,7 +82,16 @@
     "http_send_failed": "{host} ist nicht erreichbar",
     "http_no_status": "Antwort ohne Statuscode",
     "http_cut": "Der Download wurde unterbrochen",
-    "http_too_large": "Antwort zu groß (mehr als {kb} KB)"
+    "http_too_large": "Antwort zu groß (mehr als {kb} KB)",
+    "key_missing": "Dieser Dienst existiert in dieser Windows-Edition nicht",
+    "cleanup_foreign_user": "Die App läuft unter einem anderen Administratorkonto: Es würden die Ordner dieses Kontos bereinigt",
+    "update_failed": "Aktualisierung nicht möglich: {error}",
+    "update_none": "Es gibt kein ausstehendes Update",
+    "update_bad_format": "Die heruntergeladene Datei ist kein P-Rune-Installationsprogramm",
+    "cleanup_unsafe": "Die Bereinigung mit Benutzerrechten war nicht möglich, daher wurde nichts gelöscht ({error})",
+    "update_verify_message": "Bestätige, dass du es bist, um P-Rune {version} zu installieren.",
+    "update_not_verified": "Deine Identität wurde nicht bestätigt: Es wurde nichts installiert.",
+    "update_verify_failed": "Windows konnte nicht um Bestätigung gebeten werden: Es wurde nichts installiert."
   },
   "category": {
     "ai": "KI und Copilot",
@@ -102,100 +102,385 @@
     "privacy": "Datenschutz",
     "search": "Suche",
     "start": "Start und Vorschläge",
-    "taskbar": "Taskleiste"
+    "taskbar": "Taskleiste",
+    "services": "Dienste"
   },
   "tweak": {
-    "ai.copilot_legacy": { "title": "Integrierten Copilot deaktivieren (23H2)", "description": "Richtlinie für den integrierten Copilot in 23H2. Ab 24H2 ist Copilot eine App: Entferne sie unter Bloatware." },
-    "ai.recall": { "title": "Recall deaktivieren (Momentaufnahmen)", "description": "Richtlinie, die verhindert, dass Recall Aufnahmen deiner Aktivität speichert. Wirkt nur auf Copilot+-PCs." },
-    "appearance.dark_mode": { "title": "Dunkler Modus", "description": "Dunkler Modus für Windows und für Apps." },
-    "appearance.faster_menus": { "title": "Schnellere Menüs", "description": "Verkürzt die Verzögerung beim Öffnen von Untermenüs von 400 ms auf 100 ms." },
-    "appearance.no_transparency": { "title": "Keine Transparenzeffekte", "description": "Deaktiviert die Transparenz (Mica/Acrylic). Hilft auf PCs mit schwacher GPU." },
-    "appearance.performance_visuals": { "title": "Visuelle Effekte auf das Minimum", "description": "Wie „Für optimale Leistung anpassen“: keine Fenster- und Menüanimationen, Schatten, Überblendungen, Desktopvorschau oder Fensterinhalt beim Ziehen. Text bleibt geglättet." },
-    "explorer.checkboxes": { "title": "Kontrollkästchen zum Auswählen", "description": "Zeigt Kontrollkästchen zum Auswählen von Dateien." },
-    "explorer.classic_context_menu": { "title": "Klassisches Kontextmenü", "description": "Bringt das vollständige Rechtsklickmenü zurück, ohne „Weitere Optionen anzeigen“." },
-    "explorer.compact_mode": { "title": "Kompakte Ansicht", "description": "Verringert den Abstand zwischen den Elementen im Explorer." },
-    "explorer.full_path_title": { "title": "Namen nicht „verschönern“", "description": "Zeigt Datei- und Ordnernamen genau so, wie sie geschrieben sind, ohne die Groß-/Kleinschreibung zu ändern." },
-    "explorer.icons_not_thumbnails": { "title": "Symbole statt Miniaturansichten", "description": "Der Explorer erzeugt keine Vorschauen von Bildern und Videos. Schneller in großen Ordnern." },
-    "explorer.no_aero_shake": { "title": "„Schütteln zum Minimieren“ deaktivieren", "description": "Das Schütteln eines Fensters minimiert die anderen nicht mehr." },
-    "explorer.open_this_pc": { "title": "In „Dieser PC“ öffnen", "description": "Der Explorer öffnet sich in „Dieser PC“ statt in „Start“." },
-    "explorer.separate_process": { "title": "Ordner in eigenem Prozess", "description": "Hängt ein Explorer-Fenster, reißt es die Taskleiste nicht mit. Braucht etwas mehr RAM." },
-    "explorer.show_extensions": { "title": "Dateierweiterungen anzeigen", "description": "Zeigt .exe, .pdf usw. Aus Sicherheitsgründen empfohlen: So kann sich „rechnung.pdf.exe“ nicht tarnen." },
-    "explorer.show_hidden": { "title": "Ausgeblendete Dateien anzeigen", "description": "Zeigt ausgeblendete Dateien und Ordner (nicht die geschützten Systemdateien)." },
-    "gaming.game_dvr": { "title": "Hintergrundaufnahme deaktivieren (Game DVR)", "description": "Deaktiviert die Hintergrundaufnahme der Xbox Game Bar. Kann die FPS auf schwächeren PCs erhöhen." },
-    "gaming.mouse_acceleration": { "title": "Mausbeschleunigung deaktivieren", "description": "Deaktiviert „Zeigerbeschleunigung verbessern“: Die Bewegung wird 1:1. Ideal zum Spielen." },
-    "gaming.sticky_keys_prompt": { "title": "Keine Einrastfunktion-Abfrage (5× Umschalt)", "description": "Fünfmal Umschalt öffnet mitten im Spiel nicht mehr die Abfrage der Einrastfunktion." },
-    "privacy.activity_history": { "title": "Aktivitätsverlauf deaktivieren", "description": "Der Aktivitätsverlauf (genutzte Apps, Dateien und Websites) wird weder gespeichert noch hochgeladen." },
-    "privacy.advertising_id": { "title": "Werbe-ID deaktivieren", "description": "Verhindert, dass Apps deine Werbe-ID für personalisierte Werbung nutzen." },
-    "privacy.feedback_frequency": { "title": "Nicht nach Feedback fragen", "description": "Windows zeigt keine Feedback-Umfragen mehr an." },
-    "privacy.inking_typing": { "title": "Freihand- und Eingabeanpassung deaktivieren", "description": "Windows sammelt nicht mehr, was du tippst und zeichnest, um ein persönliches Wörterbuch anzulegen." },
-    "privacy.online_speech": { "title": "Online-Spracherkennung deaktivieren", "description": "Deine Stimme wird nicht in die Cloud gesendet. Online-Diktieren funktioniert nicht mehr." },
-    "privacy.tailored_experiences": { "title": "Individuelle Benutzererfahrungen deaktivieren", "description": "Microsoft nutzt deine Diagnosedaten nicht mehr für maßgeschneiderte Tipps und Werbung." },
-    "privacy.telemetry_policy": { "title": "Telemetrie auf das Minimum (Richtlinie)", "description": "Setzt die Diagnosedaten auf die niedrigste Stufe, die deine Edition erlaubt. Bei Home und Pro ist das effektive Minimum „Erforderlich“." },
-    "privacy.track_app_launches": { "title": "App-Starts nicht protokollieren", "description": "Windows protokolliert nicht mehr, welche Apps du öffnest, um Start und Suche zu sortieren." },
-    "privacy.typing_insights": { "title": "Tippstatistiken deaktivieren", "description": "Deaktiviert das Sammeln von Tippstatistiken (Erkenntnisse zur Eingabe)." },
-    "search.highlights": { "title": "Keine Suchhighlights", "description": "Entfernt die Illustrationen und Tagesthemen aus dem Suchfeld." },
-    "search.taskbar_mode": { "title": "Suche in der Taskleiste", "description": "Wie die Suche angezeigt wird: ausgeblendet, nur Symbol, Symbol mit Beschriftung oder das ganze Suchfeld.", "choices": { "box": "Suchfeld", "hidden": "Ausgeblendet", "icon": "Symbol", "icon_label": "Symbol und Beschriftung" } },
-    "search.web_results": { "title": "Keine Bing-Webergebnisse in der Suche", "description": "Richtlinie, die Webvorschläge in der Startsuche deaktiviert. Die Suche bleibt rein lokal." },
-    "start.account_notifications": { "title": "Kontohinweise im Startmenü ausblenden", "description": "Entfernt Hinweise wie „Microsoft-Konto vervollständigen“ / „Sichern“ aus dem Startmenü." },
-    "start.finish_setup_nag": { "title": "Kein „Gerät fertig einrichten“", "description": "Deaktiviert den Bildschirm, der immer wieder OneDrive, Microsoft 365 und ein Microsoft-Konto anbietet." },
-    "start.lockscreen_tips": { "title": "Keine Fun Facts auf dem Sperrbildschirm", "description": "Entfernt Tipps und „Fun Facts“ vom Sperrbildschirm." },
-    "start.recommendations": { "title": "Empfehlungen und Tipps im Startmenü ausblenden", "description": "Entfernt Werbeempfehlungen (Iris) aus dem Startmenü." },
-    "start.settings_suggestions": { "title": "Keine vorgeschlagenen Inhalte in den Einstellungen", "description": "Entfernt Vorschläge und Werbung aus der Einstellungen-App." },
-    "start.silent_installs": { "title": "Stille Installation vorgeschlagener Apps blockieren", "description": "Verhindert, dass Windows beworbene Spiele und Apps (Candy Crush & Co.) ungefragt installiert." },
-    "start.suggested_notifications": { "title": "Keine „vorgeschlagenen“ Benachrichtigungen", "description": "Schaltet Systembenachrichtigungen stumm, die Funktionen und Apps vorschlagen." },
-    "start.suggestions": { "title": "Keine Vorschläge im Startmenü", "description": "Deaktiviert die vorgeschlagenen Apps im Startmenü." },
-    "start.sync_provider_ads": { "title": "Keine Werbung im Explorer", "description": "Entfernt Hinweise von Synchronisierungsanbietern (OneDrive, Microsoft 365) aus dem Explorer." },
-    "start.tips": { "title": "Keine Tipps und Tricks", "description": "Deaktiviert die Benachrichtigungen „Tipps, Tricks und Vorschläge“." },
-    "start.welcome_experience": { "title": "Kein „Willkommensbildschirm“ nach Updates", "description": "Überspringt den Neuigkeiten-Bildschirm nach Updates." },
-    "taskbar.align_left": { "title": "Symbole links ausrichten", "description": "Startschaltfläche und Symbole links, wie in Windows 10." },
-    "taskbar.clock_seconds": { "title": "Sekunden in der Uhr anzeigen", "description": "Die Uhr in der Taskleiste zeigt Sekunden. Braucht etwas mehr Akku." },
-    "taskbar.disable_widgets": { "title": "Widgets deaktivieren", "description": "Richtlinie, die das Widgets-Board (Nachrichten, Wetter, MSN) vollständig deaktiviert." },
-    "taskbar.end_task": { "title": "„Task beenden“ per Rechtsklick", "description": "Fügt dem Kontextmenü der Apps in der Taskleiste „Task beenden“ hinzu." },
-    "taskbar.hide_task_view": { "title": "Schaltfläche „Aktive Anwendungen“ ausblenden", "description": "Entfernt die Schaltfläche „Aktive Anwendungen“ (Win+Tab funktioniert weiterhin)." },
-    "taskbar.no_animations": { "title": "Keine Taskleisten-Animationen", "description": "Deaktiviert die Animationen der Taskleiste. Sie wirkt flotter." }
+    "ai.copilot_legacy": {
+      "title": "Integrierten Copilot deaktivieren (23H2)",
+      "description": "Richtlinie für den integrierten Copilot in 23H2. Ab 24H2 ist Copilot eine App: Entferne sie unter Bloatware."
+    },
+    "ai.recall": {
+      "title": "Recall deaktivieren (Momentaufnahmen)",
+      "description": "Richtlinie, die verhindert, dass Recall Aufnahmen deiner Aktivität speichert. Wirkt nur auf Copilot+-PCs."
+    },
+    "appearance.dark_mode": {
+      "title": "Dunkler Modus",
+      "description": "Dunkler Modus für Windows und für Apps."
+    },
+    "appearance.faster_menus": {
+      "title": "Schnellere Menüs",
+      "description": "Verkürzt die Verzögerung beim Öffnen von Untermenüs von 400 ms auf 100 ms."
+    },
+    "appearance.no_transparency": {
+      "title": "Keine Transparenzeffekte",
+      "description": "Deaktiviert die Transparenz (Mica/Acrylic). Hilft auf PCs mit schwacher GPU."
+    },
+    "appearance.performance_visuals": {
+      "title": "Visuelle Effekte auf das Minimum",
+      "description": "Wie „Für optimale Leistung anpassen“: keine Fenster- und Menüanimationen, Schatten, Überblendungen, Desktopvorschau oder Fensterinhalt beim Ziehen. Text bleibt geglättet."
+    },
+    "explorer.checkboxes": {
+      "title": "Kontrollkästchen zum Auswählen",
+      "description": "Zeigt Kontrollkästchen zum Auswählen von Dateien."
+    },
+    "explorer.classic_context_menu": {
+      "title": "Klassisches Kontextmenü",
+      "description": "Bringt das vollständige Rechtsklickmenü zurück, ohne „Weitere Optionen anzeigen“."
+    },
+    "explorer.compact_mode": {
+      "title": "Kompakte Ansicht",
+      "description": "Verringert den Abstand zwischen den Elementen im Explorer."
+    },
+    "explorer.full_path_title": {
+      "title": "Namen nicht „verschönern“",
+      "description": "Zeigt Datei- und Ordnernamen genau so, wie sie geschrieben sind, ohne die Groß-/Kleinschreibung zu ändern."
+    },
+    "explorer.icons_not_thumbnails": {
+      "title": "Symbole statt Miniaturansichten",
+      "description": "Der Explorer erzeugt keine Vorschauen von Bildern und Videos. Schneller in großen Ordnern."
+    },
+    "explorer.no_aero_shake": {
+      "title": "„Schütteln zum Minimieren“ deaktivieren",
+      "description": "Das Schütteln eines Fensters minimiert die anderen nicht mehr."
+    },
+    "explorer.open_this_pc": {
+      "title": "In „Dieser PC“ öffnen",
+      "description": "Der Explorer öffnet sich in „Dieser PC“ statt in „Start“."
+    },
+    "explorer.separate_process": {
+      "title": "Ordner in eigenem Prozess",
+      "description": "Hängt ein Explorer-Fenster, reißt es die Taskleiste nicht mit. Braucht etwas mehr RAM."
+    },
+    "explorer.show_extensions": {
+      "title": "Dateierweiterungen anzeigen",
+      "description": "Zeigt .exe, .pdf usw. Aus Sicherheitsgründen empfohlen: So kann sich „rechnung.pdf.exe“ nicht tarnen."
+    },
+    "explorer.show_hidden": {
+      "title": "Ausgeblendete Dateien anzeigen",
+      "description": "Zeigt ausgeblendete Dateien und Ordner (nicht die geschützten Systemdateien)."
+    },
+    "gaming.game_dvr": {
+      "title": "Hintergrundaufnahme deaktivieren (Game DVR)",
+      "description": "Deaktiviert die Hintergrundaufnahme der Xbox Game Bar. Kann die FPS auf schwächeren PCs erhöhen."
+    },
+    "gaming.mouse_acceleration": {
+      "title": "Mausbeschleunigung deaktivieren",
+      "description": "Deaktiviert „Zeigerbeschleunigung verbessern“: Die Bewegung wird 1:1. Ideal zum Spielen."
+    },
+    "gaming.sticky_keys_prompt": {
+      "title": "Keine Einrastfunktion-Abfrage (5× Umschalt)",
+      "description": "Fünfmal Umschalt öffnet mitten im Spiel nicht mehr die Abfrage der Einrastfunktion."
+    },
+    "privacy.activity_history": {
+      "title": "Aktivitätsverlauf deaktivieren",
+      "description": "Der Aktivitätsverlauf (genutzte Apps, Dateien und Websites) wird weder gespeichert noch hochgeladen."
+    },
+    "privacy.advertising_id": {
+      "title": "Werbe-ID deaktivieren",
+      "description": "Verhindert, dass Apps deine Werbe-ID für personalisierte Werbung nutzen."
+    },
+    "privacy.feedback_frequency": {
+      "title": "Nicht nach Feedback fragen",
+      "description": "Windows zeigt keine Feedback-Umfragen mehr an."
+    },
+    "privacy.inking_typing": {
+      "title": "Freihand- und Eingabeanpassung deaktivieren",
+      "description": "Windows sammelt nicht mehr, was du tippst und zeichnest, um ein persönliches Wörterbuch anzulegen."
+    },
+    "privacy.online_speech": {
+      "title": "Online-Spracherkennung deaktivieren",
+      "description": "Deine Stimme wird nicht in die Cloud gesendet. Online-Diktieren funktioniert nicht mehr."
+    },
+    "privacy.tailored_experiences": {
+      "title": "Individuelle Benutzererfahrungen deaktivieren",
+      "description": "Microsoft nutzt deine Diagnosedaten nicht mehr für maßgeschneiderte Tipps und Werbung."
+    },
+    "privacy.telemetry_policy": {
+      "title": "Telemetrie auf das Minimum (Richtlinie)",
+      "description": "Setzt die Diagnosedaten auf die niedrigste Stufe, die deine Edition erlaubt. Bei Home und Pro ist das effektive Minimum „Erforderlich“."
+    },
+    "privacy.track_app_launches": {
+      "title": "App-Starts nicht protokollieren",
+      "description": "Windows protokolliert nicht mehr, welche Apps du öffnest, um Start und Suche zu sortieren."
+    },
+    "privacy.typing_insights": {
+      "title": "Tippstatistiken deaktivieren",
+      "description": "Deaktiviert das Sammeln von Tippstatistiken (Erkenntnisse zur Eingabe)."
+    },
+    "search.highlights": {
+      "title": "Keine Suchhighlights",
+      "description": "Entfernt die Illustrationen und Tagesthemen aus dem Suchfeld."
+    },
+    "search.taskbar_mode": {
+      "title": "Suche in der Taskleiste",
+      "description": "Wie die Suche angezeigt wird: ausgeblendet, nur Symbol, Symbol mit Beschriftung oder das ganze Suchfeld.",
+      "choices": {
+        "box": "Suchfeld",
+        "hidden": "Ausgeblendet",
+        "icon": "Symbol",
+        "icon_label": "Symbol und Beschriftung"
+      }
+    },
+    "search.web_results": {
+      "title": "Keine Bing-Webergebnisse in der Suche",
+      "description": "Richtlinie, die Webvorschläge in der Startsuche deaktiviert. Die Suche bleibt rein lokal."
+    },
+    "start.account_notifications": {
+      "title": "Kontohinweise im Startmenü ausblenden",
+      "description": "Entfernt Hinweise wie „Microsoft-Konto vervollständigen“ / „Sichern“ aus dem Startmenü."
+    },
+    "start.finish_setup_nag": {
+      "title": "Kein „Gerät fertig einrichten“",
+      "description": "Deaktiviert den Bildschirm, der immer wieder OneDrive, Microsoft 365 und ein Microsoft-Konto anbietet."
+    },
+    "start.lockscreen_tips": {
+      "title": "Keine Fun Facts auf dem Sperrbildschirm",
+      "description": "Entfernt Tipps und „Fun Facts“ vom Sperrbildschirm."
+    },
+    "start.recommendations": {
+      "title": "Empfehlungen und Tipps im Startmenü ausblenden",
+      "description": "Entfernt Werbeempfehlungen (Iris) aus dem Startmenü."
+    },
+    "start.settings_suggestions": {
+      "title": "Keine vorgeschlagenen Inhalte in den Einstellungen",
+      "description": "Entfernt Vorschläge und Werbung aus der Einstellungen-App."
+    },
+    "start.silent_installs": {
+      "title": "Stille Installation vorgeschlagener Apps blockieren",
+      "description": "Verhindert, dass Windows beworbene Spiele und Apps (Candy Crush & Co.) ungefragt installiert."
+    },
+    "start.suggested_notifications": {
+      "title": "Keine „vorgeschlagenen“ Benachrichtigungen",
+      "description": "Schaltet Systembenachrichtigungen stumm, die Funktionen und Apps vorschlagen."
+    },
+    "start.suggestions": {
+      "title": "Keine Vorschläge im Startmenü",
+      "description": "Deaktiviert die vorgeschlagenen Apps im Startmenü."
+    },
+    "start.sync_provider_ads": {
+      "title": "Keine Werbung im Explorer",
+      "description": "Entfernt Hinweise von Synchronisierungsanbietern (OneDrive, Microsoft 365) aus dem Explorer."
+    },
+    "start.tips": {
+      "title": "Keine Tipps und Tricks",
+      "description": "Deaktiviert die Benachrichtigungen „Tipps, Tricks und Vorschläge“."
+    },
+    "start.welcome_experience": {
+      "title": "Kein „Willkommensbildschirm“ nach Updates",
+      "description": "Überspringt den Neuigkeiten-Bildschirm nach Updates."
+    },
+    "taskbar.align_left": {
+      "title": "Symbole links ausrichten",
+      "description": "Startschaltfläche und Symbole links, wie in Windows 10."
+    },
+    "taskbar.clock_seconds": {
+      "title": "Sekunden in der Uhr anzeigen",
+      "description": "Die Uhr in der Taskleiste zeigt Sekunden. Braucht etwas mehr Akku."
+    },
+    "taskbar.disable_widgets": {
+      "title": "Widgets deaktivieren",
+      "description": "Richtlinie, die das Widgets-Board (Nachrichten, Wetter, MSN) vollständig deaktiviert."
+    },
+    "taskbar.end_task": {
+      "title": "„Task beenden“ per Rechtsklick",
+      "description": "Fügt dem Kontextmenü der Apps in der Taskleiste „Task beenden“ hinzu."
+    },
+    "taskbar.hide_task_view": {
+      "title": "Schaltfläche „Aktive Anwendungen“ ausblenden",
+      "description": "Entfernt die Schaltfläche „Aktive Anwendungen“ (Win+Tab funktioniert weiterhin)."
+    },
+    "taskbar.no_animations": {
+      "title": "Keine Taskleisten-Animationen",
+      "description": "Deaktiviert die Animationen der Taskleiste. Sie wirkt flotter."
+    },
+    "services.diagtrack": {
+      "title": "Telemetriedienst deaktivieren (DiagTrack)",
+      "description": "Beendet „Benutzererfahrung und Telemetrie im verbundenen Modus“, den Dienst, der Diagnosedaten an Microsoft sendet."
+    },
+    "services.wap_push": {
+      "title": "WAP-Push-Nachrichtenrouting deaktivieren",
+      "description": "Push-Nachrichtendienst für Geräte, der vor allem zusammen mit der Telemetrie genutzt wird. Ein normaler PC vermisst ihn nicht."
+    },
+    "services.maps": {
+      "title": "Manager für heruntergeladene Karten deaktivieren",
+      "description": "Wurde nur von der (eingestellten) Karten-App für Offlinekarten genutzt."
+    },
+    "services.retail_demo": {
+      "title": "Einzelhandelsdemo-Dienst deaktivieren",
+      "description": "Dient nur dem Vorführmodus von PCs im Geschäft."
+    },
+    "services.fax": {
+      "title": "Faxdienst deaktivieren",
+      "description": "Dienst zum Senden und Empfangen von Faxen. Viele Editionen von Windows 11 enthalten ihn nicht mehr."
+    },
+    "services.error_reporting": {
+      "title": "Windows-Fehlerberichterstattung deaktivieren",
+      "description": "Windows sammelt und sendet keine Berichte mehr, wenn ein Programm abstürzt. Kein Einfluss auf die normale Nutzung."
+    },
+    "services.insider": {
+      "title": "Windows-Insider-Dienst deaktivieren",
+      "description": "Wird nur für Vorabversionen aus dem Insider-Programm benötigt."
+    },
+    "services.xbox": {
+      "title": "Xbox-Dienste deaktivieren",
+      "description": "Xbox-Anmeldung, Cloudspeicherstände, Netzwerk und Zubehör. Beeinträchtigt Spiele aus dem Microsoft Store / Game Pass, die Xbox Game Bar und die Konfiguration von Xbox-Controllern."
+    },
+    "services.print_spooler": {
+      "title": "Druckwarteschlange deaktivieren",
+      "description": "Wenn du keinen Drucker nutzt: schließt außerdem einen bekannten Angriffsweg (PrintNightmare). Ausgeschaltet kannst du weder drucken noch mit Microsoft Print to PDF als PDF speichern."
+    },
+    "services.geolocation": {
+      "title": "Standortdienst deaktivieren",
+      "description": "Apps wissen nicht mehr, wo sich der PC befindet. Beeinträchtigt lokales Wetter, „Mein Gerät suchen“ und die automatische Zeitzone."
+    },
+    "services.sysmain": {
+      "title": "SysMain (Superfetch) deaktivieren",
+      "description": "Lädt deine meistgenutzten Apps nicht mehr vorab in den RAM. Mit SSD kaum spürbar; mit Festplatte öffnen sich Apps langsamer."
+    }
   },
   "bloat": {
-    "5319275A.WhatsAppDesktop": { "title": "WhatsApp" },
-    "AmazonVideo.PrimeVideo": { "title": "Prime Video" },
-    "BytedancePte.Ltd.TikTok": { "title": "TikTok" },
-    "Clipchamp.Clipchamp": { "title": "Clipchamp" },
-    "Disney.37853FC22B2CE": { "title": "Disney+" },
-    "Facebook.InstagramBeta": { "title": "Instagram" },
-    "MSTeams": { "title": "Microsoft Teams (privat)" },
-    "Microsoft.549981C3F5F10": { "title": "Cortana (eingestellt)" },
-    "Microsoft.BingNews": { "title": "Microsoft Nachrichten" },
-    "Microsoft.BingSearch": { "title": "Bing Search" },
-    "Microsoft.BingWeather": { "title": "Wetter (MSN)" },
-    "Microsoft.Copilot": { "title": "Copilot" },
-    "Microsoft.GamingApp": { "title": "Xbox", "note": "Wird zum Installieren von PC-Game-Pass-Spielen benötigt." },
-    "Microsoft.GetHelp": { "title": "Hilfe anfordern", "note": "Einige Problembehandlungen von Windows 11 benötigen sie." },
-    "Microsoft.Getstarted": { "title": "Tipps" },
-    "Microsoft.MicrosoftOfficeHub": { "title": "Microsoft 365 (Office Hub)" },
-    "Microsoft.MicrosoftSolitaireCollection": { "title": "Solitaire Collection" },
-    "Microsoft.MicrosoftStickyNotes": { "title": "Kurznotizen" },
-    "Microsoft.OutlookForWindows": { "title": "Outlook (neu)", "note": "Ersetzt Mail und Kalender. Nur entfernen, wenn du ein anderes E-Mail-Programm nutzt." },
-    "Microsoft.People": { "title": "Kontakte" },
-    "Microsoft.PowerAutomateDesktop": { "title": "Power Automate" },
-    "Microsoft.Todos": { "title": "Microsoft To Do" },
-    "Microsoft.Windows.DevHome": { "title": "Dev Home (eingestellt)" },
-    "Microsoft.Windows.Photos": { "title": "Fotos", "note": "Ist die Standard-Bildanzeige. Installiere vorher eine andere." },
-    "Microsoft.WindowsAlarms": { "title": "Uhr" },
-    "Microsoft.WindowsCamera": { "title": "Kamera" },
-    "Microsoft.WindowsFeedbackHub": { "title": "Feedback-Hub" },
-    "Microsoft.WindowsMaps": { "title": "Karten (eingestellt)" },
-    "Microsoft.WindowsSoundRecorder": { "title": "Audiorekorder" },
-    "Microsoft.XboxGamingOverlay": { "title": "Xbox Game Bar", "note": "Manche Spiele nutzen sie für Aufnahmen und Chat." },
-    "Microsoft.XboxIdentityProvider": { "title": "Xbox Identity Provider", "note": "Xbox-Anmeldung: Ohne sie können sich Spiele aus dem Microsoft Store nicht anmelden." },
-    "Microsoft.YourPhone": { "title": "Smartphone-Link" },
-    "Microsoft.ZuneMusic": { "title": "Medienwiedergabe" },
-    "Microsoft.ZuneVideo": { "title": "Filme & TV" },
-    "MicrosoftCorporationII.MicrosoftFamily": { "title": "Microsoft Family Safety" },
-    "MicrosoftCorporationII.QuickAssist": { "title": "Remotehilfe", "note": "Das Fernwartungstool, das Betrüger am häufigsten nutzen. Es zu entfernen senkt dieses Risiko." },
-    "MicrosoftTeams": { "title": "Microsoft Teams (klassisch, privat)" },
-    "MicrosoftWindows.Client.WebExperience": { "title": "Widgets (Windows Web Experience Pack)", "note": "Entfernt das Widgets-Board (Nachrichten, Wetter, MSN). Lässt sich im Microsoft Store als „Windows Web Experience Pack“ neu installieren." },
-    "MicrosoftWindows.CrossDevice": { "title": "Geräteübergreifende Erfahrung" },
-    "SpotifyAB.SpotifyMusic": { "title": "Spotify (Store)" },
-    "king.com.": { "title": "King-Spiele (Candy Crush usw.)" }
+    "5319275A.WhatsAppDesktop": {
+      "title": "WhatsApp"
+    },
+    "AmazonVideo.PrimeVideo": {
+      "title": "Prime Video"
+    },
+    "BytedancePte.Ltd.TikTok": {
+      "title": "TikTok"
+    },
+    "Clipchamp.Clipchamp": {
+      "title": "Clipchamp"
+    },
+    "Disney.37853FC22B2CE": {
+      "title": "Disney+"
+    },
+    "Facebook.InstagramBeta": {
+      "title": "Instagram"
+    },
+    "MSTeams": {
+      "title": "Microsoft Teams (privat)"
+    },
+    "Microsoft.549981C3F5F10": {
+      "title": "Cortana (eingestellt)"
+    },
+    "Microsoft.BingNews": {
+      "title": "Microsoft Nachrichten"
+    },
+    "Microsoft.BingSearch": {
+      "title": "Bing Search"
+    },
+    "Microsoft.BingWeather": {
+      "title": "Wetter (MSN)"
+    },
+    "Microsoft.Copilot": {
+      "title": "Copilot"
+    },
+    "Microsoft.GamingApp": {
+      "title": "Xbox",
+      "note": "Wird zum Installieren von PC-Game-Pass-Spielen benötigt."
+    },
+    "Microsoft.GetHelp": {
+      "title": "Hilfe anfordern",
+      "note": "Einige Problembehandlungen von Windows 11 benötigen sie."
+    },
+    "Microsoft.Getstarted": {
+      "title": "Tipps"
+    },
+    "Microsoft.MicrosoftOfficeHub": {
+      "title": "Microsoft 365 (Office Hub)"
+    },
+    "Microsoft.MicrosoftSolitaireCollection": {
+      "title": "Solitaire Collection"
+    },
+    "Microsoft.MicrosoftStickyNotes": {
+      "title": "Kurznotizen"
+    },
+    "Microsoft.OutlookForWindows": {
+      "title": "Outlook (neu)",
+      "note": "Ersetzt Mail und Kalender. Nur entfernen, wenn du ein anderes E-Mail-Programm nutzt."
+    },
+    "Microsoft.People": {
+      "title": "Kontakte"
+    },
+    "Microsoft.PowerAutomateDesktop": {
+      "title": "Power Automate"
+    },
+    "Microsoft.Todos": {
+      "title": "Microsoft To Do"
+    },
+    "Microsoft.Windows.DevHome": {
+      "title": "Dev Home (eingestellt)"
+    },
+    "Microsoft.Windows.Photos": {
+      "title": "Fotos",
+      "note": "Ist die Standard-Bildanzeige. Installiere vorher eine andere."
+    },
+    "Microsoft.WindowsAlarms": {
+      "title": "Uhr"
+    },
+    "Microsoft.WindowsCamera": {
+      "title": "Kamera"
+    },
+    "Microsoft.WindowsFeedbackHub": {
+      "title": "Feedback-Hub"
+    },
+    "Microsoft.WindowsMaps": {
+      "title": "Karten (eingestellt)"
+    },
+    "Microsoft.WindowsSoundRecorder": {
+      "title": "Audiorekorder"
+    },
+    "Microsoft.XboxGamingOverlay": {
+      "title": "Xbox Game Bar",
+      "note": "Manche Spiele nutzen sie für Aufnahmen und Chat."
+    },
+    "Microsoft.XboxIdentityProvider": {
+      "title": "Xbox Identity Provider",
+      "note": "Xbox-Anmeldung: Ohne sie können sich Spiele aus dem Microsoft Store nicht anmelden."
+    },
+    "Microsoft.YourPhone": {
+      "title": "Smartphone-Link"
+    },
+    "Microsoft.ZuneMusic": {
+      "title": "Medienwiedergabe"
+    },
+    "Microsoft.ZuneVideo": {
+      "title": "Filme & TV"
+    },
+    "MicrosoftCorporationII.MicrosoftFamily": {
+      "title": "Microsoft Family Safety"
+    },
+    "MicrosoftCorporationII.QuickAssist": {
+      "title": "Remotehilfe",
+      "note": "Das Fernwartungstool, das Betrüger am häufigsten nutzen. Es zu entfernen senkt dieses Risiko."
+    },
+    "MicrosoftTeams": {
+      "title": "Microsoft Teams (klassisch, privat)"
+    },
+    "MicrosoftWindows.Client.WebExperience": {
+      "title": "Widgets (Windows Web Experience Pack)",
+      "note": "Entfernt das Widgets-Board (Nachrichten, Wetter, MSN). Lässt sich im Microsoft Store als „Windows Web Experience Pack“ neu installieren."
+    },
+    "MicrosoftWindows.CrossDevice": {
+      "title": "Geräteübergreifende Erfahrung"
+    },
+    "SpotifyAB.SpotifyMusic": {
+      "title": "Spotify (Store)"
+    },
+    "king.com.": {
+      "title": "King-Spiele (Candy Crush usw.)"
+    }
   },
   "app_group": {
     "browsers": "Browser",

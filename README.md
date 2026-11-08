@@ -20,7 +20,9 @@
 ## Qué hace
 
 - **Tweaks** de privacidad, IA/Copilot, Inicio, búsqueda, barra de tareas, Explorador, apariencia,
-  gaming y plan de energía. Cada switch muestra el estado **real** del registro.
+  gaming, servicios y plan de energía. Cada switch muestra el estado **real** del registro.
+- **Servicios**: desactiva servicios de Windows descartables (telemetría, mapas, Xbox, cola de impresión…),
+  cada uno marcado por riesgo. Si un servicio no existe en esa edición de Windows, no se crea nunca.
 - **Plan antes de aplicar**: el diff exacto de cada valor que se va a escribir.
 - **Historial con deshacer**: guarda el valor anterior exacto; si algo cambió después, avisa antes de pisarlo.
 - **Perfiles** (Privacidad, Escritorio limpio, Gaming, Equipo liviano) que marcan varios tweaks de una.
@@ -28,12 +30,18 @@
   Calculadora, Seguridad de Windows) nunca aparece.
 - **Programas**: instala y actualiza ~40 programas confiables con winget, con progreso por etapas y una
   revisión previa con el **SHA-256 del instalador** para verificarlo en VirusTotal.
-- **Disco**: encuentra las carpetas que más ocupan (solo lectura: no mueve ni borra nada).
+- **Disco**: encuentra las carpetas que más ocupan (el análisis es solo lectura) y **limpia lo
+  descartable** con vista previa: temporales, cachés de sombreadores y miniaturas, volcados e informes de
+  errores, descargas de Windows Update, caché de Spotify, Prefetch y papelera. Respeta lo de las últimas
+  24 horas y lo que está en uso.
 - **Temas**: Moderno (oscuro) y Aero 7, con **transparencia real** opcional (acrílico de Windows).
 - **Idiomas**: español, English, Português (Brasil), Français, Deutsch, Italiano, 简体中文, 日本語 y
   Русский. Usa el idioma de Windows la primera vez y se cambia en vivo desde la barra lateral o con Ctrl K.
   Se traduce todo: interfaz, catálogo de tweaks, bloatware, programas y mensajes de error.
 - **Bienvenida**: al abrir, una pantalla breve con la foto y el usuario de Windows de quien la abrió.
+- **Actualizaciones**: P-Rune avisa cuando hay una versión nueva y se actualiza sola. Antes de instalar,
+  Windows pide confirmar que sos vos (Windows Hello o la contraseña, en el diálogo de Windows).
+- **Versiones**: la versión instalada, la nueva si hay, y el historial con un resumen de cada una.
 
 | Plan de cambios | Revisión antes de instalar |
 |---|---|
@@ -63,6 +71,12 @@ Los ejecutables todavía no están firmados: Windows SmartScreen puede mostrar "
 - **Historial protegido**: instalada, guarda el historial en `Program Files\P-Rune\data` (solo admins
   escriben) y valida cada entrada contra el catálogo antes de deshacer.
 - DLLs solo desde `System32` y carpetas temporales con permisos solo para administradores.
+- **Actualizaciones firmadas**: solo se instalan si están firmadas con la clave del proyecto y la firma
+  cubre la versión anunciada; el instalador se guarda en una carpeta que solo pueden tocar los
+  administradores, y antes de instalar Windows confirma la identidad de quien está frente a la PC.
+- **Limpieza a prueba de enlaces**: nunca entra en uniones ni enlaces, fija la carpeta mientras la vacía
+  (nadie puede cambiarla por otra a mitad de camino) y las carpetas del perfil se limpian con permisos de
+  usuario común, no como administrador.
 
 Para reportar una vulnerabilidad, ver [SECURITY.md](SECURITY.md).
 
@@ -77,6 +91,23 @@ npm run tauri build    # instaladores MSI y NSIS; el exe de release pide adminis
 npm run check:locales  # verifica que las traducciones de la interfaz usen los mismos {valores}
 ```
 
+### Publicar una versión
+
+1. Subí la versión en `package.json`, `src-tauri/Cargo.toml` y `src-tauri/tauri.conf.json`, y agregá su
+   entrada (con el resumen en los 9 idiomas) en `src/lib/changelog.ts`.
+2. Escribí las notas en `docs/releases/<versión>.md`.
+3. En PowerShell, cargá la clave de firma (nunca va al repo) y publicá:
+
+```powershell
+$env:TAURI_SIGNING_PRIVATE_KEY = "<ruta a p-rune.key>"
+$env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = [Net.NetworkCredential]::new('', (Read-Host "Contraseña de la clave" -AsSecureString)).Password
+node scripts/release.mjs --notes docs/releases/<versión>.md --publish
+Remove-Item Env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD
+```
+
+El script compila y firma el MSI y el NSIS, verifica que las firmas cubran la versión, arma
+`latest.json` (lo que consultan las apps instaladas) y crea el release en GitHub.
+
 ## Estructura
 
 | Ruta | Qué hay |
@@ -90,9 +121,14 @@ npm run check:locales  # verifica que las traducciones de la interfaz usen los m
 | `src-tauri/src/winget.rs` | winget: estado, instalar/actualizar/desinstalar, progreso |
 | `src-tauri/src/disk.rs` | Análisis de uso de disco en paralelo |
 | `src-tauri/src/power.rs` | Plan de energía |
+| `src-tauri/src/cleanup.rs` | Limpieza de archivos descartables |
+| `src-tauri/src/updater.rs` | Actualizaciones: consulta, descarga verificada e instalador |
+| `src-tauri/src/verify.rs` | Confirmación de identidad con Windows antes de actualizar |
 | `src-tauri/src/i18n.rs` | Idioma del backend: mensajes y textos del catálogo |
 | `src-tauri/locales/` | Traducciones del catálogo y de los mensajes (el español vive en los `.toml`) |
 | `src/lib/locales/` | Traducciones de la interfaz (`es.ts` define las claves) |
+| `src/lib/changelog.ts` | Historial de versiones que muestra la sección Versiones |
+| `scripts/release.mjs` | Compila, firma y publica una versión |
 | `src/lib/` | Estado de la interfaz, temas, componentes |
 
 ## Origen
