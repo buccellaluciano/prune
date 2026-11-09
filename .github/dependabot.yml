@@ -6,11 +6,26 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    ignore:
+      # Tiene que ser la versión que usa el crate `windows` (0.62 → windows-future 0.3).
+      # Se sube a mano junto con `windows`; por separado no compila.
+      - dependency-name: "windows-future"
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    groups:
+      # Siempre se actualizan juntos: un solo PR.
+      tailwind:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
+    ignore:
+      # SvelteKit 3 pide TypeScript 6; la 7 rompe el chequeo y el build. Sacar esta regla
+      # cuando SvelteKit la soporte.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
