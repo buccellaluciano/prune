@@ -91,7 +91,8 @@
     "cleanup_unsafe": "Die Bereinigung mit Benutzerrechten war nicht möglich, daher wurde nichts gelöscht ({error})",
     "update_verify_message": "Bestätige, dass du es bist, um P-Rune {version} zu installieren.",
     "update_not_verified": "Deine Identität wurde nicht bestätigt: Es wurde nichts installiert.",
-    "update_verify_failed": "Windows konnte nicht um Bestätigung gebeten werden: Es wurde nichts installiert."
+    "update_verify_failed": "Windows konnte nicht um Bestätigung gebeten werden: Es wurde nichts installiert.",
+    "update_unreachable": "Es konnte nicht nach Updates gesucht werden: GitHub hat nicht geantwortet. Prüfe die Verbindung und versuche es später erneut."
   },
   "category": {
     "ai": "KI und Copilot",

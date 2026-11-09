@@ -1,10 +1,10 @@
 [package]
 name = "debloater"
-version = "0.3.0"
+version = "0.3.1"
 description = "P-Rune: debloater y ajustes para Windows 11"
 authors = ["buccellaluciano"]
 license = "MIT"
-repository = "https://github.com/buccellaluciano/debloater"
+repository = "https://github.com/buccellaluciano/prune"
 edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

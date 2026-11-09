@@ -14,7 +14,8 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, copyFileSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
+import { homedir } from "node:os";
 
 const ROOT = resolve(import.meta.dirname, "..");
 const REPO = "buccellaluciano/prune";
@@ -55,11 +56,25 @@ const buildConfig = { ...overrides, bundle: { ...(overrides.bundle ?? {}), creat
 const cfgPath = join(ROOT, "src-tauri/target/release-config.json");
 mkdirSync(join(ROOT, "src-tauri/target"), { recursive: true });
 writeFileSync(cfgPath, JSON.stringify(buildConfig));
+// Rust guarda en el ejecutable rutas absolutas de la máquina que compila (los mensajes de
+// error de cada dependencia: C:\Users\<usuario>\.cargo\registry\...). Se reemplazan por
+// rutas neutras para no publicar el nombre de usuario ni la estructura de carpetas.
+const remap = [[homedir(), "~"], [ROOT, "."]];
+if (process.env.CARGO_HOME) remap.splice(1, 0, [process.env.CARGO_HOME, "~/.cargo"]);
+const rustflags = [process.env.CARGO_ENCODED_RUSTFLAGS, ...remap.map(([from, to]) => `--remap-path-prefix=${from}=${to}`)]
+  .filter(Boolean)
+  .join("\x1f");
 console.log(`Compilando ${product} ${version}…`);
 execFileSync(process.execPath, [join(ROOT, "node_modules/@tauri-apps/cli/tauri.js"), "build", "--config", cfgPath], {
   cwd: ROOT,
   stdio: "inherit",
+  env: { ...process.env, CARGO_ENCODED_RUSTFLAGS: rustflags },
 });
+
+// Comprobación: el ejecutable no puede llevar la carpeta del usuario.
+const exe = readFileSync(join(ROOT, "src-tauri/target/release", `${conf.mainBinaryName ?? product}.exe`)).toString("latin1");
+const leaked = [homedir(), basename(homedir())].filter((s) => s.length > 2 && exe.toLowerCase().includes(`\\${s.toLowerCase()}\\`));
+if (leaked.length) fail(`El ejecutable todavía contiene rutas locales (${leaked.join(", ")}). No se publica.`);
 
 // 2. Artefactos y firmas.
 const bundle = join(ROOT, "src-tauri/target/release/bundle");

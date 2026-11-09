@@ -91,6 +91,7 @@
     "cleanup_unsafe": "No se pudo limpiar con permisos de usuario, así que no se borró nada ({error})",
     "update_verify_message": "Confirmá que sos vos para instalar P-Rune {version}.",
     "update_not_verified": "No se confirmó tu identidad: no se instaló nada.",
-    "update_verify_failed": "No se pudo pedir la confirmación de Windows: no se instaló nada."
+    "update_verify_failed": "No se pudo pedir la confirmación de Windows: no se instaló nada.",
+    "update_unreachable": "No se pudo consultar si hay actualizaciones: GitHub no respondió. Revisá la conexión e intentá más tarde."
   }
 }

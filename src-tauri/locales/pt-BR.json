@@ -91,7 +91,8 @@
     "cleanup_unsafe": "Não foi possível limpar com permissões de usuário, então nada foi apagado ({error})",
     "update_verify_message": "Confirme que é você para instalar o P-Rune {version}.",
     "update_not_verified": "Sua identidade não foi confirmada: nada foi instalado.",
-    "update_verify_failed": "Não foi possível pedir a confirmação do Windows: nada foi instalado."
+    "update_verify_failed": "Não foi possível pedir a confirmação do Windows: nada foi instalado.",
+    "update_unreachable": "Não foi possível verificar se há atualizações: o GitHub não respondeu. Verifique a conexão e tente mais tarde."
   },
   "category": {
     "ai": "IA e Copilot",

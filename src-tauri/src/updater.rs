@@ -37,7 +37,13 @@ struct Progress {
 #[tauri::command]
 pub async fn update_check(app: AppHandle, pending: State<'_, Pending>) -> Result<Option<UpdateInfo>, String> {
     let updater = app.updater().map_err(|e| t!("update_failed", error = e))?;
-    let found = updater.check().await.map_err(|e| t!("update_failed", error = e))?;
+    let found = updater.check().await.map_err(|e| match e {
+        // Sin conexión, GitHub caído o el release todavía no es público: no es un error de P-Rune.
+        tauri_plugin_updater::Error::ReleaseNotFound
+        | tauri_plugin_updater::Error::Reqwest(_)
+        | tauri_plugin_updater::Error::Network(_) => t!("update_unreachable"),
+        other => t!("update_failed", error = other),
+    })?;
     let info = found.as_ref().map(|u| UpdateInfo {
         version: u.version.clone(),
         current: u.current_version.clone(),

@@ -2,7 +2,7 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "P-Rune",
   "mainBinaryName": "P-Rune",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "identifier": "com.debloater.app",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -38,7 +38,7 @@
     ],
     "publisher": "buccellaluciano",
     "copyright": "Copyright © 2026 buccellaluciano",
-    "homepage": "https://github.com/buccellaluciano/debloater",
+    "homepage": "https://github.com/buccellaluciano/prune",
     "category": "Utility",
     "shortDescription": "Debloater y ajustes para Windows 11",
     "longDescription": "Quita apps preinstaladas, aplica ajustes de privacidad y rendimiento con vista previa y deshacer, instala programas con winget y analiza el uso del disco.",

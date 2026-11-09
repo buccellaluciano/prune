@@ -91,7 +91,8 @@
     "cleanup_unsafe": "无法以普通用户权限清理，因此没有删除任何内容（{error}）",
     "update_verify_message": "请确认是你本人，以安装 P-Rune {version}。",
     "update_not_verified": "未确认你的身份：没有安装任何内容。",
-    "update_verify_failed": "无法请求 Windows 确认：没有安装任何内容。"
+    "update_verify_failed": "无法请求 Windows 确认：没有安装任何内容。",
+    "update_unreachable": "无法检查更新：GitHub 没有响应。请检查网络连接，稍后再试。"
   },
   "category": {
     "ai": "AI 与 Copilot",

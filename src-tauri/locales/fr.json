@@ -91,7 +91,8 @@
     "cleanup_unsafe": "Impossible de nettoyer avec les droits d'utilisateur, donc rien n'a été supprimé ({error})",
     "update_verify_message": "Confirmez que c'est bien vous pour installer P-Rune {version}.",
     "update_not_verified": "Votre identité n'a pas été confirmée : rien n'a été installé.",
-    "update_verify_failed": "Impossible de demander la confirmation à Windows : rien n'a été installé."
+    "update_verify_failed": "Impossible de demander la confirmation à Windows : rien n'a été installé.",
+    "update_unreachable": "Impossible de rechercher des mises à jour : GitHub n'a pas répondu. Vérifiez la connexion et réessayez plus tard."
   },
   "category": {
     "ai": "IA et Copilot",

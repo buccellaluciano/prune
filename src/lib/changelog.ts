@@ -15,6 +15,48 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.3.1",
+    date: "2026-11-09",
+    notes: {
+      es: [
+        "Si no se puede consultar si hay actualizaciones (sin conexión o GitHub no responde), ahora lo dice con un mensaje claro en tu idioma.",
+        "Los instaladores ya no incluyen rutas de la PC donde se compilan.",
+      ],
+      en: [
+        "If checking for updates isn't possible (offline, or GitHub doesn't respond), it now says so with a clear message in your language.",
+        "The installers no longer include paths from the PC they were built on.",
+      ],
+      "pt-BR": [
+        "Se não for possível verificar se há atualizações (sem conexão ou o GitHub não responde), agora isso aparece com uma mensagem clara no seu idioma.",
+        "Os instaladores não incluem mais caminhos do PC onde foram compilados.",
+      ],
+      fr: [
+        "Si la recherche de mises à jour est impossible (hors connexion ou GitHub ne répond pas), un message clair l'indique désormais dans votre langue.",
+        "Les installateurs n'incluent plus de chemins du PC sur lequel ils ont été compilés.",
+      ],
+      de: [
+        "Wenn nicht nach Updates gesucht werden kann (offline oder GitHub antwortet nicht), erscheint jetzt eine klare Meldung in deiner Sprache.",
+        "Die Installationsprogramme enthalten keine Pfade des PCs mehr, auf dem sie erstellt wurden.",
+      ],
+      it: [
+        "Se non è possibile cercare aggiornamenti (offline o GitHub non risponde), ora lo indica un messaggio chiaro nella tua lingua.",
+        "Gli installer non includono più percorsi del PC su cui sono stati compilati.",
+      ],
+      "zh-CN": [
+        "无法检查更新时（没有网络或 GitHub 没有响应），现在会用你的语言给出清楚的提示。",
+        "安装程序不再包含编译所用电脑上的路径。",
+      ],
+      ja: [
+        "更新を確認できないとき（オフライン、または GitHub が応答しない場合）、お使いの言語でわかりやすく表示するようになりました。",
+        "インストーラーに、ビルドした PC のパスが含まれなくなりました。",
+      ],
+      ru: [
+        "Если проверить обновления не удаётся (нет подключения или GitHub не отвечает), теперь об этом сообщается понятным сообщением на вашем языке.",
+        "Установщики больше не содержат пути с компьютера, на котором они собраны.",
+      ],
+    },
+  },
+  {
     version: "0.3.0",
     date: "2026-11-08",
     notes: {

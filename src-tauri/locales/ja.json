@@ -91,7 +91,8 @@
     "cleanup_unsafe": "ユーザー権限でクリーンアップできなかったため、何も削除していません（{error}）",
     "update_verify_message": "P-Rune {version} をインストールするには、ご本人であることを確認してください。",
     "update_not_verified": "本人確認ができなかったため、何もインストールしていません。",
-    "update_verify_failed": "Windows に確認を求められなかったため、何もインストールしていません。"
+    "update_verify_failed": "Windows に確認を求められなかったため、何もインストールしていません。",
+    "update_unreachable": "更新を確認できませんでした：GitHub から応答がありません。接続を確認して、後でもう一度お試しください。"
   },
   "category": {
     "ai": "AI と Copilot",

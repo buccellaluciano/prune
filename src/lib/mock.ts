@@ -208,10 +208,10 @@ export async function mock<T>(cmd: string, args?: Record<string, unknown>): Prom
   const a = (args ?? {}) as any;
   switch (cmd) {
     case "app_version":
-      return "0.2.0" as T;
+      return "0.3.1" as T;
     case "update_check":
       await wait(600);
-      return { version: "0.3.0", current: "0.2.0", notes: "Servicios descartables como tweaks, limpieza de archivos en Disco y actualización desde la app." } as T;
+      return { version: "0.4.0", current: "0.3.1", notes: "Servicios descartables como tweaks, limpieza de archivos en Disco y actualización desde la app." } as T;
     case "update_install": {
       const total = 2_400_000;
       for (let d = 0; d <= total; d += 240_000) {
