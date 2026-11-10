@@ -17,10 +17,15 @@ use std::path::{Path, PathBuf};
 
 /// Versión que ofrece esta versión de P-Rune. Para subirla: nueva URL, tamaño y SHA-256
 /// del zip de la release (`gh api repos/buccellaluciano/win-media-overlay/releases/latest`).
+/// Nunca reemplazar el zip de una release ya fijada: las versiones de P-Rune publicadas lo
+/// rechazarían. Para cambiarlo, sacar otra versión de WMO.
 pub const VERSION: &str = "1.1.0";
 const URL: &str = "https://github.com/buccellaluciano/win-media-overlay/releases/download/1.1.0/WMO-1.1.0-win64.zip";
-const SIZE: usize = 2_071_540;
-const SHA256: &str = "779c311fb6d3cb1124c1cc8e4c881feff171f6fda40594d2c2b7aeca2d999956";
+const SIZE: usize = 2_078_175;
+const SHA256: &str = "b40c193143858c74a2ed0e22a0bc2dda89dd61a6a025678e1b21893a0a46c678";
+/// Tope de la descarga. Holgado a propósito: si el zip cambió de tamaño tiene que llegar a
+/// `verify` y decir que no coincide, no cortarse antes con "respuesta demasiado grande".
+const MAX_DOWNLOAD: usize = 64 * 1024 * 1024;
 pub const REPO: &str = "https://github.com/buccellaluciano/win-media-overlay";
 
 const EXE: &str = "wmo.exe";
@@ -255,7 +260,7 @@ pub fn install() -> Result<Status, String> {
     if exe_running(&install_dir()?.join(EXE)) {
         return Err(t!("wmo_close_first"));
     }
-    let res = crate::http::get(URL, &[], SIZE + 1024)?;
+    let res = crate::http::get(URL, &[], MAX_DOWNLOAD)?;
     if res.status != 200 {
         return Err(t!("wmo_download_failed", status = res.status));
     }
@@ -457,7 +462,7 @@ mod tests {
     #[test]
     #[ignore]
     fn release_fijada_real() {
-        let res = crate::http::get(URL, &[], SIZE + 1024).unwrap();
+        let res = crate::http::get(URL, &[], MAX_DOWNLOAD).unwrap();
         assert_eq!(res.status, 200);
         verify(&res.body).unwrap();
         let files = unpack(&res.body).unwrap();

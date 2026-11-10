@@ -1,6 +1,6 @@
 [package]
 name = "debloater"
-version = "0.3.1"
+version = "0.3.2"
 description = "P-Rune: debloater y ajustes para Windows 11"
 authors = ["buccellaluciano"]
 license = "MIT"

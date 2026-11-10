@@ -95,7 +95,7 @@
     "update_unreachable": "Couldn't check for updates: GitHub didn't respond. Check your connection and try again later.",
     "wmo_no_folder": "Couldn't find the user's programs folder",
     "wmo_hash_failed": "Couldn't compute the download's hash",
-    "wmo_hash_mismatch": "The download doesn't match the verified WMO release: nothing was installed.",
+    "wmo_hash_mismatch": "The download doesn't match the verified WMO release, so nothing was installed. If there's a newer P-Rune, update it and try again.",
     "wmo_bad_zip": "The WMO file isn't valid: {error}",
     "wmo_link": "The WMO folder is a link to somewhere else: nothing was touched.",
     "wmo_close_first": "WMO is open. Close it from the tray icon (right-click → Exit) and try again.",

@@ -15,6 +15,48 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.3.2",
+    date: "2026-11-10",
+    notes: {
+      es: [
+        "Arreglado: instalar WMO desde Más apps fallaba con \"respuesta demasiado grande\". Ahora instala la versión 1.1.0 actual (con su ícono nuevo).",
+        "Si la descarga de WMO no coincide con la versión verificada, el aviso lo dice claramente.",
+      ],
+      en: [
+        "Fixed: installing WMO from More apps failed with \"response too large\". It now installs the current 1.1.0 build (with its new icon).",
+        "If the WMO download doesn't match the verified release, the message now says so clearly.",
+      ],
+      "pt-BR": [
+        "Corrigido: instalar o WMO em Mais apps falhava com \"resposta grande demais\". Agora instala a versão 1.1.0 atual (com o ícone novo).",
+        "Se o download do WMO não corresponder à versão verificada, o aviso agora diz isso claramente.",
+      ],
+      fr: [
+        "Corrigé : l'installation de WMO depuis Plus d'apps échouait avec « réponse trop volumineuse ». Elle installe maintenant la version 1.1.0 actuelle (avec sa nouvelle icône).",
+        "Si le téléchargement de WMO ne correspond pas à la version vérifiée, le message l'indique clairement.",
+      ],
+      de: [
+        "Behoben: Die Installation von WMO über Weitere Apps schlug mit „Antwort zu groß“ fehl. Jetzt wird der aktuelle Build 1.1.0 (mit neuem Symbol) installiert.",
+        "Wenn der WMO-Download nicht mit der geprüften Version übereinstimmt, sagt die Meldung das jetzt klar.",
+      ],
+      it: [
+        "Risolto: l'installazione di WMO da Altre app falliva con \"risposta troppo grande\". Ora installa la versione 1.1.0 attuale (con la nuova icona).",
+        "Se il download di WMO non corrisponde alla versione verificata, il messaggio ora lo dice chiaramente.",
+      ],
+      "zh-CN": [
+        "已修复：从“更多应用”安装 WMO 时出现“响应过大”而失败。现在会安装当前的 1.1.0 版本（带新图标）。",
+        "如果下载的 WMO 与经过验证的版本不一致，提示会清楚说明。",
+      ],
+      ja: [
+        "修正: 「その他のアプリ」から WMO をインストールすると「応答が大きすぎます」で失敗していた問題。現在の 1.1.0 (新しいアイコン) をインストールします。",
+        "WMO のダウンロードが検証済みのものと一致しない場合、そのことをわかりやすく表示します。",
+      ],
+      ru: [
+        "Исправлено: установка WMO из раздела «Другие приложения» завершалась ошибкой «слишком большой ответ». Теперь устанавливается актуальная сборка 1.1.0 (с новым значком).",
+        "Если загрузка WMO не совпадает с проверенной версией, сообщение теперь говорит об этом прямо.",
+      ],
+    },
+  },
+  {
     version: "0.3.1",
     date: "2026-11-10",
     notes: {
