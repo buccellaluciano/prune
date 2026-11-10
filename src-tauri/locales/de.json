@@ -92,7 +92,19 @@
     "update_verify_message": "Bestätige, dass du es bist, um P-Rune {version} zu installieren.",
     "update_not_verified": "Deine Identität wurde nicht bestätigt: Es wurde nichts installiert.",
     "update_verify_failed": "Windows konnte nicht um Bestätigung gebeten werden: Es wurde nichts installiert.",
-    "update_unreachable": "Es konnte nicht nach Updates gesucht werden: GitHub hat nicht geantwortet. Prüfe die Verbindung und versuche es später erneut."
+    "update_unreachable": "Es konnte nicht nach Updates gesucht werden: GitHub hat nicht geantwortet. Prüfe die Verbindung und versuche es später erneut.",
+    "wmo_no_folder": "Der Programmordner des Benutzers wurde nicht gefunden",
+    "wmo_hash_failed": "Der Hash des Downloads konnte nicht berechnet werden",
+    "wmo_hash_mismatch": "Der Download stimmt nicht mit der geprüften WMO-Version überein: Es wurde nichts installiert.",
+    "wmo_bad_zip": "Die WMO-Datei ist ungültig: {error}",
+    "wmo_link": "Der WMO-Ordner ist ein Link an einen anderen Ort: Es wurde nichts verändert.",
+    "wmo_close_first": "WMO ist geöffnet. Beende es über das Infobereich-Symbol (Rechtsklick → Beenden) und versuche es erneut.",
+    "wmo_foreign_user": "Die App läuft unter einem anderen Administratorkonto: WMO würde für dieses Konto installiert, nicht für {user}",
+    "wmo_download_failed": "WMO konnte nicht heruntergeladen werden (GitHub antwortete {status})",
+    "wmo_not_installed": "WMO ist nicht installiert",
+    "wmo_launch_failed": "WMO konnte nicht geöffnet werden: {error}",
+    "wmo_no_shell": "WMO konnte nicht ohne Administratorrechte geöffnet werden: Der Windows-Explorer läuft nicht.",
+    "wmo_browser_failed": "Der Browser konnte nicht geöffnet werden"
   },
   "category": {
     "ai": "KI und Copilot",

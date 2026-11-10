@@ -12,3 +12,6 @@ vite.config.ts.timestamp-*
 # Claves de firma de actualizaciones: nunca al repo
 *.key
 .tauri/
+
+# Configuración local de Claude Code
+.claude/

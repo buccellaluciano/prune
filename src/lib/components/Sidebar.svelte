@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AppWindow, Check, HardDrive, History, LoaderCircle, PackageX, RefreshCw, ShieldCheck, ShieldOff, SlidersHorizontal, Tag } from "@lucide/svelte";
+  import { AppWindow, Check, Grid2x2Plus, HardDrive, History, LoaderCircle, PackageX, RefreshCw, ShieldCheck, ShieldOff, SlidersHorizontal, Tag } from "@lucide/svelte";
   import Logo from "./Logo.svelte";
   import { isTauri } from "#lib/api.ts";
   import { disk } from "#lib/disk.svelte.ts";
@@ -91,6 +91,9 @@
     </button>
     <button class="nav {store.view === 'history' ? 'active' : ''}" onclick={() => (store.view = "history")}>
       <History size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">{t("nav.history")}</span>
+    </button>
+    <button class="nav {store.view === 'more' ? 'active' : ''}" onclick={() => (store.view = "more")}>
+      <Grid2x2Plus size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">{t("nav.more")}</span>
     </button>
     <button class="nav {store.view === 'versions' ? 'active' : ''}" onclick={() => (store.view = "versions")}>
       <Tag size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">{t("nav.versions")}</span>

@@ -42,6 +42,9 @@
 - **Actualizaciones**: P-Rune avisa cuando hay una versión nueva y se actualiza sola. Antes de instalar,
   Windows pide confirmar que sos vos (Windows Hello o la contraseña, en el diálogo de Windows).
 - **Versiones**: la versión instalada, la nueva si hay, y el historial con un resumen de cada una.
+- **Más apps**: instala [WMO](https://github.com/buccellaluciano/win-media-overlay), otra app del
+  mismo autor, solo para el usuario y sin admin. Baja de GitHub la versión fijada en
+  `src-tauri/src/wmo.rs` y la instala solo si el SHA-256 coincide.
 
 | Plan de cambios | Revisión antes de instalar |
 |---|---|
@@ -96,6 +99,9 @@ npm run check:locales  # verifica que las traducciones de la interfaz usen los m
 1. Subí la versión en `package.json`, `src-tauri/Cargo.toml` y `src-tauri/tauri.conf.json`, y agregá su
    entrada (con el resumen en los 9 idiomas) en `src/lib/changelog.ts`.
 2. Escribí las notas en `docs/releases/<versión>.md`.
+   Si salió una versión nueva de WMO, actualizá en `src-tauri/src/wmo.rs` la versión, la URL,
+   el tamaño y el SHA-256 del zip (`gh release view -R buccellaluciano/win-media-overlay --json assets`),
+   y corré `cargo test wmo -- --include-ignored` para comprobarlos contra la descarga real.
 3. En PowerShell, cargá la clave de firma (nunca va al repo) y publicá:
 
 ```powershell

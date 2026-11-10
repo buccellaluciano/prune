@@ -30,6 +30,7 @@
     { id: "v:disk", group: t("palette.group.goto"), label: t("palette.disk"), run: () => ((store.view = "disk"), (store.query = "")) },
     { id: "v:bloat", group: t("palette.group.goto"), label: t("nav.bloat"), run: () => (store.view = "bloat") },
     { id: "v:versions", group: t("palette.group.goto"), label: t("nav.versions"), run: () => (store.view = "versions") },
+    { id: "v:more", group: t("palette.group.goto"), label: t("nav.more"), run: () => (store.view = "more") },
     { id: "v:history", group: t("palette.group.goto"), label: t("nav.history"), run: () => (store.view = "history") },
     ...(store.overview?.categories ?? []).map((c) => ({
       id: "c:" + c.id, group: t("palette.group.goto"), label: c.title, hint: t("palette.category"),

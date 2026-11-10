@@ -25,6 +25,7 @@ mod verify;
 mod user;
 mod vt;
 mod winget;
+mod wmo;
 
 use catalog::Category;
 use engine::{ApplyReport, Desired, Engine, JournalEntry, PlannedChange, TweakView};
@@ -204,6 +205,41 @@ fn disk_open(id: u32) -> Result<(), String> {
     disk::open(id)
 }
 
+// ───────── WMO (otra app del mismo autor) ─────────
+
+#[tauri::command]
+async fn wmo_status() -> wmo::Status {
+    tauri::async_runtime::spawn_blocking(wmo::status).await.unwrap_or_else(|_| wmo::Status {
+        installed: None,
+        available: wmo::VERSION.into(),
+        update: false,
+        running: false,
+        sha256: String::new(),
+        repo: wmo::REPO.into(),
+    })
+}
+
+/// Instala o actualiza a la versión fijada en `wmo.rs` (sin parámetros: URL y hash son fijos).
+#[tauri::command]
+async fn wmo_install() -> Result<wmo::Status, String> {
+    tauri::async_runtime::spawn_blocking(wmo::install).await.map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+async fn wmo_uninstall() -> Result<wmo::Status, String> {
+    tauri::async_runtime::spawn_blocking(wmo::uninstall).await.map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+async fn wmo_launch() -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(wmo::launch).await.map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+fn wmo_open_repo() -> Result<(), String> {
+    wmo::open_repo()
+}
+
 // ───────── Íconos y VirusTotal (Programas) ─────────
 
 /// Íconos del catálogo. Con `fetch` busca en internet los que falten.
@@ -334,6 +370,11 @@ pub fn run() {
             winget_icons,
             winget_check,
             vt_open,
+            wmo_status,
+            wmo_install,
+            wmo_uninstall,
+            wmo_launch,
+            wmo_open_repo,
             play_theme_sound
         ])
         .run(tauri::generate_context!())

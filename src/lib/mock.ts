@@ -203,6 +203,15 @@ const cleanup: CleanView[] = [
   { id: "recycle_bin", bytes: 236 * MB, files: 41, admin: false, per_user: true, warn: "permanent", available: true },
 ];
 
+const wmo = {
+  installed: null as string | null,
+  available: "1.1.0",
+  update: false,
+  running: false,
+  sha256: "779c311fb6d3cb1124c1cc8e4c881feff171f6fda40594d2c2b7aeca2d999956",
+  repo: "https://github.com/buccellaluciano/win-media-overlay",
+};
+
 export async function mock<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
   await wait(120);
   const a = (args ?? {}) as any;
@@ -343,6 +352,22 @@ export async function mock<T>(cmd: string, args?: Record<string, unknown>): Prom
       });
       return res as T;
     }
+    case "wmo_status":
+      return structuredClone(wmo) as T;
+    case "wmo_install":
+      await wait(1500);
+      wmo.installed = wmo.available;
+      wmo.update = false;
+      return structuredClone(wmo) as T;
+    case "wmo_uninstall":
+      if (wmo.running) throw "WMO está abierto. Cerralo desde el ícono de la bandeja (clic derecho → Salir) y probá de nuevo.";
+      wmo.installed = null;
+      return structuredClone(wmo) as T;
+    case "wmo_launch":
+      wmo.running = true;
+      return null as T;
+    case "wmo_open_repo":
+      return null as T;
     case "list_bloat":
       return bloat.map((b) => ({ ...structuredClone(b), title: L.bloat?.[b.id]?.title ?? b.title, note: b.note && (L.bloat?.[b.id]?.note ?? b.note) })) as T;
     case "remove_bloat":

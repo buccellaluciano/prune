@@ -16,43 +16,61 @@ export interface Release {
 export const CHANGELOG: Release[] = [
   {
     version: "0.3.1",
-    date: "2026-11-09",
+    date: "2026-11-10",
     notes: {
       es: [
         "Si no se puede consultar si hay actualizaciones (sin conexión o GitHub no responde), ahora lo dice con un mensaje claro en tu idioma.",
         "Los instaladores ya no incluyen rutas de la PC donde se compilan.",
+        "Nueva sección Más apps: instalá WMO, una isla dinámica para controlar la música, verificada y sin permisos de administrador.",
+        "Si un cambio falla al aplicarlo, queda pendiente para reintentarlo en vez de perderse.",
       ],
       en: [
         "If checking for updates isn't possible (offline, or GitHub doesn't respond), it now says so with a clear message in your language.",
         "The installers no longer include paths from the PC they were built on.",
+        "New More apps section: install WMO, a dynamic island to control your music, verified and without administrator rights.",
+        "If a change fails to apply, it stays pending so you can retry it instead of being lost.",
       ],
       "pt-BR": [
         "Se não for possível verificar se há atualizações (sem conexão ou o GitHub não responde), agora isso aparece com uma mensagem clara no seu idioma.",
         "Os instaladores não incluem mais caminhos do PC onde foram compilados.",
+        "Nova seção Mais apps: instale o WMO, uma ilha dinâmica para controlar a música, verificado e sem permissões de administrador.",
+        "Se uma alteração falhar ao ser aplicada, ela fica pendente para tentar de novo em vez de se perder.",
       ],
       fr: [
         "Si la recherche de mises à jour est impossible (hors connexion ou GitHub ne répond pas), un message clair l'indique désormais dans votre langue.",
         "Les installateurs n'incluent plus de chemins du PC sur lequel ils ont été compilés.",
+        "Nouvelle section Plus d'apps : installez WMO, une île dynamique pour contrôler la musique, vérifiée et sans droits d'administrateur.",
+        "Si une modification échoue, elle reste en attente pour pouvoir réessayer au lieu d'être perdue.",
       ],
       de: [
         "Wenn nicht nach Updates gesucht werden kann (offline oder GitHub antwortet nicht), erscheint jetzt eine klare Meldung in deiner Sprache.",
         "Die Installationsprogramme enthalten keine Pfade des PCs mehr, auf dem sie erstellt wurden.",
+        "Neuer Bereich Weitere Apps: Installiere WMO, eine Dynamic Island zur Musiksteuerung – geprüft und ohne Administratorrechte.",
+        "Wenn eine Änderung fehlschlägt, bleibt sie ausstehend, damit du sie erneut versuchen kannst, statt verloren zu gehen.",
       ],
       it: [
         "Se non è possibile cercare aggiornamenti (offline o GitHub non risponde), ora lo indica un messaggio chiaro nella tua lingua.",
         "Gli installer non includono più percorsi del PC su cui sono stati compilati.",
+        "Nuova sezione Altre app: installa WMO, un'isola dinamica per controllare la musica, verificata e senza permessi di amministratore.",
+        "Se una modifica non va a buon fine, resta in sospeso per riprovare invece di andare persa.",
       ],
       "zh-CN": [
         "无法检查更新时（没有网络或 GitHub 没有响应），现在会用你的语言给出清楚的提示。",
         "安装程序不再包含编译所用电脑上的路径。",
+        "新增“更多应用”：安装 WMO（控制音乐的灵动岛），经过验证，无需管理员权限。",
+        "某项更改应用失败时，会保留为待处理以便重试，而不会丢失。",
       ],
       ja: [
         "更新を確認できないとき（オフライン、または GitHub が応答しない場合）、お使いの言語でわかりやすく表示するようになりました。",
         "インストーラーに、ビルドした PC のパスが含まれなくなりました。",
+        "新しい「その他のアプリ」: 音楽を操作するダイナミック アイランド WMO を、検証済みで管理者権限なしでインストールできます。",
+        "変更の適用に失敗しても消えずに保留のまま残り、再試行できます。",
       ],
       ru: [
         "Если проверить обновления не удаётся (нет подключения или GitHub не отвечает), теперь об этом сообщается понятным сообщением на вашем языке.",
         "Установщики больше не содержат пути с компьютера, на котором они собраны.",
+        "Новый раздел «Другие приложения»: установите WMO — динамический остров для управления музыкой, проверенный и без прав администратора.",
+        "Если изменение не удалось применить, оно остаётся в ожидании для повтора, а не теряется.",
       ],
     },
   },

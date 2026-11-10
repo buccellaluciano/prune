@@ -92,7 +92,19 @@
     "update_verify_message": "Conferma che sei tu per installare P-Rune {version}.",
     "update_not_verified": "La tua identità non è stata confermata: non è stato installato nulla.",
     "update_verify_failed": "Impossibile chiedere la conferma a Windows: non è stato installato nulla.",
-    "update_unreachable": "Impossibile cercare aggiornamenti: GitHub non ha risposto. Controlla la connessione e riprova più tardi."
+    "update_unreachable": "Impossibile cercare aggiornamenti: GitHub non ha risposto. Controlla la connessione e riprova più tardi.",
+    "wmo_no_folder": "Cartella dei programmi dell'utente non trovata",
+    "wmo_hash_failed": "Impossibile calcolare l'hash del download",
+    "wmo_hash_mismatch": "Il download non corrisponde alla versione verificata di WMO: non è stato installato nulla.",
+    "wmo_bad_zip": "Il file di WMO non è valido: {error}",
+    "wmo_link": "La cartella di WMO è un collegamento a un altro percorso: non è stato toccato nulla.",
+    "wmo_close_first": "WMO è aperto. Chiudilo dall'icona nell'area di notifica (clic destro → Esci) e riprova.",
+    "wmo_foreign_user": "L'app è in esecuzione con un altro account amministratore: WMO verrebbe installato per quell'account e non per {user}",
+    "wmo_download_failed": "Impossibile scaricare WMO (GitHub ha risposto {status})",
+    "wmo_not_installed": "WMO non è installato",
+    "wmo_launch_failed": "Impossibile aprire WMO: {error}",
+    "wmo_no_shell": "Impossibile aprire WMO senza permessi di amministratore: Esplora file non è in esecuzione.",
+    "wmo_browser_failed": "Impossibile aprire il browser"
   },
   "category": {
     "ai": "IA e Copilot",

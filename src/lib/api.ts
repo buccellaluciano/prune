@@ -239,6 +239,31 @@ export const vtApi = {
   open: (sha256: string) => call<void>("vt_open", { sha256 }),
 };
 
+// ───────── WMO (otra app del mismo autor) ─────────
+
+export interface WmoStatus {
+  /** Versión instalada, o null si no está. */
+  installed: string | null;
+  /** La que instala esta versión de P-Rune. */
+  available: string;
+  update: boolean;
+  /** Abierto: hay que cerrarlo para actualizar o desinstalar. */
+  running: boolean;
+  /** SHA-256 fijado del zip de la release. */
+  sha256: string;
+  repo: string;
+}
+
+export const wmoApi = {
+  status: () => call<WmoStatus>("wmo_status"),
+  /** Descarga la versión fijada, verifica su SHA-256 e instala o actualiza. */
+  install: () => call<WmoStatus>("wmo_install"),
+  uninstall: () => call<WmoStatus>("wmo_uninstall"),
+  /** Abre WMO sin permisos de administrador. */
+  launch: () => call<void>("wmo_launch"),
+  openRepo: () => call<void>("wmo_open_repo"),
+};
+
 export interface UserInfo {
   name: string;
   username: string;

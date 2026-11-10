@@ -92,7 +92,19 @@
     "update_verify_message": "Confirm it's you to install P-Rune {version}.",
     "update_not_verified": "Your identity wasn't confirmed: nothing was installed.",
     "update_verify_failed": "Couldn't ask Windows for confirmation: nothing was installed.",
-    "update_unreachable": "Couldn't check for updates: GitHub didn't respond. Check your connection and try again later."
+    "update_unreachable": "Couldn't check for updates: GitHub didn't respond. Check your connection and try again later.",
+    "wmo_no_folder": "Couldn't find the user's programs folder",
+    "wmo_hash_failed": "Couldn't compute the download's hash",
+    "wmo_hash_mismatch": "The download doesn't match the verified WMO release: nothing was installed.",
+    "wmo_bad_zip": "The WMO file isn't valid: {error}",
+    "wmo_link": "The WMO folder is a link to somewhere else: nothing was touched.",
+    "wmo_close_first": "WMO is open. Close it from the tray icon (right-click → Exit) and try again.",
+    "wmo_foreign_user": "The app is running under a different administrator account: WMO would be installed for that account, not for {user}",
+    "wmo_download_failed": "Couldn't download WMO (GitHub answered {status})",
+    "wmo_not_installed": "WMO isn't installed",
+    "wmo_launch_failed": "Couldn't open WMO: {error}",
+    "wmo_no_shell": "Couldn't open WMO without administrator rights: Windows Explorer isn't running.",
+    "wmo_browser_failed": "Couldn't open the browser"
   },
   "category": {
     "ai": "AI and Copilot",

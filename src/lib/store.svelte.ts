@@ -4,7 +4,7 @@ import { t, tn, type Key } from "./i18n.svelte";
 /** Pendiente: true/false para switches, id de opción para selectores. */
 export type Pending = boolean | string;
 
-export type View = "tweaks" | "apps" | "disk" | "bloat" | "history" | "versions";
+export type View = "tweaks" | "apps" | "disk" | "bloat" | "history" | "versions" | "more";
 
 export interface Toast {
   id: number;
@@ -152,7 +152,9 @@ class AppStore {
     try {
       const report = await api.apply(changes);
       this.report(report, "apply");
-      this.pending = {};
+      // Lo que falló queda pendiente para corregirlo o reintentarlo; lo aplicado se limpia.
+      const failed = new Set(report.results.filter((r) => !r.ok).map((r) => r.id));
+      this.pending = Object.fromEntries(Object.entries(this.pending).filter(([id]) => failed.has(id)));
       this.planOpen = false;
       await this.load();
     } catch (e) {

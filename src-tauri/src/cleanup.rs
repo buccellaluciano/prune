@@ -242,7 +242,7 @@ impl WideNull for std::ffi::OsStr {
 /// Corre `f` con los permisos de usuario común (sin el grupo Administradores ni privilegios),
 /// para las carpetas del perfil: así, pase lo que pase con la ruta, no se puede borrar nada
 /// que el usuario no pudiera borrar por su cuenta. Sin elevación, corre tal cual.
-fn as_user<T>(f: impl FnOnce() -> T) -> Result<T, String> {
+pub(crate) fn as_user<T>(f: impl FnOnce() -> T) -> Result<T, String> {
     if !crate::system::is_elevated() {
         return Ok(f());
     }

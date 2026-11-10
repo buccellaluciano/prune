@@ -92,7 +92,19 @@
     "update_verify_message": "Confirmez que c'est bien vous pour installer P-Rune {version}.",
     "update_not_verified": "Votre identité n'a pas été confirmée : rien n'a été installé.",
     "update_verify_failed": "Impossible de demander la confirmation à Windows : rien n'a été installé.",
-    "update_unreachable": "Impossible de rechercher des mises à jour : GitHub n'a pas répondu. Vérifiez la connexion et réessayez plus tard."
+    "update_unreachable": "Impossible de rechercher des mises à jour : GitHub n'a pas répondu. Vérifiez la connexion et réessayez plus tard.",
+    "wmo_no_folder": "Dossier des programmes de l'utilisateur introuvable",
+    "wmo_hash_failed": "Impossible de calculer l'empreinte du téléchargement",
+    "wmo_hash_mismatch": "Le téléchargement ne correspond pas à la version vérifiée de WMO : rien n'a été installé.",
+    "wmo_bad_zip": "Le fichier de WMO n'est pas valide : {error}",
+    "wmo_link": "Le dossier de WMO est un lien vers un autre emplacement : rien n'a été modifié.",
+    "wmo_close_first": "WMO est ouvert. Fermez-le depuis l'icône de la zone de notification (clic droit → Quitter) et réessayez.",
+    "wmo_foreign_user": "L'app s'exécute avec un autre compte administrateur : WMO serait installé pour ce compte et non pour {user}",
+    "wmo_download_failed": "Impossible de télécharger WMO (GitHub a répondu {status})",
+    "wmo_not_installed": "WMO n'est pas installé",
+    "wmo_launch_failed": "Impossible d'ouvrir WMO : {error}",
+    "wmo_no_shell": "Impossible d'ouvrir WMO sans droits d'administrateur : l'Explorateur Windows ne tourne pas.",
+    "wmo_browser_failed": "Impossible d'ouvrir le navigateur"
   },
   "category": {
     "ai": "IA et Copilot",

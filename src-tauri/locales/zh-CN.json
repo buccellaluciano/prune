@@ -92,7 +92,19 @@
     "update_verify_message": "请确认是你本人，以安装 P-Rune {version}。",
     "update_not_verified": "未确认你的身份：没有安装任何内容。",
     "update_verify_failed": "无法请求 Windows 确认：没有安装任何内容。",
-    "update_unreachable": "无法检查更新：GitHub 没有响应。请检查网络连接，稍后再试。"
+    "update_unreachable": "无法检查更新：GitHub 没有响应。请检查网络连接，稍后再试。",
+    "wmo_no_folder": "找不到用户的程序文件夹",
+    "wmo_hash_failed": "无法计算下载文件的哈希值",
+    "wmo_hash_mismatch": "下载的文件与经过验证的 WMO 版本不一致：未安装任何内容。",
+    "wmo_bad_zip": "WMO 文件无效：{error}",
+    "wmo_link": "WMO 文件夹是指向其他位置的链接：未做任何更改。",
+    "wmo_close_first": "WMO 正在运行。请从托盘图标关闭它（右键 → 退出）后重试。",
+    "wmo_foreign_user": "应用正以另一个管理员帐户运行：WMO 会安装到该帐户，而不是 {user}",
+    "wmo_download_failed": "无法下载 WMO（GitHub 返回 {status}）",
+    "wmo_not_installed": "未安装 WMO",
+    "wmo_launch_failed": "无法打开 WMO：{error}",
+    "wmo_no_shell": "无法以非管理员权限打开 WMO：Windows 资源管理器未运行。",
+    "wmo_browser_failed": "无法打开浏览器"
   },
   "category": {
     "ai": "AI 与 Copilot",
