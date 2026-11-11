@@ -26,6 +26,18 @@
 - **Plan antes de aplicar**: el diff exacto de cada valor que se va a escribir.
 - **Historial con deshacer**: guarda el valor anterior exacto; si algo cambió después, avisa antes de pisarlo.
 - **Perfiles** (Privacidad, Escritorio limpio, Gaming, Equipo liviano) que marcan varios tweaks de una.
+- **Exportar e importar la configuración**: un archivo con los tweaks aplicados, las apps quitadas y los
+  programas instalados, para llevarlos a otra PC. Solo guarda ids del catálogo; al importar se muestra
+  qué cambiaría y los tweaks pasan por el plan de siempre.
+- **Punto de restauración** antes de cambios grandes o de quitar apps (Restaurar sistema de Windows),
+  y desde el Historial se crea uno o se abre Restaurar sistema.
+- **Cambios que Windows deshizo**: si una actualización vuelve atrás un tweak o reinstala una app que
+  quitaste, P-Rune avisa y deja reaplicarlo o ignorarlo.
+- **Inicio de Windows**: lo que arranca al iniciar sesión (registro, carpeta Inicio y tareas programadas
+  de terceros), con su firmante. Se desactiva como lo hace el Administrador de tareas, sin borrar nada.
+- **Windows Update**: pausar hasta 5 semanas, horas activas y no instalar drivers por Windows Update.
+- **Red**: DNS de cada conexión (IPv4 e IPv6) desde una lista o a mano, con DNS cifrado, y activar o
+  desactivar el proxy ya configurado. Cada cambio de DNS vuelve atrás solo si no se confirma.
 - **Bloatware**: quita apps Appx de una lista curada; lo esencial (Store, winget, Terminal,
   Calculadora, Seguridad de Windows) nunca aparece.
 - **Programas**: instala y actualiza ~40 programas confiables con winget, con progreso por etapas y una

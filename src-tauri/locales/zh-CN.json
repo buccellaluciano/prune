@@ -131,7 +131,35 @@
     "proxy_on": "已开启",
     "proxy_off": "已关闭",
     "conflict_proxy": "代理设置在此记录之后已更改",
-    "dns_unrestorable": "{adapter} 当前的 DNS 含有 P-Rune 无法原样恢复的值，因此未做任何更改。"
+    "dns_unrestorable": "{adapter} 当前的 DNS 含有 P-Rune 无法原样恢复的值，因此未做任何更改。",
+    "startup_missing": "该项已不在 Windows 启动项中。",
+    "startup_not_eligible": "该任务属于 Windows，或不在登录时运行：P-Rune 不会更改它。",
+    "startup_bad_entry": "保存的启动项无效。",
+    "label_startup_on": "启动：已启用 {name}",
+    "label_startup_off": "启动：已禁用 {name}",
+    "conflict_startup": "此记录之后，{name} 在 Windows 启动项中被更改",
+    "restore_policy": "你的组织通过策略关闭了系统还原。",
+    "restore_disabled": "此电脑已关闭系统还原，可在“系统保护”中开启。",
+    "restore_failed": "Windows 无法创建还原点（代码 {code}）。",
+    "restore_not_created": "Windows 返回成功，但找不到该还原点。请检查“系统保护”。",
+    "restore_no_rstrui": "找不到该 Windows 工具。",
+    "restore_description": "P-Rune：应用更改之前",
+    "wu_policy": "你的组织通过策略管理此项：P-Rune 不会更改。",
+    "wu_pause_days": "Windows 最多允许暂停 {max} 天。",
+    "wu_hours_invalid": "使用时段必须在 1 到 {max} 小时之间。",
+    "wu_bad_entry": "保存的 Windows 更新更改无效。",
+    "label_wu_pause": "Windows 更新：暂停 {days} 天",
+    "label_wu_resume": "Windows 更新：已恢复",
+    "label_wu_hours_auto": "Windows 更新：自动调整使用时段",
+    "label_wu_hours": "Windows 更新：使用时段 {start} 至 {end} 点",
+    "conflict_wu": "此记录之后，Windows 更新设置被更改",
+    "profile_filter": "P-Rune 配置",
+    "profile_write_failed": "无法保存文件：{error}",
+    "profile_read_failed": "无法读取文件：{error}",
+    "profile_invalid": "该文件不是 P-Rune 配置。",
+    "profile_newer": "该文件来自更新版本的 P-Rune，请更新应用后再打开。",
+    "profile_too_big": "文件过大，不可能是 P-Rune 配置。",
+    "wu_unrestorable": "Windows 更新中有其他程序设置的值（例如超过 Windows 允许时长的暂停），P-Rune 无法原样恢复，因此未做任何更改。"
   },
   "category": {
     "ai": "AI 与 Copilot",
@@ -143,7 +171,8 @@
     "search": "搜索",
     "start": "开始菜单与建议",
     "taskbar": "任务栏",
-    "services": "服务"
+    "services": "服务",
+    "updates": "Windows Update"
   },
   "tweak": {
     "ai.copilot_legacy": {
@@ -387,6 +416,10 @@
     "services.sysmain": {
       "title": "关闭 SysMain（Superfetch）",
       "description": "不再把常用应用预加载到内存。使用固态硬盘几乎感觉不到；使用机械硬盘时应用打开会变慢。"
+    },
+    "updates.no_drivers": {
+      "title": "不通过 Windows 更新安装驱动程序",
+      "description": "Windows 更新不再自行下载和安装驱动程序，新设备也不会。适合 Windows 更新的驱动带来问题，或你更想用厂商驱动的情况。已安装的驱动不受影响。“设置”会显示“某些设置由你的组织管理”，这是因为此策略。"
     }
   },
   "bloat": {

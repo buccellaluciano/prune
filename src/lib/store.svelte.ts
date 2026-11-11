@@ -4,7 +4,7 @@ import { t, tn, type Key } from "./i18n.svelte";
 /** Pendiente: true/false para switches, id de opción para selectores. */
 export type Pending = boolean | string;
 
-export type View = "tweaks" | "apps" | "disk" | "bloat" | "history" | "versions" | "more" | "network";
+export type View = "tweaks" | "apps" | "disk" | "bloat" | "history" | "versions" | "more" | "network" | "startup";
 
 export interface Toast {
   id: number;

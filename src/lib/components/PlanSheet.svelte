@@ -4,16 +4,30 @@
   import { store } from "#lib/store.svelte.ts";
   import { t } from "#lib/i18n.svelte.ts";
   import { fade, fly } from "svelte/transition";
+  import { restore } from "#lib/safety.svelte.ts";
+  import RestoreOption from "./RestoreOption.svelte";
 
   let plan = $state<PlannedChange[] | null>(null);
   let error = $state<string | null>(null);
+
+  /** Punto de restauración antes de aplicar: por defecto en cambios grandes o con riesgo. */
+  let withRestore = $state(false);
 
   $effect(() => {
     if (!store.planOpen) return;
     plan = null;
     error = null;
     api.plan(store.desired()).then((p) => (plan = p)).catch((e) => (error = String(e)));
+    restore.load().then(() => {
+      const risky = Object.keys(store.pending).some((id) => store.tweaks.find((x) => x.id === id)?.risk !== "safe");
+      withRestore = !restore.recent && (store.pendingCount >= 3 || risky);
+    });
   });
+
+  async function apply() {
+    if (withRestore && restore.available && !(await restore.create())) return;
+    await store.applyPending();
+  }
 
   const grouped = $derived.by(() => {
     const g = new Map<string, PlannedChange[]>();
@@ -77,16 +91,19 @@
       {/if}
     </div>
 
-    <footer class="flex items-center gap-2 border-t border-line px-5 py-4">
+    {#if restore.available}
+      <div class="border-t border-line px-4 pt-2"><RestoreOption bind:checked={withRestore} /></div>
+    {/if}
+    <footer class="flex items-center gap-2 border-t border-line px-5 py-4 {restore.available ? 'border-t-0 pt-2' : ''}">
       <span class="flex-1 text-[12px] text-mute">{t("plan.summary", { tweaks: store.pendingCount, values: plan?.filter((c) => !c.noop).length ?? "…" })}</span>
       <button class="rounded-lg px-3 py-2 text-[13px] text-mute hover:bg-card-hi hover:text-ink" onclick={() => (store.planOpen = false)}>{t("common.back")}</button>
       <button
         class="accent-grad inline-flex items-center gap-2 rounded-md px-3.5 py-1.5 text-[13px] font-medium disabled:opacity-50"
-        disabled={!plan || store.busy}
-        onclick={() => store.applyPending()}
+        disabled={!plan || store.busy || restore.creating}
+        onclick={apply}
       >
-        {#if store.busy}<LoaderCircle size={14} class="animate-spin" />{/if}
-        {t("plan.apply")}
+        {#if store.busy || restore.creating}<LoaderCircle size={14} class="animate-spin" />{/if}
+        {restore.creating ? t("restore.creating") : t("plan.apply")}
       </button>
     </footer>
   </section>

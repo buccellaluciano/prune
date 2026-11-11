@@ -131,7 +131,35 @@
     "proxy_on": "ativado",
     "proxy_off": "desativado",
     "conflict_proxy": "A configuração de proxy mudou depois desta entrada",
-    "dns_unrestorable": "O DNS atual de {adapter} tem valores que o P-Rune não conseguiria restaurar exatamente, então nada foi alterado."
+    "dns_unrestorable": "O DNS atual de {adapter} tem valores que o P-Rune não conseguiria restaurar exatamente, então nada foi alterado.",
+    "startup_missing": "Essa entrada não está mais na inicialização do Windows.",
+    "startup_not_eligible": "Essa tarefa é do Windows ou não roda ao entrar: o P-Rune não a altera.",
+    "startup_bad_entry": "A entrada de inicialização salva não é válida.",
+    "label_startup_on": "Inicialização: {name} ativado",
+    "label_startup_off": "Inicialização: {name} desativado",
+    "conflict_startup": "{name} mudou na inicialização do Windows depois desta entrada",
+    "restore_policy": "Uma política da sua organização desativa a Restauração do Sistema.",
+    "restore_disabled": "A Restauração do Sistema está desativada neste PC. Ative-a em Proteção do Sistema.",
+    "restore_failed": "O Windows não conseguiu criar o ponto de restauração (código {code}).",
+    "restore_not_created": "O Windows respondeu que deu certo, mas o ponto de restauração não aparece. Confira a Proteção do Sistema.",
+    "restore_no_rstrui": "A ferramenta do Windows não foi encontrada.",
+    "restore_description": "P-Rune: antes de aplicar alterações",
+    "wu_policy": "Sua organização gerencia isso por política: o P-Rune não altera.",
+    "wu_pause_days": "O Windows permite pausar por no máximo {max} dias.",
+    "wu_hours_invalid": "O horário ativo precisa cobrir entre 1 e {max} horas.",
+    "wu_bad_entry": "A alteração do Windows Update salva não é válida.",
+    "label_wu_pause": "Windows Update: pausado por {days} dias",
+    "label_wu_resume": "Windows Update: retomado",
+    "label_wu_hours_auto": "Windows Update: horário ativo automático",
+    "label_wu_hours": "Windows Update: horário ativo das {start} às {end}",
+    "conflict_wu": "As configurações do Windows Update mudaram depois desta entrada",
+    "profile_filter": "Configuração do P-Rune",
+    "profile_write_failed": "Não foi possível salvar o arquivo: {error}",
+    "profile_read_failed": "Não foi possível ler o arquivo: {error}",
+    "profile_invalid": "Esse arquivo não é uma configuração do P-Rune.",
+    "profile_newer": "O arquivo é de uma versão mais nova do P-Rune. Atualize o app para abri-lo.",
+    "profile_too_big": "O arquivo é grande demais para ser uma configuração do P-Rune.",
+    "wu_unrestorable": "O Windows Update tem valores definidos por outro programa (por exemplo, uma pausa mais longa do que o Windows permite) que o P-Rune não conseguiria restaurar exatamente, então nada foi alterado."
   },
   "category": {
     "ai": "IA e Copilot",
@@ -143,7 +171,8 @@
     "search": "Pesquisa",
     "start": "Iniciar e sugestões",
     "taskbar": "Barra de tarefas",
-    "services": "Serviços"
+    "services": "Serviços",
+    "updates": "Windows Update"
   },
   "tweak": {
     "ai.copilot_legacy": {
@@ -387,6 +416,10 @@
     "services.sysmain": {
       "title": "Desativar o SysMain (Superfetch)",
       "description": "Deixa de pré-carregar na RAM os apps que você mais usa. Com SSD quase não se nota; com HD, os apps demoram mais para abrir."
+    },
+    "updates.no_drivers": {
+      "title": "Não instalar drivers pelo Windows Update",
+      "description": "O Windows Update deixa de baixar e instalar drivers por conta própria, inclusive os de dispositivos novos. Útil se um driver do Windows Update trouxe problemas ou se você prefere os do fabricante. Os drivers já instalados não são alterados. As Configurações vão dizer que sua organização gerencia algumas opções: é por causa desta política."
     }
   },
   "bloat": {

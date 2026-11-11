@@ -131,7 +131,35 @@
     "proxy_on": "on",
     "proxy_off": "off",
     "conflict_proxy": "The proxy settings changed after this entry",
-    "dns_unrestorable": "The current DNS of {adapter} has values P-Rune couldn't restore exactly, so nothing was changed."
+    "dns_unrestorable": "The current DNS of {adapter} has values P-Rune couldn't restore exactly, so nothing was changed.",
+    "startup_missing": "That entry is no longer in Windows startup.",
+    "startup_not_eligible": "That task belongs to Windows or doesn't run at sign-in: P-Rune won't change it.",
+    "startup_bad_entry": "The saved startup entry isn't valid.",
+    "label_startup_on": "Startup: {name} enabled",
+    "label_startup_off": "Startup: {name} disabled",
+    "conflict_startup": "{name} changed in Windows startup after this entry",
+    "restore_policy": "A policy from your organization turns off System Restore.",
+    "restore_disabled": "System Restore is turned off on this PC. Turn it on in System Protection.",
+    "restore_failed": "Windows couldn't create the restore point (code {code}).",
+    "restore_not_created": "Windows said it worked, but the restore point doesn't show up. Check System Protection.",
+    "restore_no_rstrui": "The Windows tool wasn't found.",
+    "restore_description": "P-Rune: before applying changes",
+    "wu_policy": "Your organization manages this with a policy: P-Rune won't change it.",
+    "wu_pause_days": "Windows allows pausing for at most {max} days.",
+    "wu_hours_invalid": "Active hours must cover between 1 and {max} hours.",
+    "wu_bad_entry": "The saved Windows Update change isn't valid.",
+    "label_wu_pause": "Windows Update: paused for {days} days",
+    "label_wu_resume": "Windows Update: resumed",
+    "label_wu_hours_auto": "Windows Update: automatic active hours",
+    "label_wu_hours": "Windows Update: active hours {start} to {end}",
+    "conflict_wu": "Windows Update settings changed after this entry",
+    "profile_filter": "P-Rune settings",
+    "profile_write_failed": "Couldn't save the file: {error}",
+    "profile_read_failed": "Couldn't read the file: {error}",
+    "profile_invalid": "That file isn't a P-Rune configuration.",
+    "profile_newer": "The file is from a newer version of P-Rune. Update the app to open it.",
+    "profile_too_big": "The file is too large to be a P-Rune configuration.",
+    "wu_unrestorable": "Windows Update has values set by another program (for example, a pause longer than Windows allows) that P-Rune couldn't restore exactly, so nothing was changed."
   },
   "category": {
     "ai": "AI and Copilot",
@@ -143,7 +171,8 @@
     "search": "Search",
     "start": "Start and suggestions",
     "taskbar": "Taskbar",
-    "services": "Services"
+    "services": "Services",
+    "updates": "Windows Update"
   },
   "tweak": {
     "ai.copilot_legacy": {
@@ -387,6 +416,10 @@
     "services.sysmain": {
       "title": "Turn off SysMain (Superfetch)",
       "description": "Stops preloading your most-used apps into RAM. Barely noticeable with an SSD; with a hard drive, apps take longer to open."
+    },
+    "updates.no_drivers": {
+      "title": "Don't install drivers from Windows Update",
+      "description": "Windows Update stops downloading and installing drivers on its own, including for new devices. Useful if a Windows Update driver caused problems or you prefer the manufacturer's. Drivers already installed aren't touched. Settings will say your organization manages some settings: that's because of this policy."
     }
   },
   "bloat": {

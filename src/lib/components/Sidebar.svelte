@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { AppWindow, Check, Globe, Grid2x2Plus, HardDrive, History, LoaderCircle, PackageX, RefreshCw, ShieldCheck, ShieldOff, SlidersHorizontal, Tag } from "@lucide/svelte";
+  import { AppWindow, Check, Download, Globe, Grid2x2Plus, HardDrive, History, LoaderCircle, PackageX, RefreshCw, Rocket, ShieldCheck, ShieldOff, SlidersHorizontal, Tag, Upload } from "@lucide/svelte";
+  import { profile } from "#lib/safety.svelte.ts";
   import Logo from "./Logo.svelte";
   import { isTauri } from "#lib/api.ts";
   import { disk } from "#lib/disk.svelte.ts";
@@ -89,6 +90,9 @@
     <button class="nav {store.view === 'network' ? 'active' : ''}" onclick={() => (store.view = "network")}>
       <Globe size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">{t("nav.network")}</span>
     </button>
+    <button class="nav {store.view === 'startup' ? 'active' : ''}" onclick={() => (store.view = "startup")}>
+      <Rocket size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">{t("nav.startup")}</span>
+    </button>
     <button class="nav {store.view === 'bloat' ? 'active' : ''}" onclick={() => (store.view = "bloat")}>
       <PackageX size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">{t("nav.bloat")}</span>
     </button>
@@ -117,6 +121,24 @@
         <div class="text-[11px] text-faint">{t(p.hint)}</div>
       </button>
     {/each}
+      <div class="mt-1 flex gap-1 px-1">
+        <button
+          class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] text-mute hover:bg-card-hi hover:text-ink disabled:opacity-50"
+          title={t("config.export_hint")}
+          disabled={profile.busy !== null}
+          onclick={() => profile.export()}
+        >
+          {#if profile.busy === "export"}<LoaderCircle size={13} class="animate-spin" />{:else}<Upload size={13} />{/if} {t("config.export")}
+        </button>
+        <button
+          class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] text-mute hover:bg-card-hi hover:text-ink disabled:opacity-50"
+          title={t("config.import_hint")}
+          disabled={profile.busy !== null}
+          onclick={() => profile.import()}
+        >
+          {#if profile.busy === "import"}<LoaderCircle size={13} class="animate-spin" />{:else}<Download size={13} />{/if} {t("config.import")}
+        </button>
+      </div>
 
     <div class="mt-5 mb-1.5 px-2.5 text-[11.5px] text-faint">{t("side.theme")}</div>
     <div class="theme-picker mx-2.5 flex gap-1 rounded-md border border-line p-0.5" role="radiogroup" aria-label={t("side.theme")}>

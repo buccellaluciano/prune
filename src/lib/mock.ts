@@ -1,6 +1,6 @@
 // Backend simulado para desarrollar la UI en el navegador (npm run dev).
 // Nunca se usa dentro de Tauri.
-import type { AdapterDns, NetworkStatus, AppsOverview, BloatApp, CleanView, JournalEntry, Overview, Tweak, WingetProgress } from "./api";
+import type { Drift, ImportPreview, RestoreStatus, StartupStatus, WuStatus, AdapterDns, NetworkStatus, AppsOverview, BloatApp, CleanView, JournalEntry, Overview, Tweak, WingetProgress } from "./api";
 
 const op = (key: string, name: string, current: string, on: string, off = "(borra el valor)") => ({
   key, name, current, on, off,
@@ -36,6 +36,7 @@ const raw: MockTweak[] = [
     op("HKCU\\Software\\Microsoft\\Windows\\DWM", "EnableAeroPeek", "0", "0", "1"),
   ] },
   { id: "gaming.mouse_acceleration", category: "gaming", title: "Desactivar aceleración del mouse", description: "Movimiento 1:1, ideal para juegos.", risk: "safe", restart: "logoff", tags: ["mouse"], requires_admin: false, state: "default", ops: [op("HKCU\\Control Panel\\Mouse", "MouseSpeed", "\"1\"", "\"0\"", "\"1\"")] },
+  { id: "updates.no_drivers", category: "updates", title: "No instalar drivers desde Windows Update", description: "Windows Update deja de bajar e instalar drivers por su cuenta, también los de dispositivos nuevos.", risk: "moderate", restart: "none", tags: ["drivers"], requires_admin: true, state: "default", ops: [op("HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "ExcludeWUDriversInQualityUpdate", "(no existe)", "1")] },
   { id: "power.plan", category: "power", title: "Plan de energía", description: "Alto y Máximo rendimiento no dejan que el procesador baje la frecuencia ni que entre en ahorro: responde más rápido pero consume y calienta más. En notebooks, conviene usarlos solo enchufado.", risk: "moderate", restart: "none", tags: ["energia"], requires_admin: true, state: "default",
     choice: "381b4222-f694-41f0-9685-ff5bb260df2e",
     choices: [
@@ -60,6 +61,7 @@ const overview: Overview = {
     { id: "explorer", title: "Explorador", icon: "folder" },
     { id: "appearance", title: "Apariencia", icon: "palette" },
     { id: "gaming", title: "Gaming y entrada", icon: "gamepad" },
+    { id: "updates", title: "Windows Update", icon: "refresh" },
     { id: "power", title: "Energía", icon: "zap" },
   ],
   tweaks,
@@ -73,6 +75,27 @@ const bloat: BloatApp[] = [
 ];
 
 const history: JournalEntry[] = [];
+
+const startup: StartupStatus = {
+  elevated: false,
+  foreign_user: null,
+  items: [
+    { source: "run_user", name: "Discord", title: "Discord", command: "\"C:\\\\Users\\\\demo\\\\AppData\\\\Local\\\\Discord\\\\Update.exe\" --processStart Discord.exe", path: "C:\\\\Users\\\\demo\\\\AppData\\\\Local\\\\Discord\\\\Update.exe", exists: true, publisher: "Discord Inc.", system: false, enabled: true },
+    { source: "run_user", name: "Spotify", title: "Spotify", command: "\"C:\\\\Users\\\\demo\\\\AppData\\\\Roaming\\\\Spotify\\\\Spotify.exe\" /background", path: "C:\\\\Users\\\\demo\\\\AppData\\\\Roaming\\\\Spotify\\\\Spotify.exe", exists: true, publisher: "Spotify AB", system: false, enabled: true },
+    { source: "run_machine", name: "SecurityHealth", title: "SecurityHealth", command: "%windir%\\\\system32\\\\SecurityHealthSystray.exe", path: "C:\\\\WINDOWS\\\\system32\\\\SecurityHealthSystray.exe", exists: true, publisher: null, system: true, enabled: true },
+    { source: "folder_user", name: "Herramienta vieja.lnk", title: "Herramienta vieja", command: "C:\\\\Programas\\\\vieja\\\\vieja.exe", path: "C:\\\\Programas\\\\vieja\\\\vieja.exe", exists: false, publisher: null, system: false, enabled: true },
+    { source: "task", name: "\\\\GoogleUpdaterTaskSystem", title: "GoogleUpdaterTaskSystem", command: "C:\\\\Program Files (x86)\\\\Google\\\\GoogleUpdater\\\\updater.exe --wake --system", path: "C:\\\\Program Files (x86)\\\\Google\\\\GoogleUpdater\\\\updater.exe", exists: true, publisher: "Google LLC", system: false, enabled: false },
+  ],
+};
+
+const restoreState: RestoreStatus = { enabled: true, policy: false, elevated: false, last: { at: Date.now() / 1000 - 3 * 86400, description: "Windows Update" }, count: 3, readable: true };
+
+const wu: WuStatus = { paused_until: null, max_pause_days: 35, active_start: 8, active_end: 17, smart_hours: false, pause_policy: false, hours_policy: false, elevated: false };
+
+const driftItems: Drift[] = [
+  { kind: "tweak", id: "start.recommendations", title: "Ocultar recomendaciones en Inicio", entry_id: 1, at: Date.now() / 1000 - 20 * 86400, choice: null },
+  { kind: "bloat", id: "Clipchamp.Clipchamp", title: "Clipchamp", entry_id: 2, at: Date.now() / 1000 - 30 * 86400, choice: null },
+];
 
 // Disco simulado: un árbol chico con tamaños en GB.
 const GB = 1024 ** 3;
@@ -490,6 +513,61 @@ export async function mock<T>(cmd: string, args?: Record<string, unknown>): Prom
       const id = Date.now();
       history.unshift({ id, at: id / 1000, label: "Proxy", changes: [], removed_apps: [], undone: false, proxy: { kind: key, before: 0, after: 0 } });
       return id as T;
+    }
+    case "startup_status":
+      await wait(500);
+      return JSON.parse(JSON.stringify(startup)) as T;
+    case "startup_set": {
+      await wait(250);
+      const it = startup.items.find((i) => i.source === a.source && i.name === a.name);
+      if (!it) throw "Esa entrada ya no está en el inicio de Windows.";
+      if (it.source !== "run_user" && it.source !== "folder_user" && !startup.elevated) throw "Requiere ejecutar como administrador";
+      if (it.enabled === a.enabled) return null as T;
+      it.enabled = a.enabled;
+      const id = Date.now();
+      history.unshift({ id, at: id / 1000, label: `Inicio: ${it.title}`, changes: [], removed_apps: [], undone: false, startup: { source: it.source, name: it.name, title: it.title, enabled_before: !a.enabled, enabled_after: a.enabled } });
+      return id as T;
+    }
+    case "restore_status":
+      return { ...restoreState } as T;
+    case "restore_create":
+      await wait(1500);
+      if (!restoreState.elevated) throw "Requiere ejecutar como administrador";
+      restoreState.last = { at: Date.now() / 1000, description: "P-Rune" };
+      return { at: restoreState.last.at, reused: false } as T;
+    case "restore_open":
+    case "restore_settings":
+      return undefined as T;
+    case "wu_status":
+      return { ...wu } as T;
+    case "wu_set": {
+      await wait(300);
+      if (!wu.elevated) throw "Requiere ejecutar como administrador";
+      const r = a.request;
+      if (r.action === "pause") wu.paused_until = Date.now() / 1000 + r.days * 86400;
+      else if (r.action === "resume") wu.paused_until = null;
+      else if (r.start === null) wu.smart_hours = true;
+      else Object.assign(wu, { smart_hours: false, active_start: r.start, active_end: r.end });
+      return Date.now() as T;
+    }
+    case "drift_check":
+      return JSON.parse(JSON.stringify(driftItems)) as T;
+    case "profile_export":
+      await wait(600);
+      return "p-rune.json" as T;
+    case "profile_import": {
+      await wait(400);
+      const preview: ImportPreview = {
+        file: "p-rune.json", app_version: "0.5.0", created: Date.now() / 1000 - 86400,
+        tweaks: [
+          { id: "explorer.show_extensions", title: "Mostrar extensiones de archivo", applied: true, choice: null, choice_label: null, current: false },
+          { id: "search.taskbar_mode", title: "Búsqueda en la barra de tareas", applied: true, choice: "hidden", choice_label: "Oculta", current: true },
+        ],
+        bloat: [{ id: "Microsoft.BingNews", title: "Microsoft Noticias", tier: "safe" }],
+        apps: [{ id: "Mozilla.Firefox", title: "Firefox", installed: false }],
+        skipped: 2,
+      };
+      return preview as T;
     }
     case "list_bloat":
       return bloat.map((b) => ({ ...structuredClone(b), title: L.bloat?.[b.id]?.title ?? b.title, note: b.note && (L.bloat?.[b.id]?.note ?? b.note) })) as T;

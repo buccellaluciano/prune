@@ -129,6 +129,8 @@ fn entry_label(e: &JournalEntry) -> String {
         [] if !e.removed_apps.is_empty() && e.changes.is_empty() => t!("label_removed_apps", n = e.removed_apps.len()),
         [] if e.network.is_some() => e.network.as_ref().map(crate::network::label).unwrap_or_default(),
         [] if e.proxy.is_some() => e.proxy.as_ref().map(crate::proxy::label).unwrap_or_default(),
+        [] if e.startup.is_some() => e.startup.as_ref().map(crate::startup::label).unwrap_or_default(),
+        [] if e.wu.is_some() => e.wu.as_ref().map(crate::wupdate::label).unwrap_or_default(),
         [] => e.label.clone(),
         many => t!("label_tweaks", n = many.len()),
     }
@@ -187,6 +189,51 @@ pub struct JournalEntry {
     /// Cambio de proxy del usuario.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub proxy: Option<crate::proxy::ProxyChange>,
+    /// Algo que arranca con Windows, habilitado o deshabilitado.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub startup: Option<crate::startup::StartupChange>,
+    /// Pausa u horas activas de Windows Update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wu: Option<crate::wupdate::WuChange>,
+}
+
+impl JournalEntry {
+    /// Entrada sin cambios, para completar con uno solo de los tipos especiales.
+    fn blank(id: u64, label: String) -> Self {
+        Self {
+            id,
+            at: id / 1000,
+            label,
+            changes: vec![],
+            removed_apps: vec![],
+            undone: false,
+            power: None,
+            items: vec![],
+            network: None,
+            proxy: None,
+            startup: None,
+            wu: None,
+        }
+    }
+
+    fn special(&self) -> bool {
+        self.power.is_some() || self.network.is_some() || self.proxy.is_some() || self.startup.is_some() || self.wu.is_some()
+    }
+}
+
+/// Un tweak que habías aplicado y hoy no está como lo dejaste (una actualización de
+/// Windows u otro programa lo volvió a cambiar), o una app que quitaste y volvió.
+#[derive(Debug, Clone, Serialize)]
+pub struct Drift {
+    /// "tweak" o "bloat".
+    pub kind: &'static str,
+    pub id: String,
+    pub title: String,
+    /// Entrada del historial que lo aplicó (para "ignorar" hasta el próximo cambio).
+    pub entry_id: u64,
+    pub at: u64,
+    /// Lo que se había aplicado (opción, o None para switches).
+    pub choice: Option<String>,
 }
 
 // ───────────────────────────── Plan de energía ─────────────────────────────
@@ -646,6 +693,8 @@ impl Engine {
             items: vec![],
             network: None,
             proxy: None,
+            startup: None,
+            wu: None,
         });
         self.save(&entries)
     }
@@ -666,9 +715,82 @@ impl Engine {
             items: vec![],
             network: None,
             proxy: Some(change),
+            startup: None,
+            wu: None,
         });
         self.save(&entries)?;
         Ok(id)
+    }
+
+    fn push(&self, f: impl FnOnce(u64) -> JournalEntry) -> Result<u64, String> {
+        let _g = self.lock.lock().unwrap();
+        let mut entries = self.load();
+        let id = entries.last().map_or(now_ms(), |l| now_ms().max(l.id + 1));
+        entries.push(f(id));
+        self.save(&entries)?;
+        Ok(id)
+    }
+
+    /// Guarda un cambio de inicio ya aplicado. Devuelve el id de la entrada.
+    pub fn record_startup(&self, change: crate::startup::StartupChange) -> Result<u64, String> {
+        self.push(|id| JournalEntry { startup: Some(change.clone()), ..JournalEntry::blank(id, crate::startup::label(&change)) })
+    }
+
+    /// Guarda un cambio de Windows Update ya aplicado. Devuelve el id de la entrada.
+    pub fn record_wu(&self, change: crate::wupdate::WuChange) -> Result<u64, String> {
+        self.push(|id| JournalEntry { wu: Some(change.clone()), ..JournalEntry::blank(id, crate::wupdate::label(&change)) })
+    }
+
+    /// Tweaks aplicados que hoy no están como se dejaron, y apps quitadas que volvieron.
+    /// Solo cuenta lo último que se aplicó de cada tweak, y nada que después se haya deshecho.
+    pub fn drift(&self, build: u32, installed_bloat: &[(String, String)]) -> Vec<Drift> {
+        let entries = {
+            let _g = self.lock.lock().unwrap();
+            self.load()
+        };
+        let mut last: std::collections::HashMap<String, (u64, LabelItem)> = Default::default();
+        let mut removed: std::collections::HashMap<String, u64> = Default::default();
+        for e in &entries {
+            for i in &e.items {
+                if e.undone {
+                    last.remove(&i.id);
+                } else {
+                    last.insert(i.id.clone(), (e.id, i.clone()));
+                }
+            }
+            for full in &e.removed_apps {
+                let name = full.split('_').next().unwrap_or(full);
+                if let Some(a) = catalog::bloat().app.iter().find(|a| a.matches(name)) {
+                    removed.insert(a.name.clone(), e.id);
+                }
+            }
+        }
+        let mut out = Vec::new();
+        for (id, (entry_id, item)) in last {
+            // El plan de energía no: lo cambian también el fabricante y la propia persona.
+            let Some(t) = catalog::find_tweak(&id) else { continue };
+            if !t.supported_on(build) || !(item.applied || item.choice.is_some()) {
+                continue;
+            }
+            let d = tweak_state(t, build);
+            if matches!(d.state, TweakState::Unsupported | TweakState::Error) {
+                continue;
+            }
+            let drifted = match &item.choice {
+                Some(c) => t.find_choice(c).is_some() && d.choice.as_deref() != Some(c.as_str()),
+                None => d.state != TweakState::Applied,
+            };
+            if drifted {
+                out.push(Drift { kind: "tweak", id, title: i18n::tweak_title(t), entry_id, at: entry_id / 1000, choice: item.choice });
+            }
+        }
+        for (id, title) in installed_bloat {
+            if let Some(&entry_id) = removed.get(id) {
+                out.push(Drift { kind: "bloat", id: id.clone(), title: title.clone(), entry_id, at: entry_id / 1000, choice: None });
+            }
+        }
+        out.sort_by(|a, b| b.entry_id.cmp(&a.entry_id).then_with(|| a.title.cmp(&b.title)));
+        out
     }
 
     /// Guarda un cambio de DNS ya aplicado. Devuelve el id de la entrada.
@@ -687,6 +809,8 @@ impl Engine {
             items: vec![],
             network: Some(change),
             proxy: None,
+            startup: None,
+            wu: None,
         });
         self.save(&entries)?;
         Ok(id)
@@ -802,6 +926,8 @@ impl Engine {
                 items,
                 network: None,
                 proxy: None,
+                startup: None,
+                wu: None,
             });
             if let Err(e) = self.save(&entries) {
                 results.push(ItemResult { id: "journal".into(), ok: false, error: Some(t!("journal_save_failed", error = e)) });
@@ -830,7 +956,7 @@ impl Engine {
         if entry.undone {
             return Err(t!("entry_undone"));
         }
-        if entry.changes.is_empty() && entry.power.is_none() && entry.network.is_none() && entry.proxy.is_none() {
+        if entry.changes.is_empty() && !entry.special() {
             return Err(t!("apps_not_restorable"));
         }
         if entry.network.is_some() && !crate::system::is_elevated() {
@@ -851,6 +977,12 @@ impl Engine {
         }
         if let Some(p) = &entry.proxy {
             crate::proxy::validate_saved(p)?;
+        }
+        if let Some(s) = &entry.startup {
+            crate::startup::validate_saved(s).map_err(|e| t!("journal_mismatch", error = e))?;
+        }
+        if let Some(w) = &entry.wu {
+            crate::wupdate::validate_saved(w).map_err(|e| t!("journal_mismatch", error = e))?;
         }
 
         if !force {
@@ -893,6 +1025,16 @@ impl Engine {
                     conflicts.push(t!("conflict_proxy"));
                 }
             }
+            if let Some(s) = &entry.startup {
+                if crate::startup::current(s).is_some_and(|now| now != s.enabled_after) {
+                    conflicts.push(t!("conflict_startup", name = s.title));
+                }
+            }
+            if let Some(w) = &entry.wu {
+                if crate::wupdate::conflicts(w) {
+                    conflicts.push(t!("conflict_wu"));
+                }
+            }
             if !conflicts.is_empty() {
                 let mut r = ApplyReport::new(Some(entry_id), vec![], Restart::None);
                 r.conflicts = conflicts;
@@ -925,6 +1067,14 @@ impl Engine {
         if let Some(n) = &entry.network {
             let r = crate::network::restore(&n.before);
             results.push(ItemResult { id: "network.dns".into(), ok: r.is_ok(), error: r.err() });
+        }
+        if let Some(s) = &entry.startup {
+            let r = crate::startup::restore(s);
+            results.push(ItemResult { id: "startup".into(), ok: r.is_ok(), error: r.err() });
+        }
+        if let Some(w) = &entry.wu {
+            let r = crate::wupdate::restore(w);
+            results.push(ItemResult { id: "windows_update".into(), ok: r.is_ok(), error: r.err() });
         }
         let mut ids: Vec<String> = entry.changes.iter().map(|c| c.tweak_id.clone()).collect();
         ids.dedup();
@@ -990,6 +1140,8 @@ mod tests {
             items: vec![],
             network: None,
             proxy: None,
+            startup: None,
+            wu: None,
         }
     }
 

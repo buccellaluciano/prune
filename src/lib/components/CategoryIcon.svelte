@@ -1,6 +1,6 @@
 <script lang="ts">
   import {
-    Shield, Sparkles, MegaphoneOff, Search, PanelBottom, Folder, Palette, Gamepad2, Zap, Cog,
+    Shield, Sparkles, MegaphoneOff, Search, PanelBottom, Folder, Palette, Gamepad2, Zap, Cog, RefreshCw,
   } from "@lucide/svelte";
 
   let { name, size = 16 }: { name: string; size?: number } = $props();
@@ -15,6 +15,7 @@
     palette: Palette,
     gamepad: Gamepad2,
     cog: Cog,
+    refresh: RefreshCw,
   };
   const Icon = $derived(map[name] ?? Zap);
 </script>

@@ -73,6 +73,31 @@ pub fn read(h: Hive, path: &str, name: &str) -> io::Result<Option<RawValue>> {
     }
 }
 
+/// Todos los valores de una clave (vacío si no existe).
+pub fn values(h: Hive, path: &str) -> io::Result<Vec<(String, RawValue)>> {
+    let key = match root(h).open_subkey_with_flags(path, KEY_READ | KEY_WOW64_64KEY) {
+        Ok(k) => k,
+        Err(e) if is_not_found(&e) => return Ok(vec![]),
+        Err(e) => return Err(e),
+    };
+    let mut out = Vec::new();
+    for v in key.enum_values() {
+        let (name, v) = v?;
+        out.push((name, RawValue { vtype: v.vtype as u32, bytes: v.bytes.into_owned() }));
+    }
+    Ok(out)
+}
+
+/// Texto de un REG_SZ / REG_EXPAND_SZ.
+pub fn as_text(v: &RawValue) -> Option<String> {
+    decode_sz(v)
+}
+
+/// Número de un REG_DWORD.
+pub fn as_dword(v: &RawValue) -> Option<u32> {
+    decode_dword(v)
+}
+
 /// Devuelve las claves (de la más profunda a la más alta) que no existían y
 /// se crearon para poder escribir en `path`.
 pub fn missing_keys(h: Hive, path: &str) -> io::Result<Vec<String>> {

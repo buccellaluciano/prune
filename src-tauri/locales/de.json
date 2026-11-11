@@ -131,7 +131,35 @@
     "proxy_on": "ein",
     "proxy_off": "aus",
     "conflict_proxy": "Die Proxyeinstellungen haben sich nach diesem Eintrag geändert",
-    "dns_unrestorable": "Der aktuelle DNS von {adapter} enthält Werte, die P-Rune nicht exakt wiederherstellen könnte, daher wurde nichts geändert."
+    "dns_unrestorable": "Der aktuelle DNS von {adapter} enthält Werte, die P-Rune nicht exakt wiederherstellen könnte, daher wurde nichts geändert.",
+    "startup_missing": "Dieser Eintrag ist nicht mehr im Windows-Autostart.",
+    "startup_not_eligible": "Diese Aufgabe gehört zu Windows oder startet nicht bei der Anmeldung: P-Rune ändert sie nicht.",
+    "startup_bad_entry": "Der gespeicherte Autostart-Eintrag ist ungültig.",
+    "label_startup_on": "Autostart: {name} aktiviert",
+    "label_startup_off": "Autostart: {name} deaktiviert",
+    "conflict_startup": "{name} wurde nach diesem Eintrag im Windows-Autostart geändert",
+    "restore_policy": "Eine Richtlinie deiner Organisation deaktiviert die Systemwiederherstellung.",
+    "restore_disabled": "Die Systemwiederherstellung ist auf diesem PC deaktiviert. Aktiviere sie unter Computerschutz.",
+    "restore_failed": "Windows konnte den Wiederherstellungspunkt nicht erstellen (Code {code}).",
+    "restore_not_created": "Windows meldete Erfolg, aber der Wiederherstellungspunkt erscheint nicht. Prüfe den Computerschutz.",
+    "restore_no_rstrui": "Das Windows-Werkzeug wurde nicht gefunden.",
+    "restore_description": "P-Rune: vor dem Anwenden von Änderungen",
+    "wu_policy": "Deine Organisation verwaltet das per Richtlinie: P-Rune ändert es nicht.",
+    "wu_pause_days": "Windows erlaubt höchstens {max} Tage Pause.",
+    "wu_hours_invalid": "Die Nutzungszeit muss zwischen 1 und {max} Stunden umfassen.",
+    "wu_bad_entry": "Die gespeicherte Windows-Update-Änderung ist ungültig.",
+    "label_wu_pause": "Windows Update: {days} Tage pausiert",
+    "label_wu_resume": "Windows Update: fortgesetzt",
+    "label_wu_hours_auto": "Windows Update: automatische Nutzungszeit",
+    "label_wu_hours": "Windows Update: Nutzungszeit von {start} bis {end}",
+    "conflict_wu": "Die Windows-Update-Einstellungen wurden nach diesem Eintrag geändert",
+    "profile_filter": "P-Rune-Konfiguration",
+    "profile_write_failed": "Die Datei konnte nicht gespeichert werden: {error}",
+    "profile_read_failed": "Die Datei konnte nicht gelesen werden: {error}",
+    "profile_invalid": "Diese Datei ist keine P-Rune-Konfiguration.",
+    "profile_newer": "Die Datei stammt aus einer neueren P-Rune-Version. Aktualisiere die App, um sie zu öffnen.",
+    "profile_too_big": "Die Datei ist zu groß für eine P-Rune-Konfiguration.",
+    "wu_unrestorable": "Windows Update enthält Werte eines anderen Programms (zum Beispiel eine längere Pause, als Windows erlaubt), die P-Rune nicht exakt wiederherstellen könnte, daher wurde nichts geändert."
   },
   "category": {
     "ai": "KI und Copilot",
@@ -143,7 +171,8 @@
     "search": "Suche",
     "start": "Start und Vorschläge",
     "taskbar": "Taskleiste",
-    "services": "Dienste"
+    "services": "Dienste",
+    "updates": "Windows Update"
   },
   "tweak": {
     "ai.copilot_legacy": {
@@ -387,6 +416,10 @@
     "services.sysmain": {
       "title": "SysMain (Superfetch) deaktivieren",
       "description": "Lädt deine meistgenutzten Apps nicht mehr vorab in den RAM. Mit SSD kaum spürbar; mit Festplatte öffnen sich Apps langsamer."
+    },
+    "updates.no_drivers": {
+      "title": "Keine Treiber über Windows Update installieren",
+      "description": "Windows Update lädt und installiert keine Treiber mehr von selbst, auch nicht für neue Geräte. Nützlich, wenn ein Treiber aus Windows Update Probleme gemacht hat oder du die des Herstellers bevorzugst. Bereits installierte Treiber bleiben unverändert. Die Einstellungen zeigen dann an, dass deine Organisation einige Einstellungen verwaltet: Das liegt an dieser Richtlinie."
     }
   },
   "bloat": {

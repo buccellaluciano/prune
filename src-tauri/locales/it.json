@@ -131,7 +131,35 @@
     "proxy_on": "attivato",
     "proxy_off": "disattivato",
     "conflict_proxy": "Le impostazioni del proxy sono cambiate dopo questa voce",
-    "dns_unrestorable": "Il DNS attuale di {adapter} ha valori che P-Rune non potrebbe ripristinare esattamente, quindi non è stato cambiato nulla."
+    "dns_unrestorable": "Il DNS attuale di {adapter} ha valori che P-Rune non potrebbe ripristinare esattamente, quindi non è stato cambiato nulla.",
+    "startup_missing": "Quella voce non è più nell'avvio di Windows.",
+    "startup_not_eligible": "Quell'attività è di Windows o non parte all'accesso: P-Rune non la modifica.",
+    "startup_bad_entry": "La voce di avvio salvata non è valida.",
+    "label_startup_on": "Avvio: {name} attivato",
+    "label_startup_off": "Avvio: {name} disattivato",
+    "conflict_startup": "{name} è cambiato nell'avvio di Windows dopo questa voce",
+    "restore_policy": "Un criterio della tua organizzazione disattiva Ripristino configurazione di sistema.",
+    "restore_disabled": "Ripristino configurazione di sistema è disattivato su questo PC. Si attiva in Protezione sistema.",
+    "restore_failed": "Windows non è riuscito a creare il punto di ripristino (codice {code}).",
+    "restore_not_created": "Windows ha risposto che è andato tutto bene, ma il punto di ripristino non compare. Controlla Protezione sistema.",
+    "restore_no_rstrui": "Lo strumento di Windows non è stato trovato.",
+    "restore_description": "P-Rune: prima di applicare modifiche",
+    "wu_policy": "La tua organizzazione lo gestisce con un criterio: P-Rune non lo modifica.",
+    "wu_pause_days": "Windows consente di sospendere al massimo {max} giorni.",
+    "wu_hours_invalid": "L'orario di attività deve coprire da 1 a {max} ore.",
+    "wu_bad_entry": "La modifica di Windows Update salvata non è valida.",
+    "label_wu_pause": "Windows Update: sospeso per {days} giorni",
+    "label_wu_resume": "Windows Update: ripreso",
+    "label_wu_hours_auto": "Windows Update: orario di attività automatico",
+    "label_wu_hours": "Windows Update: orario di attività dalle {start} alle {end}",
+    "conflict_wu": "Le impostazioni di Windows Update sono cambiate dopo questa voce",
+    "profile_filter": "Configurazione di P-Rune",
+    "profile_write_failed": "Impossibile salvare il file: {error}",
+    "profile_read_failed": "Impossibile leggere il file: {error}",
+    "profile_invalid": "Quel file non è una configurazione di P-Rune.",
+    "profile_newer": "Il file è di una versione più recente di P-Rune. Aggiorna l'app per aprirlo.",
+    "profile_too_big": "Il file è troppo grande per essere una configurazione di P-Rune.",
+    "wu_unrestorable": "Windows Update ha valori impostati da un altro programma (per esempio una pausa più lunga di quanto consente Windows) che P-Rune non potrebbe ripristinare esattamente, quindi non è stato cambiato nulla."
   },
   "category": {
     "ai": "IA e Copilot",
@@ -143,7 +171,8 @@
     "search": "Ricerca",
     "start": "Start e suggerimenti",
     "taskbar": "Barra delle applicazioni",
-    "services": "Servizi"
+    "services": "Servizi",
+    "updates": "Windows Update"
   },
   "tweak": {
     "ai.copilot_legacy": {
@@ -387,6 +416,10 @@
     "services.sysmain": {
       "title": "Disattiva SysMain (Superfetch)",
       "description": "Smette di precaricare in RAM le app che usi di più. Con un SSD quasi non si nota; con un disco rigido le app si aprono più lentamente."
+    },
+    "updates.no_drivers": {
+      "title": "Non installare driver da Windows Update",
+      "description": "Windows Update smette di scaricare e installare driver da solo, anche per i nuovi dispositivi. Utile se un driver di Windows Update ha causato problemi o preferisci quelli del produttore. I driver già installati non vengono toccati. Impostazioni dirà che la tua organizzazione gestisce alcune impostazioni: è per via di questo criterio."
     }
   },
   "bloat": {

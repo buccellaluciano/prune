@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Command, LoaderCircle, Search, ShieldAlert, X } from "@lucide/svelte";
+  import { Command, LoaderCircle, RotateCcw, Search, ShieldAlert, X } from "@lucide/svelte";
   import { isTauri } from "#lib/api.ts";
   import { store } from "#lib/store.svelte.ts";
   import Sidebar from "#lib/components/Sidebar.svelte";
@@ -15,6 +15,11 @@
   import MoreAppsView from "#lib/components/MoreAppsView.svelte";
   import NetworkView from "#lib/components/NetworkView.svelte";
   import DnsConfirm from "#lib/components/DnsConfirm.svelte";
+  import StartupView from "#lib/components/StartupView.svelte";
+  import UpdatesCard from "#lib/components/UpdatesCard.svelte";
+  import DriftSheet from "#lib/components/DriftSheet.svelte";
+  import ImportSheet from "#lib/components/ImportSheet.svelte";
+  import { drift } from "#lib/safety.svelte.ts";
   import InstallSheet from "#lib/components/InstallSheet.svelte";
   import Welcome from "#lib/components/Welcome.svelte";
   import UpdateSheet from "#lib/components/UpdateSheet.svelte";
@@ -26,17 +31,19 @@
   import ModernTitleBar from "#lib/components/ModernTitleBar.svelte";
   import { theme } from "#lib/theme.svelte.ts";
   import { apps } from "#lib/apps.svelte.ts";
-  import { i18n, t } from "#lib/i18n.svelte.ts";
+  import { i18n, t, tn } from "#lib/i18n.svelte.ts";
 
   onMount(() => {
     theme.apply();
     store.loadUser();
     // El idioma va primero: el backend arma el catálogo y los mensajes en ese idioma.
     // Después, en silencio, si hay una versión nueva (un pedido a GitHub; si falla, nada).
-    i18n.init().finally(() => store.load().then(() => updates.check(true)));
+    // También si Windows volvió atrás algo que se había aplicado (solo lectura).
+    i18n.init().finally(() => store.load().then(() => (updates.check(true), drift.check())));
     // Al cambiarlo, se vuelve a pedir lo que trae textos del catálogo.
     i18n.onChange(() => {
       store.load();
+      drift.check();
       if (apps.overview) apps.load();
     });
   });
@@ -125,6 +132,8 @@
         {#key i18n.lang}<HistoryView />{/key}
       {:else if store.view === "network"}
         <NetworkView />
+      {:else if store.view === "startup"}
+        <StartupView />
       {:else if store.view === "more"}
         <MoreAppsView />
       {:else if store.view === "versions"}
@@ -133,6 +142,23 @@
         <div class="mx-auto max-w-4xl">
           <h1 class="font-display text-[20px] font-semibold">{categoryTitle}</h1>
           <p class="mt-1 mb-7 text-[13px] text-mute">{t("page.subtitle")}</p>
+
+          {#if drift.visible.length && !store.query}
+            <div class="mb-6 flex items-center gap-3 rounded-lg border border-moderate/40 bg-moderate/5 px-4 py-3">
+              <RotateCcw size={16} class="shrink-0 text-moderate" />
+              <div class="min-w-0 flex-1">
+                <div class="text-[13px]">{tn("drift.banner", drift.visible.length)}</div>
+                <div class="text-[11.5px] text-mute">{t("drift.banner_hint")}</div>
+              </div>
+              <button class="rounded-md border border-line px-2.5 py-1 text-[12.5px] hover:border-mute" onclick={() => (drift.open = true)}>
+                {t("drift.review")}
+              </button>
+            </div>
+          {/if}
+
+          {#if store.category === "updates" && !store.query}
+            {#key i18n.lang}<UpdatesCard />{/key}
+          {/if}
 
           {#each grouped as g (g.cat?.id ?? "single")}
             {#if g.cat}
@@ -167,6 +193,8 @@
 <InstallSheet />
 <UpdateSheet />
 <DnsConfirm />
+<DriftSheet />
+<ImportSheet />
 <Welcome />
 
 <!-- Toasts -->

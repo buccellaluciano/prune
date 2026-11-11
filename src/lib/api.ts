@@ -108,6 +108,10 @@ export interface JournalEntry {
   network?: { before: AdapterDns[]; after: AdapterDns[] } | null;
   /** Cambio de proxy (interruptores antes/después). */
   proxy?: { kind: ProxyKind; before: number; after: number } | null;
+  /** Algo del inicio de Windows, habilitado o deshabilitado. */
+  startup?: { source: StartupSource; name: string; title: string; enabled_before: boolean; enabled_after: boolean } | null;
+  /** Pausa u horas activas de Windows Update. */
+  wu?: { kind: "pause" | "resume" | "hours"; detail: string } | null;
 }
 
 export interface BloatApp {
@@ -497,4 +501,114 @@ export interface CleanResult {
 export const cleanupApi = {
   scan: () => call<CleanView[]>("cleanup_scan"),
   run: (ids: CleanupId[]) => call<CleanResult[]>("cleanup_run", { ids }),
+};
+
+// ───────── Inicio de Windows ─────────
+
+export type StartupSource = "run_user" | "run_machine" | "run_machine32" | "folder_user" | "folder_machine" | "task";
+
+export interface StartupItem {
+  source: StartupSource;
+  /** Id dentro de su origen (nombre del valor, del archivo o ruta de la tarea). */
+  name: string;
+  title: string;
+  command: string;
+  path: string | null;
+  exists: boolean;
+  /** Firmante válido, si tiene. */
+  publisher: string | null;
+  /** Es parte de Windows. */
+  system: boolean;
+  enabled: boolean;
+}
+
+export interface StartupStatus {
+  items: StartupItem[];
+  elevated: boolean;
+  foreign_user: string | null;
+}
+
+export const startupApi = {
+  status: () => call<StartupStatus>("startup_status"),
+  /** Devuelve la entrada del historial, o null si ya estaba así. */
+  set: (source: StartupSource, name: string, enabled: boolean) => call<number | null>("startup_set", { source, name, enabled }),
+};
+
+// ───────── Puntos de restauración ─────────
+
+export interface RestoreStatus {
+  enabled: boolean;
+  policy: boolean;
+  elevated: boolean;
+  last: { at: number; description: string } | null;
+  count: number;
+  /** Se pudo leer la lista de puntos. */
+  readable: boolean;
+}
+
+export const restoreApi = {
+  status: () => call<RestoreStatus>("restore_status"),
+  /** Crea uno, o usa el de las últimas 24 horas (`reused`). */
+  create: () => call<{ at: number; reused: boolean }>("restore_create"),
+  open: () => call<void>("restore_open"),
+  settings: () => call<void>("restore_settings"),
+};
+
+// ───────── Windows Update ─────────
+
+export interface WuStatus {
+  paused_until: number | null;
+  max_pause_days: number;
+  active_start: number | null;
+  active_end: number | null;
+  smart_hours: boolean | null;
+  pause_policy: boolean;
+  hours_policy: boolean;
+  elevated: boolean;
+}
+
+export type WuRequest =
+  | { action: "pause"; days: number }
+  | { action: "resume" }
+  | { action: "hours"; start: number | null; end: number | null };
+
+export const wuApi = {
+  status: () => call<WuStatus>("wu_status"),
+  /** Devuelve la entrada del historial. */
+  /** Devuelve la entrada del historial, o null si ya estaba así. */
+  set: (request: WuRequest) => call<number | null>("wu_set", { request }),
+};
+
+// ───────── Cambios que Windows volvió atrás ─────────
+
+export interface Drift {
+  kind: "tweak" | "bloat";
+  id: string;
+  title: string;
+  entry_id: number;
+  at: number;
+  choice: string | null;
+}
+
+export const driftApi = {
+  check: () => call<Drift[]>("drift_check"),
+};
+
+// ───────── Exportar / importar configuración ─────────
+
+export interface ImportPreview {
+  file: string;
+  app_version: string;
+  created: number;
+  tweaks: { id: string; title: string; applied: boolean; choice: string | null; choice_label: string | null; current: boolean }[];
+  bloat: { id: string; title: string; tier: Risk }[];
+  apps: { id: string; title: string; installed: boolean }[];
+  skipped: number;
+}
+
+export const profileApi = {
+  /** Abre "Guardar como". Devuelve el nombre del archivo, o null si se canceló. */
+  export: () => call<string | null>("profile_export"),
+  /** Abre "Abrir" y devuelve la vista previa, o null si se canceló. */
+  import: () => call<ImportPreview | null>("profile_import"),
 };

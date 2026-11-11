@@ -58,6 +58,11 @@ title = "Servicios"
 icon = "cog"
 
 [[category]]
+id = "updates"
+title = "Windows Update"
+icon = "refresh"
+
+[[category]]
 id = "power"
 title = "Energía"
 icon = "zap"
@@ -1165,3 +1170,27 @@ kind = "dword"
 on = 4
 off = 2
 must_exist = true
+
+# ───────────────────────────── Windows Update ─────────────────────────────
+# La pausa y las horas activas no son tweaks: son fechas y horas, las maneja wupdate.rs.
+
+[[tweak]]
+id = "updates.no_drivers"
+category = "updates"
+title = "No instalar drivers desde Windows Update"
+description = "Windows Update deja de bajar e instalar drivers por su cuenta, también los de dispositivos nuevos. Sirve si un driver de Windows Update te trajo problemas o preferís los del fabricante. Los drivers ya instalados no se tocan. Configuración va a decir que tu organización administra algunas opciones: es por esta directiva."
+risk = "moderate"
+tags = ["windows update", "drivers", "controladores", "actualizaciones"]
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate'
+name = "ExcludeWUDriversInQualityUpdate"
+kind = "dword"
+on = 1
+[[tweak.ops]]
+hive = "HKLM"
+path = 'SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching'
+name = "SearchOrderConfig"
+kind = "dword"
+on = 0
+off = 1

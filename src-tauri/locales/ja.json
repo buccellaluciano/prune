@@ -131,7 +131,35 @@
     "proxy_on": "オン",
     "proxy_off": "オフ",
     "conflict_proxy": "この記録の後にプロキシ設定が変更されました",
-    "dns_unrestorable": "{adapter} の現在の DNS には P-Rune が元どおりに戻せない値があるため、何も変更していません。"
+    "dns_unrestorable": "{adapter} の現在の DNS には P-Rune が元どおりに戻せない値があるため、何も変更していません。",
+    "startup_missing": "その項目はもう Windows のスタートアップにありません。",
+    "startup_not_eligible": "そのタスクは Windows のものか、サインイン時に実行されないため、P-Rune は変更しません。",
+    "startup_bad_entry": "保存されたスタートアップ項目が無効です。",
+    "label_startup_on": "スタートアップ: {name} を有効化",
+    "label_startup_off": "スタートアップ: {name} を無効化",
+    "conflict_startup": "この履歴の後、{name} のスタートアップ設定が変わりました",
+    "restore_policy": "組織のポリシーでシステムの復元が無効になっています。",
+    "restore_disabled": "この PC ではシステムの復元がオフです。「システムの保護」でオンにできます。",
+    "restore_failed": "Windows が復元ポイントを作成できませんでした (コード {code})。",
+    "restore_not_created": "Windows は成功と返しましたが、復元ポイントが見つかりません。「システムの保護」を確認してください。",
+    "restore_no_rstrui": "Windows のツールが見つかりません。",
+    "restore_description": "P-Rune: 変更を適用する前",
+    "wu_policy": "組織がポリシーで管理しているため、P-Rune は変更しません。",
+    "wu_pause_days": "Windows で一時停止できるのは最大 {max} 日です。",
+    "wu_hours_invalid": "アクティブ時間は 1〜{max} 時間の範囲にしてください。",
+    "wu_bad_entry": "保存された Windows Update の変更が無効です。",
+    "label_wu_pause": "Windows Update: {days} 日間一時停止",
+    "label_wu_resume": "Windows Update: 再開",
+    "label_wu_hours_auto": "Windows Update: アクティブ時間を自動調整",
+    "label_wu_hours": "Windows Update: アクティブ時間 {start} 時〜{end} 時",
+    "conflict_wu": "この履歴の後、Windows Update の設定が変わりました",
+    "profile_filter": "P-Rune の構成",
+    "profile_write_failed": "ファイルを保存できませんでした: {error}",
+    "profile_read_failed": "ファイルを読み込めませんでした: {error}",
+    "profile_invalid": "そのファイルは P-Rune の構成ではありません。",
+    "profile_newer": "このファイルは新しいバージョンの P-Rune のものです。アプリを更新してから開いてください。",
+    "profile_too_big": "ファイルが大きすぎるため、P-Rune の構成ではありません。",
+    "wu_unrestorable": "Windows Update に別のプログラムが設定した値 (Windows の上限を超える一時停止など) があり、P-Rune が元どおりに戻せないため、何も変更していません。"
   },
   "category": {
     "ai": "AI と Copilot",
@@ -143,7 +171,8 @@
     "search": "検索",
     "start": "スタートとおすすめ",
     "taskbar": "タスクバー",
-    "services": "サービス"
+    "services": "サービス",
+    "updates": "Windows Update"
   },
   "tweak": {
     "ai.copilot_legacy": {
@@ -387,6 +416,10 @@
     "services.sysmain": {
       "title": "SysMain（Superfetch）をオフにする",
       "description": "よく使うアプリを RAM に事前に読み込まなくなります。SSD ならほとんど変わりませんが、HDD ではアプリの起動が遅くなります。"
+    },
+    "updates.no_drivers": {
+      "title": "Windows Update でドライバーをインストールしない",
+      "description": "Windows Update が自動でドライバーをダウンロード・インストールしなくなります (新しいデバイスも含む)。Windows Update のドライバーで問題が出た場合や、メーカー製を使いたい場合に便利です。インストール済みのドライバーは変わりません。設定に「一部の設定は組織によって管理されています」と表示されますが、このポリシーによるものです。"
     }
   },
   "bloat": {

@@ -4,6 +4,8 @@
   import { store } from "#lib/store.svelte.ts";
   import { i18n, t, tn } from "#lib/i18n.svelte.ts";
   import { onMount } from "svelte";
+  import RestoreCard from "./RestoreCard.svelte";
+  import { drift } from "#lib/safety.svelte.ts";
 
   let entries = $state<JournalEntry[] | null>(null);
   let working = $state<number | null>(null);
@@ -30,6 +32,7 @@
       conflict = null;
       store.report(r, "undo");
       await Promise.all([load(), store.load()]);
+      drift.check();
     } catch (err) {
       store.toast("error", String(err));
     } finally {
@@ -43,6 +46,8 @@
 <div class="mx-auto max-w-3xl">
   <h1 class="font-display text-[20px] font-semibold">{t("nav.history")}</h1>
   <p class="mt-1 mb-5 text-[13px] text-mute">{t("history.subtitle")}</p>
+
+  <RestoreCard />
 
   {#if !entries}
     <div class="flex items-center gap-2 text-[13px] text-mute"><LoaderCircle size={16} class="animate-spin" /> {t("common.loading")}</div>
@@ -60,11 +65,11 @@
               <div class="truncate text-[13px] font-medium">{e.label}</div>
               <div class="text-[11.5px] text-mute">
                 {fmt.format(new Date(e.at * 1000))} ·
-                {#if e.removed_apps.length}{tn("history.apps_removed", e.removed_apps.length)}{:else}{tn("history.changes", e.changes.length + (e.power ? 1 : 0) + (e.network ? 1 : 0) + (e.proxy ? 1 : 0))}{/if}
+                {#if e.removed_apps.length}{tn("history.apps_removed", e.removed_apps.length)}{:else}{tn("history.changes", e.changes.length + (e.power ? 1 : 0) + (e.network ? 1 : 0) + (e.proxy ? 1 : 0) + (e.startup ? 1 : 0) + (e.wu ? 1 : 0))}{/if}
                 {#if e.undone} · {t("history.undone")}{/if}
               </div>
             </div>
-            {#if !e.undone && (e.changes.length || e.power || e.network || e.proxy) && conflict?.id !== e.id}
+            {#if !e.undone && (e.changes.length || e.power || e.network || e.proxy || e.startup || e.wu) && conflict?.id !== e.id}
               <button
                 class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12.5px] text-mute hover:bg-card-hi hover:text-ink disabled:opacity-50"
                 disabled={working !== null}

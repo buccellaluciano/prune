@@ -5,6 +5,7 @@
   import { t, tn } from "#lib/i18n.svelte.ts";
   import { onMount } from "svelte";
   import { fly } from "svelte/transition";
+  import { restore } from "#lib/safety.svelte.ts";
 
   let apps = $state<BloatApp[] | null>(null);
   let error = $state<string | null>(null);
@@ -12,6 +13,8 @@
   let deprovision = $state(true);
   let confirming = $state(false);
   let working = $state(false);
+  /** Quitar apps no se deshace desde P-Rune: por defecto, punto de restauración antes. */
+  let withRestore = $state(true);
 
   const tiers = $derived<{ id: Risk; title: string; hint: string; cls: string }[]>([
     { id: "safe", title: t("bloat.tier.safe"), hint: t("bloat.tier.safe_hint"), cls: "" },
@@ -32,7 +35,10 @@
       error = String(e);
     }
   }
-  onMount(load);
+  onMount(() => {
+    load();
+    restore.load().then(() => (withRestore = !restore.recent));
+  });
 
   function toggle(id: string) {
     selected = { ...selected, [id]: !selected[id] };
@@ -55,6 +61,7 @@
   async function remove() {
     working = true;
     try {
+      if (withRestore && restore.available && !(await restore.create())) return;
       const res = await api.removeBloat(chosen, deprovision && elevated);
       const ok = res.filter((r) => r.ok).length;
       if (ok) store.toast("ok", tn("bloat.removed", ok));
@@ -159,7 +166,7 @@
         disabled={working}
         onclick={remove}
       >
-        {#if working}<LoaderCircle size={13} class="animate-spin" />{/if} {t("bloat.yes_remove")}
+        {#if working}<LoaderCircle size={13} class="animate-spin" />{/if} {restore.creating ? t("restore.creating") : t("bloat.yes_remove")}
       </button>
     {:else}
       <span class="text-[13px] text-mute">
@@ -174,6 +181,17 @@
           onclick={() => (deprovision = !deprovision)}
         >
           {@render checkbox(deprovision)} {t("bloat.deprovision")}
+        </button>
+      {/if}
+      {#if restore.available}
+        <button
+          role="checkbox"
+          aria-checked={withRestore}
+          class="group flex items-center gap-2 rounded-md px-2 py-1 text-[12.5px] text-mute hover:bg-card-hi hover:text-ink"
+          title={t(restore.recent ? "restore.option_recent" : "restore.option_hint")}
+          onclick={() => (withRestore = !withRestore)}
+        >
+          {@render checkbox(withRestore)} {t("restore.option_short")}
         </button>
       {/if}
       <button class="rounded-md px-2.5 py-1 text-[13px] text-mute hover:bg-card-hi hover:text-ink" onclick={clear}>{t("pending.discard")}</button>

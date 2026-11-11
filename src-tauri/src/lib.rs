@@ -11,6 +11,7 @@ macro_rules! t {
 mod appx;
 mod catalog;
 mod cleanup;
+mod com;
 mod disk;
 mod engine;
 mod http;
@@ -18,9 +19,12 @@ mod i18n;
 mod icons;
 mod network;
 mod power;
+mod profile;
 mod proxy;
 mod registry;
+mod restore;
 mod sign;
+mod startup;
 mod system;
 mod updater;
 mod verify;
@@ -28,6 +32,7 @@ mod user;
 mod vt;
 mod winget;
 mod wmo;
+mod wupdate;
 
 use catalog::Category;
 use engine::{ApplyReport, Desired, Engine, JournalEntry, PlannedChange, TweakView};
@@ -321,6 +326,150 @@ async fn proxy_set(app: tauri::AppHandle, kind: proxy::Kind, enabled: bool) -> R
     .map_err(|e| e.to_string())?
 }
 
+// ───────── Inicio de Windows ─────────
+
+#[tauri::command]
+async fn startup_status() -> startup::StartupStatus {
+    tauri::async_runtime::spawn_blocking(startup::status).await.unwrap_or_else(|_| startup::StartupStatus {
+        items: vec![],
+        elevated: system::is_elevated(),
+        foreign_user: None,
+    })
+}
+
+/// Habilita o deshabilita algo que ya arranca con Windows. Devuelve la entrada del historial
+/// (None si ya estaba así).
+#[tauri::command]
+async fn startup_set(app: tauri::AppHandle, source: startup::Source, name: String, enabled: bool) -> Result<Option<u64>, String> {
+    tauri::async_runtime::spawn_blocking(move || -> Result<Option<u64>, String> {
+        let Some(change) = startup::set(source, &name, enabled)? else { return Ok(None) };
+        match app.state::<Engine>().record_startup(change.clone()) {
+            Ok(id) => Ok(Some(id)),
+            Err(e) => {
+                let _ = startup::restore(&change);
+                Err(t!("journal_save_failed", error = e))
+            }
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+// ───────── Puntos de restauración ─────────
+
+#[tauri::command]
+async fn restore_status() -> restore::RestoreStatus {
+    tauri::async_runtime::spawn_blocking(restore::status).await.unwrap_or_else(|_| restore::RestoreStatus {
+        enabled: false,
+        policy: false,
+        elevated: false,
+        last: None,
+        count: 0,
+        readable: false,
+    })
+}
+
+#[tauri::command]
+async fn restore_create() -> Result<restore::Created, String> {
+    tauri::async_runtime::spawn_blocking(|| restore::create(&t!("restore_description")))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+fn restore_open() -> Result<(), String> {
+    restore::open_rstrui()
+}
+
+#[tauri::command]
+fn restore_settings() -> Result<(), String> {
+    restore::open_settings()
+}
+
+// ───────── Windows Update ─────────
+
+#[tauri::command]
+async fn wu_status() -> wupdate::WuStatus {
+    tauri::async_runtime::spawn_blocking(wupdate::status).await.unwrap_or_else(|_| wupdate::WuStatus {
+        paused_until: None,
+        max_pause_days: wupdate::DEFAULT_MAX_DAYS,
+        active_start: None,
+        active_end: None,
+        smart_hours: None,
+        pause_policy: false,
+        hours_policy: false,
+        elevated: false,
+    })
+}
+
+#[derive(serde::Deserialize)]
+#[serde(tag = "action", rename_all = "snake_case")]
+enum WuRequest {
+    Pause { days: u32 },
+    Resume,
+    Hours { start: Option<u32>, end: Option<u32> },
+}
+
+/// Pausa, reanuda o cambia las horas activas. Devuelve la entrada del historial.
+#[tauri::command]
+async fn wu_set(app: tauri::AppHandle, request: WuRequest) -> Result<Option<u64>, String> {
+    tauri::async_runtime::spawn_blocking(move || -> Result<Option<u64>, String> {
+        let change = match request {
+            WuRequest::Pause { days } => wupdate::pause(days)?,
+            WuRequest::Resume => wupdate::resume()?,
+            WuRequest::Hours { start: Some(s), end: Some(e) } => wupdate::hours(Some((s, e)))?,
+            WuRequest::Hours { start: None, end: None } => wupdate::hours(None)?,
+            // Solo una de las dos no es "automáticas": se rechaza.
+            WuRequest::Hours { .. } => return Err(t!("wu_hours_invalid", max = wupdate::MAX_ACTIVE_SPAN)),
+        };
+        // Ya estaba así: no se escribió nada ni hace falta una entrada en el historial.
+        let Some(change) = change else { return Ok(None) };
+        app.state::<Engine>().record_wu(change.clone()).map(Some).map_err(|e| {
+            let _ = wupdate::restore(&change);
+            t!("journal_save_failed", error = e)
+        })
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+// ───────── Cambios que Windows volvió atrás ─────────
+
+#[tauri::command]
+async fn drift_check(app: tauri::AppHandle) -> Vec<engine::Drift> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let installed: Vec<(String, String)> = appx::list().unwrap_or_default().into_iter().map(|b| (b.id, b.title)).collect();
+        app.state::<Engine>().drift(system::info().build, &installed)
+    })
+    .await
+    .unwrap_or_default()
+}
+
+// ───────── Exportar / importar configuración ─────────
+
+fn main_hwnd(app: &tauri::AppHandle) -> Result<isize, String> {
+    let w = app.get_webview_window("main").ok_or("sin ventana")?;
+    Ok(w.hwnd().map_err(|e| e.to_string())?.0 as isize)
+}
+
+#[tauri::command]
+async fn profile_export(app: tauri::AppHandle) -> Result<Option<String>, String> {
+    let hwnd = main_hwnd(&app)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        profile::export(&app.state::<Engine>(), windows::Win32::Foundation::HWND(hwnd as *mut core::ffi::c_void))
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+async fn profile_import(app: tauri::AppHandle) -> Result<Option<profile::ImportPreview>, String> {
+    let hwnd = main_hwnd(&app)?;
+    tauri::async_runtime::spawn_blocking(move || profile::import(windows::Win32::Foundation::HWND(hwnd as *mut core::ffi::c_void)))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
 // ───────── WMO (otra app del mismo autor) ─────────
 
 #[tauri::command]
@@ -498,6 +647,17 @@ pub fn run() {
             dns_revert,
             proxy_status,
             proxy_set,
+            startup_status,
+            startup_set,
+            restore_status,
+            restore_create,
+            restore_open,
+            restore_settings,
+            wu_status,
+            wu_set,
+            drift_check,
+            profile_export,
+            profile_import,
             play_theme_sound
         ])
         .run(tauri::generate_context!())

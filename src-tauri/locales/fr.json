@@ -131,7 +131,35 @@
     "proxy_on": "activé",
     "proxy_off": "désactivé",
     "conflict_proxy": "Les paramètres de proxy ont changé après cette entrée",
-    "dns_unrestorable": "Le DNS actuel de {adapter} contient des valeurs que P-Rune ne pourrait pas restaurer à l'identique : rien n'a été modifié."
+    "dns_unrestorable": "Le DNS actuel de {adapter} contient des valeurs que P-Rune ne pourrait pas restaurer à l'identique : rien n'a été modifié.",
+    "startup_missing": "Cette entrée ne fait plus partie du démarrage de Windows.",
+    "startup_not_eligible": "Cette tâche appartient à Windows ou ne se lance pas à l'ouverture de session : P-Rune ne la modifie pas.",
+    "startup_bad_entry": "L'entrée de démarrage enregistrée n'est pas valide.",
+    "label_startup_on": "Démarrage : {name} activé",
+    "label_startup_off": "Démarrage : {name} désactivé",
+    "conflict_startup": "{name} a changé dans le démarrage de Windows après cette entrée",
+    "restore_policy": "Une stratégie de votre organisation désactive la Restauration du système.",
+    "restore_disabled": "La Restauration du système est désactivée sur ce PC. Activez-la dans Protection du système.",
+    "restore_failed": "Windows n'a pas pu créer le point de restauration (code {code}).",
+    "restore_not_created": "Windows a répondu que c'était fait, mais le point de restauration n'apparaît pas. Vérifiez Protection du système.",
+    "restore_no_rstrui": "L'outil de Windows est introuvable.",
+    "restore_description": "P-Rune : avant d'appliquer des modifications",
+    "wu_policy": "Votre organisation gère ceci par une stratégie : P-Rune ne le modifie pas.",
+    "wu_pause_days": "Windows permet de suspendre au maximum {max} jours.",
+    "wu_hours_invalid": "Les heures d'activité doivent couvrir entre 1 et {max} heures.",
+    "wu_bad_entry": "La modification Windows Update enregistrée n'est pas valide.",
+    "label_wu_pause": "Windows Update : suspendu {days} jours",
+    "label_wu_resume": "Windows Update : repris",
+    "label_wu_hours_auto": "Windows Update : heures d'activité automatiques",
+    "label_wu_hours": "Windows Update : heures d'activité de {start} à {end}",
+    "conflict_wu": "Les paramètres de Windows Update ont changé après cette entrée",
+    "profile_filter": "Configuration P-Rune",
+    "profile_write_failed": "Impossible d'enregistrer le fichier : {error}",
+    "profile_read_failed": "Impossible de lire le fichier : {error}",
+    "profile_invalid": "Ce fichier n'est pas une configuration P-Rune.",
+    "profile_newer": "Le fichier vient d'une version plus récente de P-Rune. Mettez l'application à jour pour l'ouvrir.",
+    "profile_too_big": "Le fichier est trop volumineux pour être une configuration P-Rune.",
+    "wu_unrestorable": "Windows Update contient des valeurs définies par un autre programme (par exemple une suspension plus longue que ce que Windows permet) que P-Rune ne pourrait pas restaurer à l'identique : rien n'a été modifié."
   },
   "category": {
     "ai": "IA et Copilot",
@@ -143,7 +171,8 @@
     "search": "Recherche",
     "start": "Démarrer et suggestions",
     "taskbar": "Barre des tâches",
-    "services": "Services"
+    "services": "Services",
+    "updates": "Windows Update"
   },
   "tweak": {
     "ai.copilot_legacy": {
@@ -387,6 +416,10 @@
     "services.sysmain": {
       "title": "Désactiver SysMain (Superfetch)",
       "description": "Ne précharge plus en RAM les apps que vous utilisez le plus. À peine perceptible avec un SSD ; avec un disque dur, les apps s'ouvrent plus lentement."
+    },
+    "updates.no_drivers": {
+      "title": "Ne pas installer de pilotes via Windows Update",
+      "description": "Windows Update cesse de télécharger et d'installer des pilotes de lui-même, y compris pour les nouveaux périphériques. Utile si un pilote de Windows Update a posé problème ou si vous préférez ceux du fabricant. Les pilotes déjà installés ne sont pas modifiés. Paramètres indiquera que votre organisation gère certains paramètres : c'est dû à cette stratégie."
     }
   },
   "bloat": {

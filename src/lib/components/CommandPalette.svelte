@@ -31,6 +31,7 @@
     { id: "v:bloat", group: t("palette.group.goto"), label: t("nav.bloat"), run: () => (store.view = "bloat") },
     { id: "v:versions", group: t("palette.group.goto"), label: t("nav.versions"), run: () => (store.view = "versions") },
     { id: "v:network", group: t("palette.group.goto"), label: t("palette.network"), run: () => (store.view = "network") },
+    { id: "v:startup", group: t("palette.group.goto"), label: t("nav.startup"), run: () => (store.view = "startup") },
     { id: "v:more", group: t("palette.group.goto"), label: t("nav.more"), run: () => (store.view = "more") },
     { id: "v:history", group: t("palette.group.goto"), label: t("nav.history"), run: () => (store.view = "history") },
     ...(store.overview?.categories ?? []).map((c) => ({
