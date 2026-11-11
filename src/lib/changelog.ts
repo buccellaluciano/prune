@@ -15,6 +15,75 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.4.0",
+    date: "2026-11-11",
+    notes: {
+      es: [
+        "Nueva sección Red: elegí los DNS de cada conexión (IPv4 e IPv6) entre Cloudflare, Google, Quad9 y AdGuard, o cargalos a mano.",
+        "DNS cifrado (DNS sobre HTTPS) para los proveedores de la lista, con cifrado preferido por defecto.",
+        "Cada cambio de DNS se prueba antes y vuelve atrás solo si no confirmás en 15 segundos que internet sigue andando.",
+        "Proxy: activá o desactivá el proxy manual, el script de configuración y la detección automática que ya tengas configurados.",
+        "Los cambios de red quedan en el historial y se deshacen como cualquier otro.",
+      ],
+      en: [
+        "New Network section: pick each connection's DNS (IPv4 and IPv6) from Cloudflare, Google, Quad9 and AdGuard, or enter them by hand.",
+        "Encrypted DNS (DNS over HTTPS) for the providers in the list, with encrypted-preferred by default.",
+        "Every DNS change is tested first and rolls back on its own unless you confirm within 15 seconds that the internet still works.",
+        "Proxy: turn on or off the manual proxy, setup script and automatic detection you already have configured.",
+        "Network changes are saved in the history and can be undone like any other.",
+      ],
+      "pt-BR": [
+        "Nova seção Rede: escolha os DNS de cada conexão (IPv4 e IPv6) entre Cloudflare, Google, Quad9 e AdGuard, ou digite-os à mão.",
+        "DNS criptografado (DNS sobre HTTPS) para os provedores da lista, com criptografia preferencial por padrão.",
+        "Cada alteração de DNS é testada antes e volta sozinha se você não confirmar em 15 segundos que a internet continua funcionando.",
+        "Proxy: ative ou desative o proxy manual, o script de configuração e a detecção automática que você já tem configurados.",
+        "As alterações de rede ficam no histórico e podem ser desfeitas como qualquer outra.",
+      ],
+      fr: [
+        "Nouvelle section Réseau : choisissez les DNS de chaque connexion (IPv4 et IPv6) parmi Cloudflare, Google, Quad9 et AdGuard, ou saisissez-les à la main.",
+        "DNS chiffré (DNS sur HTTPS) pour les fournisseurs de la liste, chiffré de préférence par défaut.",
+        "Chaque modification DNS est testée avant et annulée automatiquement si vous ne confirmez pas sous 15 secondes qu'Internet fonctionne.",
+        "Proxy : activez ou désactivez le proxy manuel, le script de configuration et la détection automatique déjà configurés.",
+        "Les modifications réseau sont enregistrées dans l'historique et s'annulent comme les autres.",
+      ],
+      de: [
+        "Neuer Bereich Netzwerk: Wähle den DNS jeder Verbindung (IPv4 und IPv6) aus Cloudflare, Google, Quad9 und AdGuard oder gib ihn von Hand ein.",
+        "Verschlüsselter DNS (DNS über HTTPS) für die Anbieter der Liste, standardmäßig „verschlüsselt bevorzugt“.",
+        "Jede DNS-Änderung wird vorher getestet und automatisch zurückgenommen, wenn du nicht innerhalb von 15 Sekunden bestätigst, dass das Internet funktioniert.",
+        "Proxy: Schalte den bereits eingerichteten manuellen Proxy, das Setupskript und die automatische Erkennung ein oder aus.",
+        "Netzwerkänderungen landen im Verlauf und lassen sich wie alle anderen rückgängig machen.",
+      ],
+      it: [
+        "Nuova sezione Rete: scegli i DNS di ogni connessione (IPv4 e IPv6) tra Cloudflare, Google, Quad9 e AdGuard, o inseriscili a mano.",
+        "DNS crittografato (DNS su HTTPS) per i provider dell'elenco, con crittografia preferita per impostazione predefinita.",
+        "Ogni modifica DNS viene provata prima e torna indietro da sola se non confermi entro 15 secondi che internet funziona ancora.",
+        "Proxy: attiva o disattiva il proxy manuale, lo script di configurazione e il rilevamento automatico già configurati.",
+        "Le modifiche di rete restano nella cronologia e si annullano come le altre.",
+      ],
+      "zh-CN": [
+        "新增“网络”：为每个连接（IPv4 和 IPv6）从 Cloudflare、Google、Quad9 和 AdGuard 中选择 DNS，或手动填写。",
+        "列表中的服务商支持加密 DNS（DNS over HTTPS），默认优先加密。",
+        "每次更改 DNS 前都会先测试；如果 15 秒内未确认网络正常，会自动恢复。",
+        "代理：开启或关闭已配置的手动代理、设置脚本和自动检测。",
+        "网络更改会记入历史，可以像其他更改一样撤销。",
+      ],
+      ja: [
+        "新しい「ネットワーク」: 接続ごとの DNS (IPv4 と IPv6) を Cloudflare、Google、Quad9、AdGuard から選ぶか、手動で入力できます。",
+        "リストのプロバイダーで暗号化 DNS (DNS over HTTPS) に対応。既定は「暗号化を優先」。",
+        "DNS の変更は事前にテストされ、15 秒以内にインターネットが使えると確認しないと自動で元に戻ります。",
+        "プロキシ: 設定済みの手動プロキシ、セットアップ スクリプト、自動検出をオン/オフできます。",
+        "ネットワークの変更は履歴に残り、ほかの変更と同じく元に戻せます。",
+      ],
+      ru: [
+        "Новый раздел «Сеть»: выберите DNS для каждого подключения (IPv4 и IPv6) из Cloudflare, Google, Quad9 и AdGuard или введите вручную.",
+        "Шифрованный DNS (DNS через HTTPS) для провайдеров из списка, по умолчанию — «предпочтительно шифровать».",
+        "Каждое изменение DNS сначала проверяется и отменяется само, если в течение 15 секунд не подтвердить, что интернет работает.",
+        "Прокси: включайте и выключайте уже настроенные ручной прокси, сценарий настройки и автоматическое определение.",
+        "Изменения сети сохраняются в истории и отменяются, как и любые другие.",
+      ],
+    },
+  },
+  {
     version: "0.3.2",
     date: "2026-11-10",
     notes: {
