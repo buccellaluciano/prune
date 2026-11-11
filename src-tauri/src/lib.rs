@@ -16,7 +16,9 @@ mod engine;
 mod http;
 mod i18n;
 mod icons;
+mod network;
 mod power;
+mod proxy;
 mod registry;
 mod sign;
 mod system;
@@ -81,6 +83,8 @@ async fn history(state: tauri::State<'_, Engine>) -> Result<Vec<JournalEntry>, S
 
 #[tauri::command]
 async fn undo(state: tauri::State<'_, Engine>, entry_id: u64, force: Option<bool>) -> Result<ApplyReport, String> {
+    // Deshacer a mano un cambio de DNS sin confirmar también cancela la vuelta atrás automática.
+    network::take(entry_id);
     state.undo(entry_id, force.unwrap_or(false), system::foreign_user().as_deref())
 }
 
@@ -203,6 +207,118 @@ fn disk_dir(id: u32) -> Result<disk::DirView, String> {
 #[tauri::command]
 fn disk_open(id: u32) -> Result<(), String> {
     disk::open(id)
+}
+
+// ───────── Red (DNS) ─────────
+
+#[tauri::command]
+async fn network_status() -> Result<network::NetworkStatus, String> {
+    tauri::async_runtime::spawn_blocking(network::status).await.map_err(|e| e.to_string())
+}
+
+/// Prueba cada servidor pedido antes de aplicar (no cambia nada).
+#[tauri::command]
+async fn dns_test(adapters: Vec<network::AdapterDns>) -> Result<Vec<network::TestResult>, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let target = network::validate_request(&adapters, &network::adapters())?;
+        Ok(network::test(&target))
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[derive(Serialize)]
+struct DnsApplied {
+    entry_id: u64,
+    seconds: u64,
+}
+
+/// Aplica, guarda en el historial y arma la vuelta atrás: si en `CONFIRM_SECS` no llega
+/// `dns_confirm`, se restaura solo (aunque la interfaz no responda).
+#[tauri::command]
+async fn dns_apply(app: tauri::AppHandle, adapters: Vec<network::AdapterDns>) -> Result<DnsApplied, String> {
+    let entry_id = tauri::async_runtime::spawn_blocking({
+        let app = app.clone();
+        move || -> Result<u64, String> {
+            // Dos pedidos a la vez no pueden pasar los dos el control de "hay uno pendiente".
+            let _lock = network::APPLY_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+            network::guard()?;
+            let target = network::validate_request(&adapters, &network::adapters())?;
+            let change = network::apply(&target)?;
+            let engine = app.state::<Engine>();
+            match engine.record_network(change.clone()) {
+                Ok(id) => {
+                    network::arm(id);
+                    Ok(id)
+                }
+                Err(e) => {
+                    // Sin historial no hay cómo deshacer: mejor no dejar el cambio.
+                    let _ = network::restore(&change.before);
+                    Err(t!("journal_save_failed", error = e))
+                }
+            }
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())??;
+    std::thread::spawn(move || {
+        std::thread::sleep(std::time::Duration::from_secs(network::CONFIRM_SECS));
+        if network::take(entry_id) {
+            // `undo` devuelve Ok aunque restaurar haya fallado (va en `results`): la interfaz
+            // tiene que enterarse de la falla, no mostrar "volvió a como estaba".
+            let r = app.state::<Engine>().undo(entry_id, true, None).and_then(|rep| {
+                match rep.results.iter().find(|x| !x.ok) {
+                    Some(f) => Err(f.error.clone().unwrap_or_default()),
+                    None => Ok(entry_id),
+                }
+            });
+            let _ = app.emit("dns-reverted", r);
+        }
+    });
+    Ok(DnsApplied { entry_id, seconds: network::CONFIRM_SECS })
+}
+
+/// La persona confirmó que internet anda: el cambio queda.
+#[tauri::command]
+fn dns_confirm(entry_id: u64) -> bool {
+    network::take(entry_id)
+}
+
+/// "Volver" en el diálogo de confirmación.
+#[tauri::command]
+async fn dns_revert(state: tauri::State<'_, Engine>, entry_id: u64) -> Result<ApplyReport, String> {
+    // Solo el cambio de DNS que está esperando confirmación. Sin esto, este comando forzaría
+    // el deshacer de cualquier entrada del historial salteando el aviso de conflictos. Si ya
+    // no está pendiente es porque la vuelta atrás automática ganó: no hay nada más que hacer.
+    if !network::take(entry_id) {
+        return Ok(ApplyReport::default_for(entry_id));
+    }
+    state.undo(entry_id, true, None)
+}
+
+// ───────── Red (proxy del usuario) ─────────
+
+#[tauri::command]
+async fn proxy_status() -> Result<proxy::ProxyStatus, String> {
+    tauri::async_runtime::spawn_blocking(proxy::status).await.map_err(|e| e.to_string())?
+}
+
+/// Prende o apaga un interruptor del proxy ya configurado. Devuelve la entrada del historial
+/// (None si ya estaba así).
+#[tauri::command]
+async fn proxy_set(app: tauri::AppHandle, kind: proxy::Kind, enabled: bool) -> Result<Option<u64>, String> {
+    tauri::async_runtime::spawn_blocking(move || -> Result<Option<u64>, String> {
+        let Some(change) = proxy::set(kind, enabled)? else { return Ok(None) };
+        match app.state::<Engine>().record_proxy(change.clone()) {
+            Ok(id) => Ok(Some(id)),
+            Err(e) => {
+                let _ = proxy::restore(&change);
+                Err(t!("journal_save_failed", error = e))
+            }
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 // ───────── WMO (otra app del mismo autor) ─────────
@@ -375,6 +491,13 @@ pub fn run() {
             wmo_uninstall,
             wmo_launch,
             wmo_open_repo,
+            network_status,
+            dns_test,
+            dns_apply,
+            dns_confirm,
+            dns_revert,
+            proxy_status,
+            proxy_set,
             play_theme_sound
         ])
         .run(tauri::generate_context!())

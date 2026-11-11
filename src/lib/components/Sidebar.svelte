@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AppWindow, Check, Grid2x2Plus, HardDrive, History, LoaderCircle, PackageX, RefreshCw, ShieldCheck, ShieldOff, SlidersHorizontal, Tag } from "@lucide/svelte";
+  import { AppWindow, Check, Globe, Grid2x2Plus, HardDrive, History, LoaderCircle, PackageX, RefreshCw, ShieldCheck, ShieldOff, SlidersHorizontal, Tag } from "@lucide/svelte";
   import Logo from "./Logo.svelte";
   import { isTauri } from "#lib/api.ts";
   import { disk } from "#lib/disk.svelte.ts";
@@ -85,6 +85,9 @@
     <button class="nav {store.view === 'disk' ? 'active' : ''}" onclick={() => ((store.view = "disk"), (store.query = ""))}>
       <HardDrive size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">{t("nav.disk")}</span>
       {#if disk.status?.running}<span class="size-1.5 animate-pulse rounded-full bg-accent" title={t("side.scanning")}></span>{/if}
+    </button>
+    <button class="nav {store.view === 'network' ? 'active' : ''}" onclick={() => (store.view = "network")}>
+      <Globe size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">{t("nav.network")}</span>
     </button>
     <button class="nav {store.view === 'bloat' ? 'active' : ''}" onclick={() => (store.view = "bloat")}>
       <PackageX size={15} strokeWidth={1.7} /> <span class="flex-1 text-left">{t("nav.bloat")}</span>

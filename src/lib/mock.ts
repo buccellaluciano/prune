@@ -1,6 +1,6 @@
 // Backend simulado para desarrollar la UI en el navegador (npm run dev).
 // Nunca se usa dentro de Tauri.
-import type { AppsOverview, BloatApp, CleanView, JournalEntry, Overview, Tweak, WingetProgress } from "./api";
+import type { AdapterDns, NetworkStatus, AppsOverview, BloatApp, CleanView, JournalEntry, Overview, Tweak, WingetProgress } from "./api";
 
 const op = (key: string, name: string, current: string, on: string, off = "(borra el valor)") => ({
   key, name, current, on, off,
@@ -203,6 +203,71 @@ const cleanup: CleanView[] = [
   { id: "recycle_bin", bytes: 236 * MB, files: 41, admin: false, per_user: true, warn: "permanent", available: true },
 ];
 
+// Red de la demo: Wi-Fi principal en automático y Ethernet con Cloudflare.
+const auto = (effective: string[]) => ({ config: { servers: [], doh: "off" as const }, effective, provider: null });
+const net: NetworkStatus = {
+  adapters: [
+    { guid: "{11111111-AAAA-4000-8000-000000000001}", name: "Wi-Fi", description: "Intel(R) Wi-Fi 6 AX201 160MHz", kind: "wifi", primary: true, v4: auto(["192.168.0.1"]), v6: auto(["fe80::1"]) },
+    {
+      guid: "{22222222-BBBB-4000-8000-000000000002}", name: "Ethernet", description: "Realtek PCIe GbE Family Controller", kind: "ethernet", primary: false,
+      v4: { config: { servers: ["1.1.1.1", "1.0.0.1"], doh: "preferred" }, effective: ["1.1.1.1", "1.0.0.1"], provider: "cloudflare" },
+      v6: auto([]),
+    },
+  ],
+  providers: [
+    { id: "cloudflare", name: "Cloudflare", v4: ["1.1.1.1", "1.0.0.1"], v6: ["2606:4700:4700::1111", "2606:4700:4700::1001"] },
+    { id: "cloudflare_malware", name: "Cloudflare (malware)", v4: ["1.1.1.2", "1.0.0.2"], v6: ["2606:4700:4700::1112", "2606:4700:4700::1002"] },
+    { id: "google", name: "Google", v4: ["8.8.8.8", "8.8.4.4"], v6: ["2001:4860:4860::8888", "2001:4860:4860::8844"] },
+    { id: "quad9", name: "Quad9", v4: ["9.9.9.9", "149.112.112.112"], v6: ["2620:fe::fe", "2620:fe::9"] },
+    { id: "adguard", name: "AdGuard", v4: ["94.140.14.14", "94.140.15.15"], v6: ["2a10:50c0::ad1:ff", "2a10:50c0::ad2:ff"] },
+  ],
+  domain: null,
+  policy: false,
+  vpn: false,
+  elevated: true,
+  pending: null,
+};
+type RevertCb = (r: { Ok?: number; Err?: string }) => void;
+const revertListeners = new Set<RevertCb>();
+export function mockDnsReverted(cb: RevertCb): () => void {
+  revertListeners.add(cb);
+  return () => revertListeners.delete(cb);
+}
+let netBefore: NetworkStatus["adapters"] | null = null;
+let pendingDeadline = 0;
+let netTimer: ReturnType<typeof setTimeout> | null = null;
+function netSet(list: AdapterDns[]) {
+  for (const r of list) {
+    const a = net.adapters.find((x) => x.guid === r.guid)!;
+    for (const fam of ["v4", "v6"] as const) {
+      const cfg = r[fam];
+      const provider = net.providers.find((p) => cfg.servers.length && cfg.servers.every((s) => [...p.v4, ...p.v6].includes(s)));
+      a[fam] = { config: { servers: [...cfg.servers], doh: cfg.doh }, effective: cfg.servers.length ? [...cfg.servers] : fam === "v4" ? ["192.168.0.1"] : [], provider: provider?.id ?? null };
+    }
+  }
+}
+function netRevert() {
+  if (netBefore) net.adapters = netBefore;
+  netBefore = null;
+  net.pending = null;
+  if (netTimer) clearTimeout(netTimer);
+  netTimer = null;
+}
+
+// Proxy de la demo: un proxy local apagado (como el de Fiddler) y detección automática prendida.
+const proxy = {
+  manual: false,
+  server: "127.0.0.1:8888",
+  bypass: "<local>",
+  pac: false,
+  pac_url: "",
+  auto_detect: true,
+  local: true,
+  policy: false,
+  winhttp: null as string | null,
+  foreign_user: null as string | null,
+};
+
 const wmo = {
   installed: null as string | null,
   available: "1.1.0",
@@ -368,6 +433,64 @@ export async function mock<T>(cmd: string, args?: Record<string, unknown>): Prom
       return null as T;
     case "wmo_open_repo":
       return null as T;
+    case "network_status":
+      if (net.pending) net.pending.seconds_left = Math.max(0, Math.round((pendingDeadline - Date.now()) / 1000));
+      return structuredClone(net) as T;
+    case "dns_test":
+      await wait(700);
+      return (a.adapters as AdapterDns[])
+        .flatMap((r) => [...r.v4.servers.map((s) => [s, r.v4.doh]), ...r.v6.servers.map((s) => [s, r.v6.doh])])
+        .map(([s, doh]) => {
+          const ok = !s.startsWith("10.");
+          return { server: s, doh: doh !== "off" && net.providers.some((p) => [...p.v4, ...p.v6].includes(s)), ok, ms: ok ? 12 + Math.round(Math.random() * 30) : null };
+        }) as T;
+    case "dns_apply": {
+      if (net.pending) throw "Primero confirmá o deshacé el cambio de DNS anterior.";
+      await wait(400);
+      netBefore = structuredClone(net.adapters);
+      const list: AdapterDns[] = JSON.parse(JSON.stringify(a.adapters));
+      netSet(list);
+      const id = Date.now();
+      net.pending = { entry_id: id, seconds_left: 15 };
+      const deadline = Date.now() + 15000;
+      pendingDeadline = deadline;
+      history.unshift({ id, at: id / 1000, label: "DNS", changes: [], removed_apps: [], undone: false, network: { before: [], after: list } });
+      netTimer = setTimeout(() => {
+        netRevert();
+        const h = history.find((x) => x.id === id);
+        if (h) h.undone = true;
+        revertListeners.forEach((cb) => cb({ Ok: id }));
+      }, 15000);
+      return { entry_id: id, seconds: 15 } as T;
+    }
+    case "dns_confirm": {
+      const was = net.pending?.entry_id === a.entryId;
+      if (was) {
+        net.pending = null;
+        netBefore = null;
+        if (netTimer) clearTimeout(netTimer);
+        netTimer = null;
+      }
+      return was as T;
+    }
+    case "dns_revert": {
+      netRevert();
+      const h = history.find((x) => x.id === a.entryId);
+      if (h) h.undone = true;
+      return { entry_id: a.entryId, results: [{ id: "network.dns", ok: true, error: null }], restart: "none", conflicts: [], warning: null } as T;
+    }
+    case "proxy_status":
+      return structuredClone(proxy) as T;
+    case "proxy_set": {
+      await wait(250);
+      const key = a.kind as "manual" | "pac" | "auto_detect";
+      if (a.enabled && key === "pac" && !proxy.pac_url) throw "No hay un script de configuración para activar.";
+      if (proxy[key] === a.enabled) return null as T;
+      proxy[key] = a.enabled;
+      const id = Date.now();
+      history.unshift({ id, at: id / 1000, label: "Proxy", changes: [], removed_apps: [], undone: false, proxy: { kind: key, before: 0, after: 0 } });
+      return id as T;
+    }
     case "list_bloat":
       return bloat.map((b) => ({ ...structuredClone(b), title: L.bloat?.[b.id]?.title ?? b.title, note: b.note && (L.bloat?.[b.id]?.note ?? b.note) })) as T;
     case "remove_bloat":

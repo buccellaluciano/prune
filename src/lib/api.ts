@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { mock, mockProgress, mockUpdateProgress } from "./mock";
+import { mock, mockDnsReverted, mockProgress, mockUpdateProgress } from "./mock";
 
 export type Risk = "safe" | "moderate" | "advanced";
 export type Restart = "none" | "explorer" | "logoff" | "reboot";
@@ -104,6 +104,10 @@ export interface JournalEntry {
   undone: boolean;
   /** Cambio de plan de energía (GUIDs antes/después). */
   power?: { before: string; after: string; created: string | null } | null;
+  /** Cambio de DNS (cómo estaba y cómo quedó cada adaptador). */
+  network?: { before: AdapterDns[]; after: AdapterDns[] } | null;
+  /** Cambio de proxy (interruptores antes/después). */
+  proxy?: { kind: ProxyKind; before: number; after: number } | null;
 }
 
 export interface BloatApp {
@@ -237,6 +241,112 @@ export const updateApi = {
 export const vtApi = {
   /** Abre en el navegador el informe de VirusTotal de ese hash. */
   open: (sha256: string) => call<void>("vt_open", { sha256 }),
+};
+
+// ───────── Red (DNS) ─────────
+
+export type DohMode = "off" | "preferred" | "required";
+
+/** Un protocolo en un adaptador. `servers` vacío = Automático (DHCP). */
+export interface DnsConfig {
+  servers: string[];
+  doh: DohMode;
+}
+
+export interface DnsFamily {
+  config: DnsConfig;
+  /** Servidores que Windows usa de hecho (los propios o los del DHCP). */
+  effective: string[];
+  /** Proveedor del catálogo, si los servidores propios son de uno. */
+  provider: string | null;
+}
+
+export interface NetAdapter {
+  guid: string;
+  name: string;
+  description: string;
+  kind: "ethernet" | "wifi";
+  /** Es la salida a internet. */
+  primary: boolean;
+  v4: DnsFamily;
+  v6: DnsFamily;
+}
+
+export interface DnsProvider {
+  id: string;
+  name: string;
+  v4: string[];
+  v6: string[];
+}
+
+export interface NetworkStatus {
+  adapters: NetAdapter[];
+  providers: DnsProvider[];
+  /** Dominio de empresa (cambiar el DNS lo rompería). */
+  domain: string | null;
+  /** DNS impuesto por directiva. */
+  policy: boolean;
+  /** VPN conectada. */
+  vpn: boolean;
+  elevated: boolean;
+  /** Cambio aplicado esperando confirmación. */
+  pending: { entry_id: number; seconds_left: number } | null;
+}
+
+export interface AdapterDns {
+  guid: string;
+  name?: string;
+  v4: DnsConfig;
+  v6: DnsConfig;
+}
+
+export interface DnsTestResult {
+  server: string;
+  doh: boolean;
+  ok: boolean;
+  ms: number | null;
+}
+
+export const networkApi = {
+  status: () => call<NetworkStatus>("network_status"),
+  /** Prueba cada servidor (no cambia nada). */
+  test: (adapters: AdapterDns[]) => call<DnsTestResult[]>("dns_test", { adapters }),
+  /** Aplica y arma la vuelta atrás automática. */
+  apply: (adapters: AdapterDns[]) => call<{ entry_id: number; seconds: number }>("dns_apply", { adapters }),
+  confirm: (entryId: number) => call<boolean>("dns_confirm", { entryId }),
+  revert: (entryId: number) => call<ApplyReport>("dns_revert", { entryId }),
+  /** El backend volvió atrás solo porque no se confirmó a tiempo. */
+  async onReverted(cb: (r: { Ok?: number; Err?: string }) => void): Promise<() => void> {
+    if (!isTauri) return mockDnsReverted(cb);
+    const { listen } = await import("@tauri-apps/api/event");
+    return listen<{ Ok?: number; Err?: string }>("dns-reverted", (e) => cb(e.payload));
+  },
+};
+
+// ───────── Red (proxy del usuario) ─────────
+
+export type ProxyKind = "manual" | "pac" | "auto_detect";
+
+export interface ProxyStatus {
+  manual: boolean;
+  server: string;
+  bypass: string;
+  pac: boolean;
+  pac_url: string;
+  auto_detect: boolean;
+  /** El proxy manual apunta a esta PC (suele ser de un programa). */
+  local: boolean;
+  /** Una directiva lo bloquea. */
+  policy: boolean;
+  /** Proxy de WinHTTP (informativo). */
+  winhttp: string | null;
+  foreign_user: string | null;
+}
+
+export const proxyApi = {
+  status: () => call<ProxyStatus>("proxy_status"),
+  /** Prende o apaga lo que ya está configurado. Devuelve la entrada del historial. */
+  set: (kind: ProxyKind, enabled: boolean) => call<number | null>("proxy_set", { kind, enabled }),
 };
 
 // ───────── WMO (otra app del mismo autor) ─────────

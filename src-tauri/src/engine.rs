@@ -127,6 +127,8 @@ fn entry_label(e: &JournalEntry) -> String {
     match e.items.as_slice() {
         [one] => item_label(one).unwrap_or_else(|| e.label.clone()),
         [] if !e.removed_apps.is_empty() && e.changes.is_empty() => t!("label_removed_apps", n = e.removed_apps.len()),
+        [] if e.network.is_some() => e.network.as_ref().map(crate::network::label).unwrap_or_default(),
+        [] if e.proxy.is_some() => e.proxy.as_ref().map(crate::proxy::label).unwrap_or_default(),
         [] => e.label.clone(),
         many => t!("label_tweaks", n = many.len()),
     }
@@ -179,6 +181,12 @@ pub struct JournalEntry {
     /// Qué se aplicó (para traducir `label`). Vacío en entradas de versiones anteriores.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub items: Vec<LabelItem>,
+    /// Cambio de DNS (no es un tweak del catálogo).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub network: Option<crate::network::NetworkChange>,
+    /// Cambio de proxy del usuario.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub proxy: Option<crate::proxy::ProxyChange>,
 }
 
 // ───────────────────────────── Plan de energía ─────────────────────────────
@@ -263,6 +271,11 @@ pub struct ApplyReport {
 impl ApplyReport {
     fn new(entry_id: Option<u64>, results: Vec<ItemResult>, restart: Restart) -> Self {
         Self { entry_id, results, restart, conflicts: vec![], warning: None }
+    }
+
+    /// Sin cambios (p. ej. "Volver" cuando la vuelta atrás automática ya se hizo).
+    pub fn default_for(entry_id: u64) -> Self {
+        Self::new(Some(entry_id), vec![], Restart::None)
     }
 }
 
@@ -631,8 +644,52 @@ impl Engine {
             undone: false,
             power: None,
             items: vec![],
+            network: None,
+            proxy: None,
         });
         self.save(&entries)
+    }
+
+    /// Guarda un cambio de proxy ya aplicado. Devuelve el id de la entrada.
+    pub fn record_proxy(&self, change: crate::proxy::ProxyChange) -> Result<u64, String> {
+        let _g = self.lock.lock().unwrap();
+        let mut entries = self.load();
+        let id = entries.last().map_or(now_ms(), |l| now_ms().max(l.id + 1));
+        entries.push(JournalEntry {
+            id,
+            at: id / 1000,
+            label: crate::proxy::label(&change),
+            changes: vec![],
+            removed_apps: vec![],
+            undone: false,
+            power: None,
+            items: vec![],
+            network: None,
+            proxy: Some(change),
+        });
+        self.save(&entries)?;
+        Ok(id)
+    }
+
+    /// Guarda un cambio de DNS ya aplicado. Devuelve el id de la entrada.
+    pub fn record_network(&self, change: crate::network::NetworkChange) -> Result<u64, String> {
+        let _g = self.lock.lock().unwrap();
+        let mut entries = self.load();
+        let id = entries.last().map_or(now_ms(), |l| now_ms().max(l.id + 1));
+        entries.push(JournalEntry {
+            id,
+            at: id / 1000,
+            label: crate::network::label(&change),
+            changes: vec![],
+            removed_apps: vec![],
+            undone: false,
+            power: None,
+            items: vec![],
+            network: Some(change),
+            proxy: None,
+        });
+        self.save(&entries)?;
+        Ok(id)
     }
 
     /// `foreign_user`: si la app corre elevada con otra cuenta, el nombre del usuario
@@ -743,6 +800,8 @@ impl Engine {
                 undone: false,
                 power: power_change,
                 items,
+                network: None,
+                proxy: None,
             });
             if let Err(e) = self.save(&entries) {
                 results.push(ItemResult { id: "journal".into(), ok: false, error: Some(t!("journal_save_failed", error = e)) });
@@ -771,8 +830,11 @@ impl Engine {
         if entry.undone {
             return Err(t!("entry_undone"));
         }
-        if entry.changes.is_empty() && entry.power.is_none() {
+        if entry.changes.is_empty() && entry.power.is_none() && entry.network.is_none() && entry.proxy.is_none() {
             return Err(t!("apps_not_restorable"));
+        }
+        if entry.network.is_some() && !crate::system::is_elevated() {
+            return Err(t!("requires_admin"));
         }
         if let (true, Some(user)) = (entry.changes.iter().any(|c| c.hive == Hive::HKCU), foreign_user) {
             return Err(t!("foreign_user_undo", user = user));
@@ -783,6 +845,12 @@ impl Engine {
         }
         if let Some(p) = &entry.power {
             validate_power(p).map_err(|e| t!("journal_power_invalid", error = e))?;
+        }
+        if let Some(n) = &entry.network {
+            crate::network::validate_saved(&n.before).map_err(|e| t!("journal_mismatch", error = e))?;
+        }
+        if let Some(p) = &entry.proxy {
+            crate::proxy::validate_saved(p)?;
         }
 
         if !force {
@@ -809,6 +877,22 @@ impl Engine {
                     conflicts.push(t!("conflict_power", plan = power_label(&now)));
                 }
             }
+            if let Some(n) = &entry.network {
+                for now in crate::network::current(&n.before) {
+                    let same = |l: &[crate::network::AdapterDns]| {
+                        l.iter().any(|a| a.guid == now.guid && a.v4 == now.v4 && a.v6 == now.v6)
+                    };
+                    if !same(&n.after) && !same(&n.before) {
+                        conflicts.push(t!("conflict_dns", adapter = now.name));
+                    }
+                }
+            }
+            if let Some(p) = &entry.proxy {
+                let now = crate::proxy::current_flags();
+                if now != Some(p.after) && now != Some(p.before) {
+                    conflicts.push(t!("conflict_proxy"));
+                }
+            }
             if !conflicts.is_empty() {
                 let mut r = ApplyReport::new(Some(entry_id), vec![], Restart::None);
                 r.conflicts = conflicts;
@@ -833,6 +917,14 @@ impl Engine {
             } else {
                 results.push(ItemResult { id: POWER_ID.into(), ok: true, error: None });
             }
+        }
+        if let Some(p) = &entry.proxy {
+            let r = crate::proxy::restore(p);
+            results.push(ItemResult { id: "network.proxy".into(), ok: r.is_ok(), error: r.err() });
+        }
+        if let Some(n) = &entry.network {
+            let r = crate::network::restore(&n.before);
+            results.push(ItemResult { id: "network.dns".into(), ok: r.is_ok(), error: r.err() });
         }
         let mut ids: Vec<String> = entry.changes.iter().map(|c| c.tweak_id.clone()).collect();
         ids.dedup();
@@ -896,6 +988,8 @@ mod tests {
             undone: false,
             power: None,
             items: vec![],
+            network: None,
+            proxy: None,
         }
     }
 

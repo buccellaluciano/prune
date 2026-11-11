@@ -13,6 +13,8 @@
   import DiskView from "#lib/components/DiskView.svelte";
   import VersionsView from "#lib/components/VersionsView.svelte";
   import MoreAppsView from "#lib/components/MoreAppsView.svelte";
+  import NetworkView from "#lib/components/NetworkView.svelte";
+  import DnsConfirm from "#lib/components/DnsConfirm.svelte";
   import InstallSheet from "#lib/components/InstallSheet.svelte";
   import Welcome from "#lib/components/Welcome.svelte";
   import UpdateSheet from "#lib/components/UpdateSheet.svelte";
@@ -121,6 +123,8 @@
         <DiskView />
       {:else if store.view === "history"}
         {#key i18n.lang}<HistoryView />{/key}
+      {:else if store.view === "network"}
+        <NetworkView />
       {:else if store.view === "more"}
         <MoreAppsView />
       {:else if store.view === "versions"}
@@ -162,6 +166,7 @@
 <CommandPalette />
 <InstallSheet />
 <UpdateSheet />
+<DnsConfirm />
 <Welcome />
 
 <!-- Toasts -->
