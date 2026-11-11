@@ -15,6 +15,75 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.5.0",
+    date: "2026-11-11",
+    notes: {
+      es: [
+        "Nueva sección Inicio de Windows: mirá qué arranca al iniciar sesión (registro, carpeta Inicio y tareas programadas), quién lo firma, y desactivalo como lo hace el Administrador de tareas, sin borrar nada.",
+        "Punto de restauración antes de aplicar cambios grandes o quitar apps, y desde el Historial se crea uno o se abre Restaurar sistema.",
+        "Windows Update: pausá las actualizaciones hasta 5 semanas, elegí las horas activas y evitá que instale drivers por su cuenta.",
+        "Exportá tu configuración a un archivo e importala en otra PC: muestra qué cambiaría antes de aplicar nada.",
+        "Si una actualización de Windows vuelve atrás algo que aplicaste o reinstala una app que quitaste, P-Rune te avisa para reaplicarlo o ignorarlo.",
+      ],
+      en: [
+        "New Windows startup section: see what starts when you sign in (registry, Startup folder and scheduled tasks), who signed it, and turn it off the way Task Manager does, without deleting anything.",
+        "Restore point before big changes or removing apps, and from History you can create one or open System Restore.",
+        "Windows Update: pause updates for up to 5 weeks, choose active hours and stop it from installing drivers on its own.",
+        "Export your configuration to a file and import it on another PC: it shows what would change before applying anything.",
+        "If a Windows update reverts something you applied or reinstalls an app you removed, P-Rune lets you know so you can reapply it or ignore it.",
+      ],
+      "pt-BR": [
+        "Nova seção Inicialização do Windows: veja o que abre ao entrar (registro, pasta Inicializar e tarefas agendadas), quem assinou, e desative como o Gerenciador de Tarefas faz, sem apagar nada.",
+        "Ponto de restauração antes de grandes alterações ou de remover apps, e pelo Histórico você cria um ou abre a Restauração do Sistema.",
+        "Windows Update: pause as atualizações por até 5 semanas, escolha o horário ativo e impeça que instale drivers por conta própria.",
+        "Exporte sua configuração para um arquivo e importe em outro PC: mostra o que mudaria antes de aplicar qualquer coisa.",
+        "Se uma atualização do Windows desfizer algo que você aplicou ou reinstalar um app que você removeu, o P-Rune avisa para reaplicar ou ignorar.",
+      ],
+      fr: [
+        "Nouvelle section Démarrage de Windows : voyez ce qui se lance à l'ouverture de session (registre, dossier Démarrage et tâches planifiées), qui l'a signé, et désactivez-le comme le Gestionnaire des tâches, sans rien supprimer.",
+        "Point de restauration avant les gros changements ou la suppression d'applications ; depuis l'Historique, créez-en un ou ouvrez la Restauration du système.",
+        "Windows Update : suspendez les mises à jour jusqu'à 5 semaines, choisissez les heures d'activité et empêchez-le d'installer des pilotes tout seul.",
+        "Exportez votre configuration dans un fichier et importez-la sur un autre PC : elle montre ce qui changerait avant d'appliquer quoi que ce soit.",
+        "Si une mise à jour de Windows annule un réglage appliqué ou réinstalle une application supprimée, P-Rune vous prévient pour le réappliquer ou l'ignorer.",
+      ],
+      de: [
+        "Neuer Bereich Windows-Autostart: Sieh, was bei der Anmeldung startet (Registry, Autostart-Ordner und geplante Aufgaben), wer es signiert hat, und deaktiviere es wie im Task-Manager, ohne etwas zu löschen.",
+        "Wiederherstellungspunkt vor großen Änderungen oder dem Entfernen von Apps; im Verlauf kannst du einen erstellen oder die Systemwiederherstellung öffnen.",
+        "Windows Update: Pausiere Updates bis zu 5 Wochen, wähle die Nutzungszeit und verhindere, dass es selbst Treiber installiert.",
+        "Exportiere deine Konfiguration in eine Datei und importiere sie auf einem anderen PC: Es wird angezeigt, was sich ändern würde, bevor etwas angewendet wird.",
+        "Wenn ein Windows-Update etwas Angewendetes zurücksetzt oder eine entfernte App wieder installiert, sagt P-Rune Bescheid, damit du es erneut anwenden oder ignorieren kannst.",
+      ],
+      it: [
+        "Nuova sezione Avvio di Windows: vedi cosa si avvia all'accesso (registro, cartella Esecuzione automatica e attività pianificate), chi l'ha firmato, e disattivalo come fa Gestione attività, senza eliminare nulla.",
+        "Punto di ripristino prima di grandi modifiche o della rimozione di app; dalla Cronologia puoi crearne uno o aprire Ripristino configurazione di sistema.",
+        "Windows Update: sospendi gli aggiornamenti fino a 5 settimane, scegli l'orario di attività ed evita che installi driver da solo.",
+        "Esporta la configurazione in un file e importala su un altro PC: mostra cosa cambierebbe prima di applicare qualsiasi cosa.",
+        "Se un aggiornamento di Windows annulla qualcosa che hai applicato o reinstalla un'app che avevi rimosso, P-Rune ti avvisa per riapplicarlo o ignorarlo.",
+      ],
+      "zh-CN": [
+        "新增“Windows 启动项”：查看登录时自动启动的内容（注册表、启动文件夹和计划任务）及其签名者，并像任务管理器一样禁用，不删除任何东西。",
+        "在重大更改或移除应用之前创建还原点；也可以在“历史”中创建还原点或打开系统还原。",
+        "Windows 更新：最多暂停 5 周、设置使用时段，并阻止其自行安装驱动程序。",
+        "将配置导出到文件并在另一台电脑上导入：应用前会先显示会改什么。",
+        "如果 Windows 更新撤销了你应用的设置或重新安装了你移除的应用，P-Rune 会提醒你重新应用或忽略。",
+      ],
+      ja: [
+        "新しい「Windows スタートアップ」: サインイン時に起動するもの (レジストリ、スタートアップ フォルダー、タスク スケジューラ) と署名者を確認し、タスク マネージャーと同じ方法で何も削除せずに無効にできます。",
+        "大きな変更やアプリの削除の前に復元ポイントを作成。履歴から作成したり、システムの復元を開いたりできます。",
+        "Windows Update: 最大 5 週間の一時停止、アクティブ時間の設定、ドライバーの自動インストールの停止。",
+        "構成をファイルにエクスポートし、別の PC でインポートできます。適用する前に何が変わるかを表示します。",
+        "Windows の更新で適用した内容が元に戻ったり、削除したアプリが再インストールされたりすると、P-Rune が知らせ、再適用または無視を選べます。",
+      ],
+      ru: [
+        "Новый раздел «Автозагрузка Windows»: что запускается при входе (реестр, папка автозагрузки и задачи планировщика), кто это подписал, и отключение, как в Диспетчере задач, без удаления.",
+        "Точка восстановления перед крупными изменениями или удалением приложений; в «Истории» можно создать её или открыть восстановление системы.",
+        "Центр обновления: пауза до 5 недель, выбор периода активности и запрет самостоятельной установки драйверов.",
+        "Экспорт конфигурации в файл и импорт на другом ПК: перед применением показывается, что изменится.",
+        "Если обновление Windows отменило применённое или вернуло удалённое приложение, P-Rune сообщит об этом, чтобы применить снова или игнорировать.",
+      ],
+    },
+  },
+  {
     version: "0.4.0",
     date: "2026-11-11",
     notes: {
