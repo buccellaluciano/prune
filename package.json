@@ -19,7 +19,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@lucide/svelte": "^1.70.0",
+    "@lucide/svelte": "^1.72.0",
     "@tauri-apps/api": "^2"
   },
   "devDependencies": {
